@@ -17,14 +17,15 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<h1>Registrieren</h1>
 
 <div class="row">
     <div class="col-md-4">
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
+            <h2>Einen neuen Account erstellen.</h2>
+
             <hr />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
@@ -32,26 +33,46 @@
                 <label for="email">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Firstname" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="firstname">Vorname</label>
+                <ValidationMessage For="() => Input.Firstname" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Lastname" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="lastname">Nachname</label>
+                <ValidationMessage For="() => Input.Lastname" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Username" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <label for="username">Benutzername</label>
+                <ValidationMessage For="() => Input.Username" class="text-danger" />
+            </div>
+
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
+                <label for="password">Passwort</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
                 <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
+                <label for="confirm-password">Passwort bestätigen</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Registrieren</button>
         </EditForm>
     </div>
-    <div class="col-md-6 col-md-offset-2">
+
+@*     <div class="col-md-6 col-md-offset-2">
         <section>
             <h3>Use another service to register.</h3>
             <hr />
             <ExternalLoginPicker />
         </section>
-    </div>
+    </div> *@
 </div>
 
 @code {
@@ -132,7 +153,23 @@
         public string Email { get; set; } = "";
 
         [Required]
+        [DataType(DataType.Text)]
+        [Display(Name = "Firstname")]
+        public string Firstname { get; set; } = "";
+        
+        [Required]
+        [DataType(DataType.Text)]
+        [Display(Name = "Lastname")]
+        public string Lastname { get; set; } = "";
+
+        [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Username")]
+        public string Username { get; set; } = "";
+
+        [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
