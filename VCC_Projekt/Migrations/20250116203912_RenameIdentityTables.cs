@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
 
 #nullable disable
 
 namespace VCC_Projekt.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateIdentitySchema : Migration
+    public partial class RenameIdentityTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,27 +33,19 @@ namespace VCC_Projekt.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                               .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                    NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
+                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: true),
                     SecurityStamp = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false),
-                    Gruppe_GruppenID = table.Column<int>(type: "int", nullable: true)
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_vcc_AspNetUsers", x => x.Id);
-                    table.ForeignKey(
-                    name: "FK_vcc_AspNetUsers_vcc_gruppe_Gruppe_GruppenID", // Name des Fremdschlüssels
-                    column: x => x.Gruppe_GruppenID,            // Spalte im aktuellen Kontext
-                    principalTable: "vcc_gruppe",              // Referenzierte Tabelle
-                    principalColumn: "Id",                     // Referenzierte Spalte
-                    onDelete: ReferentialAction.Cascade        // Verhalten bei Löschung
-        );
                 });
 
             migrationBuilder.CreateTable(
