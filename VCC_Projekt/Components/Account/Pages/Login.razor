@@ -10,7 +10,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Anmelden</PageTitle>
 
 <h1>Anmelden</h1>
 <div class="row">
@@ -19,7 +19,7 @@
             <StatusMessage Message="@errorMessage" />
             <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
-                <h2>Mit Accout anmelden.</h2>
+                <h2>Mit Account anmelden.</h2>
                 <hr />
                 <ValidationSummary class="text-danger" role="alert" />
                 <div class="form-floating mb-3">
