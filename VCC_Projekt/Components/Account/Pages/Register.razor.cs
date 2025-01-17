@@ -84,7 +84,9 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
+            [RegularExpression(@"^[a-zA-Z0-9._-]+@htlvb\.at$", ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
+                "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
+            [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
 
             [Required]
