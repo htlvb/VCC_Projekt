@@ -100,9 +100,9 @@ namespace VCC_Projekt.Components.Account.Pages
             public string Lastname { get; set; } = "";
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "Der Benutzername muss zwischen {2} und {1} Zeichen lang sein.", MinimumLength = 3)]
             [DataType(DataType.Text)]
-            [Display(Name = "Username")]
+            [Display(Name = "Benutzername")]
             public string Username { get; set; } = "";
 
             [Required]
