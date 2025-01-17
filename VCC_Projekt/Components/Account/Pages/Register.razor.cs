@@ -105,15 +105,16 @@ namespace VCC_Projekt.Components.Account.Pages
             [Display(Name = "Benutzername")]
             public string Username { get; set; } = "";
 
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
+            [Required(ErrorMessage = "Das Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [RegularExpression( @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$", 
+                ErrorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß-/Kleinbuchstaben, Zahlen sowie Sonderzeichen enthalten.")]
+            [Display(Name = "Passwort")]
             public string Password { get; set; } = "";
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Passwort Bestätigen")]
+            [Compare("Password", ErrorMessage = "Das Passwort und das Bestätigungspasswort stimmen nicht überein.")]
             public string ConfirmPassword { get; set; } = "";
         }
     }
