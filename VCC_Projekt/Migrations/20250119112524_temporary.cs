@@ -32,32 +32,31 @@ namespace VCC_Projekt.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "vcc_AspNetUsers",
-                    columns: table => new
-                    {
-                        UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        Firstname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        Lastname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                        EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                        PasswordHash = table.Column<string>(type: "text", nullable: true),
-                        SecurityStamp = table.Column<string>(type: "text", nullable: true),
-                        ConcurrencyStamp = table.Column<string>(type: "text", nullable: true),
-                        AccessFailedCount = table.Column<int>(type: "int", nullable: false),
-                        Gruppe_GruppenID = table.Column<int>(type: "int", nullable: true)
-                    },
-                    constraints: table =>
-                    {
-                        table.PrimaryKey("PK_vcc_AspNetUsers", x => x.UserName);
-                        table.ForeignKey(
-                            name: "FK_vcc_AspNetUsers_vcc_gruppe_Gruppe_GruppenID",
-                            column: x => x.Gruppe_GruppenID,
-                            principalTable: "vcc_gruppe",
-                            principalColumn: "GruppenID",
-                            onDelete: ReferentialAction.Cascade);
-                    });
+                name: "vcc_AspNetUsers",
+                columns: table => new
+                {
+                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    EmailConfirmed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    PasswordHash = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    SecurityStamp = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_AspNetUsers", x => x.UserName);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
                 name: "vcc_AspNetRoleClaims",

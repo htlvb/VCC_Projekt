@@ -11,7 +11,7 @@ using VCC_Projekt.Data;
 namespace VCC_Projekt.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250118225547_temporary")]
+    [Migration("20250119112524_temporary")]
     partial class temporary
     {
         /// <inheritdoc />

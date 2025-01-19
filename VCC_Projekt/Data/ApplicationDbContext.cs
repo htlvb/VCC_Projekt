@@ -23,7 +23,8 @@ namespace VCC_Projekt.Data
             base.OnModelCreating(modelBuilder);
 
             // Tabelle vcc_AspNetUsers konfigurieren
-            var user = modelBuilder.Entity<ApplicationUser>().ToTable("vcc_AspNetUsers");
+            var user = modelBuilder.Entity<ApplicationUser>()
+                .ToTable("vcc_AspNetUsers");
             user.HasKey(u => u.UserName);
             user.Property(u => u.UserName)
                       .IsRequired()
@@ -48,6 +49,7 @@ namespace VCC_Projekt.Data
 
                 entity.Property(r => r.NormalizedName)
                       .HasMaxLength(256);
+                entity.Property(e => e.Id).HasColumnName("Name");
                 entity.Ignore(r => r.Id);
             });
 
@@ -61,23 +63,53 @@ namespace VCC_Projekt.Data
                 entity.HasOne<ApplicationUser>()
                       .WithMany()
                       .HasForeignKey(ur => ur.UserId)
+                      .HasPrincipalKey(a => a.UserName)
                       .IsRequired();
 
                 entity.HasOne<ApplicationRole>()
                       .WithMany()
                       .HasForeignKey(ur => ur.RoleId)
+                      .HasPrincipalKey(a => a.Name)
                       .IsRequired();
+
             });
 
             // Ignoriere ungenutzte Identity-Tabellen
-            modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("vcc_AspNetUserClaims");
-            modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("vcc_AspNetUserLogins");
-            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("vcc_AspNetRoleClaims");
-            modelBuilder.Entity<IdentityUserToken<string>>().ToTable("vcc_AspNetUserTokens");
+            // Verknüpfe die Claims-Tabellen korrekt
+            modelBuilder.Entity<IdentityUserClaim<string>>()
+                .ToTable("vcc_AspNetUserClaims")
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
+
+            modelBuilder.Entity<IdentityRoleClaim<string>>()
+                .ToTable("vcc_AspNetRoleClaims")
+                .HasOne<ApplicationRole>()
+                .WithMany()
+                .HasForeignKey(rc => rc.RoleId)
+                .HasPrincipalKey(r => r.Name); // Verknüpft RoleId mit Name
+
+            // Verknüpfe UserLogins mit UserName als ID
+            modelBuilder.Entity<IdentityUserLogin<string>>()
+                .ToTable("vcc_AspNetUserLogins")
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
+
+            // Verknüpfe UserTokens mit UserName als ID
+            modelBuilder.Entity<IdentityUserToken<string>>()
+                .ToTable("vcc_AspNetUserTokens")
+                .HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
         }
     }
-
-
-
 }
+
+
+
+
 
