@@ -45,7 +45,7 @@ namespace VCC_Projekt.Migrations
                     },
                     constraints: table =>
                     {
-                        table.PrimaryKey("PK_vcc_AspNetUsers", x => x.UserName);
+                        table.PrimaryKey("PK_vcc_AspNetUsers", x => x.Email);
                         table.ForeignKey(
                             name: "FK_vcc_AspNetUsers_vcc_gruppe_Gruppe_GruppenID",
                             column: x => x.Gruppe_GruppenID,
@@ -75,7 +75,7 @@ namespace VCC_Projekt.Migrations
                             name: "FK_vcc_AspNetUserRoles_vcc_AspNetUsers_UserId",
                             column: x => x.UserId,
                             principalTable: "vcc_AspNetUsers",
-                            principalColumn: "UserName", // Bezug auf die 'UserName' Spalte von vcc_AspNetUsers
+                            principalColumn: "Email", // Bezug auf die 'UserName' Spalte von vcc_AspNetUsers
                             onDelete: ReferentialAction.Cascade);
                     });
 
