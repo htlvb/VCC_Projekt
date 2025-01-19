@@ -5,68 +5,79 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace VCC_Projekt.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser,IdentityRole<int>, int>
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore;
+
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
-        // Konstruktor
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Konfiguriere das Modell (zum Beispiel Tabellennamen ändern)
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
             // Tabelle vcc_AspNetUsers konfigurieren
-            modelBuilder.Entity<ApplicationUser>(entity =>
-            {
-                entity.ToTable("vcc_AspNetUsers");
+            var user = modelBuilder.Entity<ApplicationUser>().ToTable("vcc_AspNetUsers");
+            user.HasKey(u => u.UserName);
+            user.Property(u => u.UserName)
+                      .IsRequired()
+                      .HasMaxLength(256);
 
-                // Optional: Entfernen nicht benötigter Felder
-                entity.Ignore(c => c.TwoFactorEnabled);
-                entity.Ignore(c => c.LockoutEnabled);
-                entity.Ignore(c => c.LockoutEnd);
-                entity.Ignore(c => c.PhoneNumber);
-                entity.Ignore(c => c.PhoneNumberConfirmed);
-            });
+            user.Property(u => u.NormalizedUserName)
+                  .HasMaxLength(256);
+            user.Ignore(e => e.LockoutEnabled);
+            user.Ignore(e => e.LockoutEnd);
+            user.Ignore(e => e.PhoneNumber);
+            user.Ignore(e => e.PhoneNumberConfirmed);
+            user.Ignore(e => e.TwoFactorEnabled);
+            user.Ignore(e => e.Id);
+
 
             // Tabelle vcc_AspNetRoles konfigurieren
-            modelBuilder.Entity<IdentityRole<int>>(entity =>
+            modelBuilder.Entity<ApplicationRole>(entity =>
             {
                 entity.ToTable("vcc_AspNetRoles");
+
+                entity.HasKey(r => r.Name);
+
+                entity.Property(r => r.NormalizedName)
+                      .HasMaxLength(256);
+                entity.Ignore(r => r.Id);
             });
 
             // Tabelle vcc_AspNetUserRoles konfigurieren
-            modelBuilder.Entity<IdentityUserRole<int>>(entity =>
+            modelBuilder.Entity<IdentityUserRole<string>>(entity =>
             {
                 entity.ToTable("vcc_AspNetUserRoles");
+
+                entity.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+                entity.HasOne<ApplicationUser>()
+                      .WithMany()
+                      .HasForeignKey(ur => ur.UserId)
+                      .IsRequired();
+
+                entity.HasOne<ApplicationRole>()
+                      .WithMany()
+                      .HasForeignKey(ur => ur.RoleId)
+                      .IsRequired();
             });
 
-            // Tabelle vcc_AspNetUserClaims konfigurieren
-            modelBuilder.Entity<IdentityUserClaim<int>>(entity =>
-            {
-                entity.ToTable("vcc_AspNetUserClaims");
-            });
-
-            // Tabelle vcc_AspNetUserLogins konfigurieren
-            modelBuilder.Entity<IdentityUserLogin<int>>(entity =>
-            {
-                entity.ToTable("vcc_AspNetUserLogins");
-            });
-
-            // Tabelle vcc_AspNetRoleClaims konfigurieren
-            modelBuilder.Entity<IdentityRoleClaim<int>>(entity =>
-            {
-                entity.ToTable("vcc_AspNetRoleClaims");
-            });
-
-            // Tabelle vcc_AspNetUserTokens konfigurieren
-            modelBuilder.Entity<IdentityUserToken<int>>(entity =>
-            {
-                entity.ToTable("vcc_AspNetUserTokens");
-            });
+            // Ignoriere ungenutzte Identity-Tabellen
+            modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("vcc_AspNetUserClaims");
+            modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("vcc_AspNetUserLogins");
+            modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("vcc_AspNetRoleClaims");
+            modelBuilder.Entity<IdentityUserToken<string>>().ToTable("vcc_AspNetUserTokens");
         }
-
     }
+
+
+
 }
+
