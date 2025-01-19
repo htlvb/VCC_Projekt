@@ -17,6 +17,8 @@ namespace VCC_Projekt.Data
             get => UserName;
             set => UserName = value;
         }
+        public new string Firstname { get; set; }
+        public new string Lastname { get; set; }
     }
 
 
