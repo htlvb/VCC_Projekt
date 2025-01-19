@@ -49,8 +49,6 @@ namespace VCC_Projekt.Data
 
                 entity.Property(r => r.NormalizedName)
                       .HasMaxLength(256);
-                entity.Property(e => e.Id).HasColumnName("Name");
-                entity.Ignore(r => r.Id);
             });
 
             // Tabelle vcc_AspNetUserRoles konfigurieren
@@ -63,13 +61,13 @@ namespace VCC_Projekt.Data
                 entity.HasOne<ApplicationUser>()
                       .WithMany()
                       .HasForeignKey(ur => ur.UserId)
-                      .HasPrincipalKey(a => a.UserName)
+                      .HasPrincipalKey("UserName")
                       .IsRequired();
 
                 entity.HasOne<ApplicationRole>()
                       .WithMany()
                       .HasForeignKey(ur => ur.RoleId)
-                      .HasPrincipalKey(a => a.Name)
+                      .HasPrincipalKey("Name")
                       .IsRequired();
 
             });
