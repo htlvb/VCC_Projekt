@@ -28,36 +28,36 @@
 
             <hr />
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true"/>
                 <label for="email">E-Mail</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Firstname" class="form-control" aria-required="true" placeholder="name@example.com" />
+                <InputText @bind-Value="Input.Firstname" class="form-control" aria-required="true"  />
                 <label for="firstname">Vorname</label>
                 <ValidationMessage For="() => Input.Firstname" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Lastname" class="form-control" aria-required="true" placeholder="name@example.com" />
+                <InputText @bind-Value="Input.Lastname" class="form-control" aria-required="true" />
                 <label for="lastname">Nachname</label>
                 <ValidationMessage For="() => Input.Lastname" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Username" class="form-control" aria-required="true" placeholder="name@example.com" />
+                <InputText @bind-Value="Input.Username" class="form-control" aria-required="true" />
                 <label for="username">Benutzername</label>
                 <ValidationMessage For="() => Input.Username" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true"  />
                 <label for="password">Passwort</label>
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
             <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true"  />
                 <label for="confirm-password">Passwort bestätigen</label>
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
