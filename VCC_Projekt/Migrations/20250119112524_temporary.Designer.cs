@@ -11,7 +11,7 @@ using VCC_Projekt.Data;
 namespace VCC_Projekt.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250119173911_temporary")]
+    [Migration("20250119112524_temporary")]
     partial class temporary
     {
         /// <inheritdoc />
@@ -136,15 +136,8 @@ namespace VCC_Projekt.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
-                    b.Property<string>("Beschreibung")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Id")
                         .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedName")
@@ -162,7 +155,7 @@ namespace VCC_Projekt.Migrations
 
             modelBuilder.Entity("VCC_Projekt.Data.ApplicationUser", b =>
                 {
-                    b.Property<string>("Email")
+                    b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)");
 
@@ -173,16 +166,12 @@ namespace VCC_Projekt.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("longtext");
 
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("tinyint(1)");
-
-                    b.Property<string>("Firstname")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("Lastname")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -198,11 +187,7 @@ namespace VCC_Projekt.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
-
-                    b.HasKey("Email");
+                    b.HasKey("UserName");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");

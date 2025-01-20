@@ -20,10 +20,6 @@ namespace VCC_Projekt.Migrations
                 {
                     Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Id = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Beschreibung = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true)
@@ -39,15 +35,11 @@ namespace VCC_Projekt.Migrations
                 name: "vcc_AspNetUsers",
                 columns: table => new
                 {
-                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Firstname = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Lastname = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                    UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -62,7 +54,7 @@ namespace VCC_Projekt.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_vcc_AspNetUsers", x => x.Email);
+                    table.PrimaryKey("PK_vcc_AspNetUsers", x => x.UserName);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -111,7 +103,7 @@ namespace VCC_Projekt.Migrations
                         name: "FK_vcc_AspNetUserClaims_vcc_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "vcc_AspNetUsers",
-                        principalColumn: "Email",
+                        principalColumn: "UserName",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -136,7 +128,7 @@ namespace VCC_Projekt.Migrations
                         name: "FK_vcc_AspNetUserLogins_vcc_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "vcc_AspNetUsers",
-                        principalColumn: "Email",
+                        principalColumn: "UserName",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -163,7 +155,7 @@ namespace VCC_Projekt.Migrations
                         name: "FK_vcc_AspNetUserRoles_vcc_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "vcc_AspNetUsers",
-                        principalColumn: "Email",
+                        principalColumn: "UserName",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
@@ -188,7 +180,7 @@ namespace VCC_Projekt.Migrations
                         name: "FK_vcc_AspNetUserTokens_vcc_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "vcc_AspNetUsers",
-                        principalColumn: "Email",
+                        principalColumn: "UserName",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");

@@ -14,11 +14,11 @@ namespace VCC_Projekt.Data
         // Der Benutzername wird als ID verwendet
         public override string Id
         {
-            get => Email;
-            set => Email = value;
+            get => UserName;
+            set => UserName = value;
         }
-        public new string? Firstname { get; set; }
-        public new string? Lastname { get; set; }
+        public new string Firstname { get; set; }
+        public new string Lastname { get; set; }
     }
 
 

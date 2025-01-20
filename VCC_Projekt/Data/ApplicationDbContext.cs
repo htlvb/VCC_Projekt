@@ -25,9 +25,12 @@ namespace VCC_Projekt.Data
             // Tabelle vcc_AspNetUsers konfigurieren
             var user = modelBuilder.Entity<ApplicationUser>()
                 .ToTable("vcc_AspNetUsers");
-            user.HasKey(u => u.Email);
+            user.HasKey(u => u.UserName);
+            user.Property(u => u.UserName)
+                      .IsRequired()
+                      .HasMaxLength(256);
 
-            user.Property(u => u.NormalizedEmail)
+            user.Property(u => u.NormalizedUserName)
                   .HasMaxLength(256);
             user.Ignore(e => e.LockoutEnabled);
             user.Ignore(e => e.LockoutEnd);
@@ -58,7 +61,7 @@ namespace VCC_Projekt.Data
                 entity.HasOne<ApplicationUser>()
                       .WithMany()
                       .HasForeignKey(ur => ur.UserId)
-                      .HasPrincipalKey("Email")
+                      .HasPrincipalKey("UserName")
                       .IsRequired();
 
                 entity.HasOne<ApplicationRole>()
@@ -76,7 +79,7 @@ namespace VCC_Projekt.Data
                 .HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(c => c.UserId)
-                .HasPrincipalKey(u => u.Email); // Verknüpft UserId mit UserName
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
 
             modelBuilder.Entity<IdentityRoleClaim<string>>()
                 .ToTable("vcc_AspNetRoleClaims")
@@ -91,7 +94,7 @@ namespace VCC_Projekt.Data
                 .HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(l => l.UserId)
-                .HasPrincipalKey(u => u.Email); // Verknüpft UserId mit UserName
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
 
             // Verknüpfe UserTokens mit UserName als ID
             modelBuilder.Entity<IdentityUserToken<string>>()
@@ -99,7 +102,7 @@ namespace VCC_Projekt.Data
                 .HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
-                .HasPrincipalKey(u => u.Email); // Verknüpft UserId mit UserName
+                .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
         }
     }
 }
