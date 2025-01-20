@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Text;
 using VCC_Projekt.Data;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
@@ -84,7 +85,7 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required]
             [EmailAddress]
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@htlvb\.at$", ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
+            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$", ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
                 "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
             [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
