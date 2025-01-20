@@ -41,6 +41,8 @@ namespace VCC_Projekt.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Firstname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
+                    Lastname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
                     NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EmailConfirmed = table.Column<bool>(type: "tinyint(1)", nullable: false),
