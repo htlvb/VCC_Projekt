@@ -12,10 +12,10 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Resend email confirmation</PageTitle>
+<PageTitle>Bestätigungsmail erneut senden</PageTitle>
 
-<h1>Resend email confirmation</h1>
-<h2>Enter your email.</h2>
+<h1>Bestätigungsmail erneut senden</h1>
+<h2>Bitte E-Mail eingeben.</h2>
 <hr />
 <StatusMessage Message="@message" />
 <div class="row">
@@ -24,11 +24,11 @@
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com" />
-                <label for="email" class="form-label">Email</label>
+                <InputText @bind-Value="Input.Email" class="form-control" aria-required="true" />
+                <label for="email" class="form-label">E-Mail</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Resend</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Erneut senden</button>
         </EditForm>
     </div>
 </div>
@@ -44,7 +44,7 @@
         var user = await UserManager.FindByEmailAsync(Input.Email!);
         if (user is null)
         {
-            message = "Verification email sent. Please check your email.";
+            message = "Bestätigungsmail erfolgreich gesendet. Bitte überprüfe deine E-Mails.";
             return;
         }
 
@@ -56,12 +56,12 @@
             new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        message = "Bestätigungsmail erfolgreich gesendet. Bitte überprüfe deine E-Mails.";
     }
 
     private sealed class InputModel
     {
-        [Required]
+        [Required(ErrorMessage = "E-Mail ist erforderlich.")]
         [EmailAddress]
         public string Email { get; set; } = "";
     }

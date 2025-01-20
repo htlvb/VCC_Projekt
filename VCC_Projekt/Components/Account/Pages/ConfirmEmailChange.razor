@@ -9,9 +9,9 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Confirm email change</PageTitle>
+<PageTitle>E-Mail geändert</PageTitle>
 
-<h1>Confirm email change</h1>
+<h1>E-Mail wurde erfolgreich geändert.</h1>
 
 <StatusMessage Message="@message" />
 
@@ -63,6 +63,7 @@
         }
 
         await SignInManager.RefreshSignInAsync(user);
-        message = "Thank you for confirming your email change.";
+        message = "Danke fürs Bestätigen der neuen E-Mail.";
+
     }
 }
