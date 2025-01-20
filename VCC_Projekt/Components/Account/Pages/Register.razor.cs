@@ -24,7 +24,7 @@ namespace VCC_Projekt.Components.Account.Pages
         public async Task RegisterUser(EditContext editContext)
         {
             var user = CreateUser();
-
+            
             await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
             var emailStore = GetEmailStore();
             await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
