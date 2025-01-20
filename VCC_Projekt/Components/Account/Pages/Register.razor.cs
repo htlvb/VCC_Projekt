@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Text;
 using VCC_Projekt.Data;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
@@ -84,7 +85,9 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
+            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$", ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
+                "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
+            [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
 
             [Required]
@@ -98,20 +101,21 @@ namespace VCC_Projekt.Components.Account.Pages
             public string Lastname { get; set; } = "";
 
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(100, ErrorMessage = "Der Benutzername muss zwischen {2} und {1} Zeichen lang sein.", MinimumLength = 3)]
             [DataType(DataType.Text)]
-            [Display(Name = "Username")]
+            [Display(Name = "Benutzername")]
             public string Username { get; set; } = "";
 
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 8)]
+            [Required(ErrorMessage = "Das Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [RegularExpression( @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$", 
+                ErrorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß-/Kleinbuchstaben, Zahlen sowie Sonderzeichen enthalten.")]
+            [Display(Name = "Passwort")]
             public string Password { get; set; } = "";
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "Passwort Bestätigen")]
+            [Compare("Password", ErrorMessage = "Das Passwort und das Bestätigungspasswort stimmen nicht überein.")]
             public string ConfirmPassword { get; set; } = "";
         }
     }
