@@ -97,8 +97,10 @@ namespace VCC_Projekt.Data
                 .HasForeignKey(t => t.UserId)
                 .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
 
-            // Weitere Konfigurationen für vcc_gruppe, vcc_level, etc.
-            modelBuilder.Entity<Group>(entity =>
+            
+
+            // Tabelle vcc_gruppe konfigurieren
+            modelBuilder.Entity<Gruppe>(entity =>
             {
                 entity.ToTable("vcc_gruppe");
                 entity.HasKey(g => g.GruppenID);
@@ -106,72 +108,80 @@ namespace VCC_Projekt.Data
                 entity.Property(g => g.Gruppenname)
                       .HasMaxLength(255);
 
-                entity.HasOne<Event>()
-                      .WithMany()
-                      .HasForeignKey(g => g.EventID);
+                // Korrekte Beziehung zu Event
+                entity.HasOne(g => g.Event)
+                      .WithMany(e => e.Gruppen)  // Ein Event kann viele Gruppen haben
+                      .HasForeignKey(g => g.EventID)
+                      .HasPrincipalKey(e => e.EventID);
 
-                entity.HasOne<ApplicationUser>()
+                // Korrekte Beziehung zum Gruppenleiter
+                entity.HasOne(g => g.GruppenleiterNavigation)
                       .WithMany()
                       .HasForeignKey(g => g.Gruppenleiter)
                       .HasPrincipalKey(u => u.UserName);
             });
 
+            // Tabelle vcc_level konfigurieren
             modelBuilder.Entity<Level>(entity =>
             {
                 entity.ToTable("vcc_level");
                 entity.HasKey(l => l.LevelID);
 
-                entity.HasOne<Event>()
-                      .WithMany()
-                      .HasForeignKey(l => l.EventID);
+                // Korrekte Beziehung zu Event
+                entity.HasOne(l => l.Event)
+                      .WithMany(e => e.Levels)  // Ein Event kann viele Levels haben
+                      .HasForeignKey(l => l.EventID)
+                      .HasPrincipalKey(e => e.EventID);
             });
 
+            // Tabelle vcc_event konfigurieren
             modelBuilder.Entity<Event>(entity =>
             {
                 entity.ToTable("vcc_event");
                 entity.HasKey(e => e.EventID);
             });
 
-            modelBuilder.Entity<GroupCompletedLevel>(entity =>
+            // Weitere Konfigurationen für vcc_gruppe_absolviert_level
+            modelBuilder.Entity<GruppeAbsolviertLevel>(entity =>
             {
                 entity.ToTable("vcc_gruppe_absolviert_level");
                 entity.HasKey(gcl => new { gcl.GruppeID, gcl.LevelID });
 
-                entity.HasOne<Group>()
+                entity.HasOne(gcl => gcl.Gruppe)
                       .WithMany()
-                      .HasForeignKey(gcl => gcl.GruppeID);
+                      .HasForeignKey(gcl => gcl.GruppeID)
+                      .HasPrincipalKey(g => g.GruppenID);
 
-                entity.HasOne<Level>()
+                entity.HasOne(gcl => gcl.Level)
                       .WithMany()
-                      .HasForeignKey(gcl => gcl.LevelID);
+                      .HasForeignKey(gcl => gcl.LevelID)
+                      .HasPrincipalKey(l => l.LevelID);
             });
 
-            modelBuilder.Entity<Task>(entity =>
+            // Tabelle vcc_aufgaben konfigurieren
+            modelBuilder.Entity<Aufgabe>(entity =>
             {
                 entity.ToTable("vcc_aufgaben");
                 entity.HasKey(t => t.AufgabenID);
 
-                entity.HasOne<Level>()
+                // Korrekte Beziehung zu Level
+                entity.HasOne(t => t.Level)
                       .WithMany()
-                      .HasForeignKey(t => t.LevelID);
+                      .HasForeignKey(t => t.LevelID)
+                      .HasPrincipalKey(l => l.LevelID);
             });
         }
 
+
         // DbSets for the tables
-        public DbSet<Group> Groups { get; set; }
+        public DbSet<Gruppe> Groups { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Level> Levels { get; set; }
-        public DbSet<GroupCompletedLevel> GroupCompletedLevels { get; set; }
-        public DbSet<Task> Tasks { get; set; }
+        public DbSet<GruppeAbsolviertLevel> GruppeAbsolviertLevels { get; set; }
+        public DbSet<Aufgabe> Aufgabe { get; set; }
     }
 
     
 
-    public class Group
-    {
-        public int GruppenID { get; set; }
-        public string Gruppenname { get; set; }
-        public int EventID { get; set; }
-        public string Gruppenleiter { get; set; }
-    }
+    
 }
