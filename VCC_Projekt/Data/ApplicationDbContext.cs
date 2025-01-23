@@ -184,6 +184,7 @@ namespace VCC_Projekt.Data
         public DbSet<Level> Levels { get; set; }
         public DbSet<GruppeAbsolviertLevel> GruppeAbsolviertLevels { get; set; }
         public DbSet<Aufgabe> Aufgabe { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     }
 
     

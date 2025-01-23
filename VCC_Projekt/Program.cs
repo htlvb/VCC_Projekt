@@ -1,10 +1,3 @@
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using VCC_Projekt.Components;
-using VCC_Projekt.Components.Account;
-using VCC_Projekt.Data;
-using Pomelo.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
