@@ -1,16 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace VCC_Projekt.Data
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore;
-
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -29,6 +22,11 @@ namespace VCC_Projekt.Data
             user.Property(u => u.UserName)
                       .IsRequired()
                       .HasMaxLength(256);
+            user.HasOne(g => g.Gruppe)
+                .WithMany()
+                .HasForeignKey(g => g.Gruppe_GruppenID)
+                .HasPrincipalKey(k => k.GruppenID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             user.Property(u => u.NormalizedUserName)
                   .HasMaxLength(256);
@@ -103,11 +101,93 @@ namespace VCC_Projekt.Data
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
                 .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
+
+            
+
+            // Tabelle vcc_gruppe konfigurieren
+            modelBuilder.Entity<Gruppe>(entity =>
+            {
+                entity.ToTable("vcc_gruppe");
+                entity.HasKey(g => g.GruppenID);
+
+                entity.Property(g => g.Gruppenname)
+                      .HasMaxLength(255);
+
+                // Korrekte Beziehung zu Event
+                entity.HasOne(g => g.Event)
+                      .WithMany(e => e.Gruppen)  // Ein Event kann viele Gruppen haben
+                      .HasForeignKey(g => g.Event_EventID)
+                      .HasPrincipalKey(e => e.EventID);
+
+                // Korrekte Beziehung zum Gruppenleiter
+                entity.HasOne(g => g.GruppenleiterNavigation)
+                      .WithMany()
+                      .HasForeignKey(g => g.GruppenleiterId)
+                      .HasPrincipalKey(u => u.UserName);
+            });
+
+            // Tabelle vcc_level konfigurieren
+            modelBuilder.Entity<Level>(entity =>
+            {
+                entity.ToTable("vcc_level");
+                entity.HasKey(l => l.LevelID);
+
+                // Korrekte Beziehung zu Event
+                entity.HasOne(l => l.Event)
+                      .WithMany(e => e.Levels)  // Ein Event kann viele Levels haben
+                      .HasForeignKey(l => l.Event_EventID)
+                      .HasPrincipalKey(e => e.EventID);
+            });
+
+            // Tabelle vcc_event konfigurieren
+            modelBuilder.Entity<Event>(entity =>
+            {
+                entity.ToTable("vcc_event");
+                entity.HasKey(e => e.EventID);
+            });
+
+            // Weitere Konfigurationen für vcc_gruppe_absolviert_level
+            modelBuilder.Entity<GruppeAbsolviertLevel>(entity =>
+            {
+                entity.ToTable("vcc_gruppe_absolviert_level");
+                entity.HasKey(gcl => new { gcl.Gruppe_GruppeID, gcl.Level_LevelID });
+
+                entity.HasOne(gcl => gcl.Gruppe)
+                      .WithMany()
+                      .HasForeignKey(gcl => gcl.Gruppe_GruppeID)
+                      .HasPrincipalKey(g => g.GruppenID);
+
+                entity.HasOne(gcl => gcl.Level)
+                      .WithMany()
+                      .HasForeignKey(gcl => gcl.Level_LevelID)
+                      .HasPrincipalKey(l => l.LevelID);
+            });
+
+            // Tabelle vcc_aufgaben konfigurieren
+            modelBuilder.Entity<Aufgabe>(entity =>
+            {
+                entity.ToTable("vcc_aufgaben");
+                entity.HasKey(t => t.AufgabenID);
+
+                // Korrekte Beziehung zu Level
+                entity.HasOne(t => t.Level)
+                      .WithMany()
+                      .HasForeignKey(t => t.Level_LevelID)
+                      .HasPrincipalKey(l => l.LevelID);
+            });
         }
+
+
+        // DbSets for the tables
+        public DbSet<Gruppe> Groups { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<GruppeAbsolviertLevel> GruppeAbsolviertLevels { get; set; }
+        public DbSet<Aufgabe> Aufgabe { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     }
+
+    
+
+    
 }
-
-
-
-
-
