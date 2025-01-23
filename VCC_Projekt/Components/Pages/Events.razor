@@ -1,0 +1,97 @@
+﻿@page "/events"
+
+<PageTitle>Events</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Kommende Events</h1>
+        <p class="lead text-muted">
+            Sei dabei und erlebe die nächsten spannenden Programmier-Herausforderungen!
+        </p>
+    </div>
+
+    <div class="mt-4">
+        <h2>Die nächsten Events</h2>
+        <div class="row">
+            <div class="col-md-6 d-flex">
+                <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="card-title">Frühjahrs-Coding Contest</h4>
+                        <p class="card-text flex-grow-1">
+                            <strong>Datum:</strong> 15. April 2025<br>
+                            <strong>Ort:</strong> HTL Vöcklabruck<br>
+                            <strong>Beschreibung:</strong> Ein spannender Wettbewerb für alle Informatikklassen. Tritt alleine oder im Team an und zeig dein Können!
+                        </p>
+                        <div class="text-center mt-auto">
+                            <a href="/signup-event" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex">
+                <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="card-title">Summer Coding Jam</h4>
+                        <p class="card-text flex-grow-1">
+                            <strong>Datum:</strong> 10. Juli 2025<br>
+                            <strong>Ort:</strong> HTL Vöcklabruck<br>
+                            <strong>Beschreibung:</strong> Eine lockere Coding-Session in sommerlicher Atmosphäre mit spannenden Herausforderungen.
+                        </p>
+                        <div class="text-center mt-auto">
+                            <a href="/signup-event" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h2>Warum teilnehmen?</h2>
+        <p>
+            Egal ob Anfänger:in oder Profi – die VCC-Events bieten jedem die Möglichkeit, 
+            in spannenden Challenges seine Skills zu testen, Spaß zu haben und tolle Preise zu gewinnen.
+        </p>
+    </div>
+
+    <div class="mt-4">
+        <h2>Noch Fragen?</h2>
+        <p>
+            Kontaktiere uns unter: <a href="mailto:vcc@htlvb.at" class="text-primary">vcc@htlvb.at</a>
+        </p>
+    </div>
+
+    <div class="text-center mt-5">
+        <a class="w-25 btn btn-lg btn-success" href="/info">Mehr über VCC erfahren</a>
+        <p></p>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card {
+        transition: transform 0.2s;
+        border: 2px solid #134883;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+</style>

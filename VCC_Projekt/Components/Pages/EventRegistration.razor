@@ -1,0 +1,58 @@
+﻿@page "/signup-event"
+@using System.ComponentModel.DataAnnotations
+
+<PageTitle>Event-Anmeldung</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4">Anmeldung für Event</h1>
+        <p class="lead text-muted">
+            Wähle deine Teilnahmeart und registriere dich für das Event.
+        </p>
+    </div>
+
+    <div class="mt-4">
+        <EditForm Model="@registrationData" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-check mb-3">
+                <InputRadioGroup @bind-Value="registrationData.ParticipationType">
+                    <InputRadio Value="@ParticipationTypeSingle" id="single" />
+                    <label for="single">@ParticipationTypeSingle</label>
+                    <br />
+                    <InputRadio Value="@ParticipationTypeTeam" id="team" />
+                    <label for="team">@ParticipationTypeTeam</label>
+                </InputRadioGroup>
+                <ValidationMessage For="@(() => registrationData.ParticipationType)" class="text-danger" />
+            </div>
+
+            @if (registrationData.ParticipationType == ParticipationTypeTeam)
+            {
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="registrationData.TeamName" class="form-control" placeholder="Teamname" />
+                    <label for="teamname">Teamname</label>
+                    <ValidationMessage For="@(() => registrationData.TeamName)" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <h5>Teammitglieder hinzufügen</h5>
+                    @foreach (var email in registrationData.TeamMembers)
+                    {
+                        <div class="input-group mb-2">
+                            <input type="email" class="form-control" value="@email" readonly />
+                            <button type="button" class="btn btn-danger" @onclick="() => RemoveMember(email)">Entfernen</button>
+                        </div>
+                    }
+                    <div class="input-group">
+                        <input type="email" class="form-control" @bind="newMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                        <button type="button" class="btn btn-success" @onclick="AddMember">Hinzufügen</button>
+                    </div>
+                    <ValidationMessage For="@(() => newMemberEmail)" class="text-danger" />
+                </div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+        </EditForm>
+    </div>
+</div>
+
