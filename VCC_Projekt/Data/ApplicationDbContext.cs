@@ -1,16 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace VCC_Projekt.Data
 {
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore;
-
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
@@ -103,11 +96,82 @@ namespace VCC_Projekt.Data
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
                 .HasPrincipalKey(u => u.UserName); // Verknüpft UserId mit UserName
+
+            // Weitere Konfigurationen für vcc_gruppe, vcc_level, etc.
+            modelBuilder.Entity<Group>(entity =>
+            {
+                entity.ToTable("vcc_gruppe");
+                entity.HasKey(g => g.GruppenID);
+
+                entity.Property(g => g.Gruppenname)
+                      .HasMaxLength(255);
+
+                entity.HasOne<Event>()
+                      .WithMany()
+                      .HasForeignKey(g => g.EventID);
+
+                entity.HasOne<ApplicationUser>()
+                      .WithMany()
+                      .HasForeignKey(g => g.Gruppenleiter)
+                      .HasPrincipalKey(u => u.UserName);
+            });
+
+            modelBuilder.Entity<Level>(entity =>
+            {
+                entity.ToTable("vcc_level");
+                entity.HasKey(l => l.LevelID);
+
+                entity.HasOne<Event>()
+                      .WithMany()
+                      .HasForeignKey(l => l.EventID);
+            });
+
+            modelBuilder.Entity<Event>(entity =>
+            {
+                entity.ToTable("vcc_event");
+                entity.HasKey(e => e.EventID);
+            });
+
+            modelBuilder.Entity<GroupCompletedLevel>(entity =>
+            {
+                entity.ToTable("vcc_gruppe_absolviert_level");
+                entity.HasKey(gcl => new { gcl.GruppeID, gcl.LevelID });
+
+                entity.HasOne<Group>()
+                      .WithMany()
+                      .HasForeignKey(gcl => gcl.GruppeID);
+
+                entity.HasOne<Level>()
+                      .WithMany()
+                      .HasForeignKey(gcl => gcl.LevelID);
+            });
+
+            modelBuilder.Entity<Task>(entity =>
+            {
+                entity.ToTable("vcc_aufgaben");
+                entity.HasKey(t => t.AufgabenID);
+
+                entity.HasOne<Level>()
+                      .WithMany()
+                      .HasForeignKey(t => t.LevelID);
+            });
         }
+
+        // DbSets for the tables
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Event> Events { get; set; }
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<GroupCompletedLevel> GroupCompletedLevels { get; set; }
+        public DbSet<Task> Tasks { get; set; }
+    }
+
+    
+
+    public class Group
+    {
+        public int GruppenID { get; set; }
+        public string Gruppenname { get; set; }
+        public int EventID { get; set; }
+        public string Gruppenleiter { get; set; }
     }
 }
-
-
-
-
-
