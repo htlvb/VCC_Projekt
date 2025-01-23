@@ -56,11 +56,11 @@ namespace VCC_Projekt.Components.Account.Pages
 
         private sealed class InputModel
         {
-            [Required]
+            [Required(ErrorMessage = "E-Mail ist erforderlich.")]
             [EmailAddress]
             public string Email { get; set; } = "";
 
-            [Required]
+            [Required(ErrorMessage = "Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
             public string Password { get; set; } = "";
 
