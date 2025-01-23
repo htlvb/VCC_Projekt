@@ -1,17 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace VCC_Projekt.Data
+﻿namespace VCC_Projekt.Data
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity;
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Security.Claims;
 
 
     // Entität für die Tabelle _gruppe
@@ -22,20 +14,25 @@ namespace VCC_Projekt.Data
         public string Gruppenname { get; set; }
 
         // Fremdschlüssel für Event
-        public int EventID { get; set; }
+        public int Event_EventID { get; set; }
 
         // Fremdschlüssel für Gruppenleiter
-        public string Gruppenleiter { get; set; }  // Typ für IdentityUser (string)
+        public string GruppenleiterId { get; set; }  // Typ für IdentityUser (string)
 
         // Navigation Properties
+
+        [ForeignKey("GruppenleiterId")]
         public virtual ApplicationUser GruppenleiterNavigation { get; set; }
+
+        [ForeignKey("Event_EventID")]
         public virtual Event Event { get; set; }  // Navigation zu Event
 
         public string Teilnehmertyp { get; set; }
 
         // Beziehung zu 'GruppeAbsolviertLevel' 
-        [ForeignKey("Gruppen_Gruppen")]
         public ICollection<GruppeAbsolviertLevel> Absolviert { get; set; }
+
+        public ICollection<ApplicationUser> Mitglieder { get; set; }
     }
 
     // Entität für die Tabelle _event
@@ -68,9 +65,10 @@ namespace VCC_Projekt.Data
         public byte[] Angabe_PDF { get; set; }
 
         // Fremdschlüssel zu Event
-        public int EventID { get; set; }
+        public int Event_EventID { get; set; }
 
         // Navigation zu Event
+        [ForeignKey("Event_EventID")]
         public virtual Event Event { get; set; }
 
         // Beziehung zu 'GruppeAbsolviertLevel'
@@ -89,9 +87,10 @@ namespace VCC_Projekt.Data
         public byte[] Ergebnis_TXT { get; set; }
 
         // Fremdschlüssel zu Level
-        public int LevelID { get; set; }
+        public int Level_LevelID { get; set; }
 
         // Navigation zu Level
+        [ForeignKey("Level_LevelID")]
         public virtual Level Level { get; set; }
     }
 
@@ -99,11 +98,13 @@ namespace VCC_Projekt.Data
     public class GruppeAbsolviertLevel
     {
         // Fremdschlüssel zu Gruppe
-        public int GruppeID { get; set; }
+        public int Gruppe_GruppeID { get; set; }
+        [ForeignKey("Gruppe_GruppeID")]
         public virtual Gruppe Gruppe { get; set; }  // Navigation Property zu Gruppe
 
         // Fremdschlüssel zu Level
-        public int LevelID { get; set; }
+        [ForeignKey("Level_LevelID")]
+        public int Level_LevelID { get; set; }
         public virtual Level Level { get; set; }  // Navigation Property zu Level
 
         public TimeSpan BenoetigteZeit { get; set; }

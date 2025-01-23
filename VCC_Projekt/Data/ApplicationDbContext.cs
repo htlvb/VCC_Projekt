@@ -22,6 +22,11 @@ namespace VCC_Projekt.Data
             user.Property(u => u.UserName)
                       .IsRequired()
                       .HasMaxLength(256);
+            user.HasOne(g => g.Gruppe)
+                .WithMany()
+                .HasForeignKey(g => g.Gruppe_GruppenID)
+                .HasPrincipalKey(k => k.GruppenID)
+                .OnDelete(DeleteBehavior.Restrict);
 
             user.Property(u => u.NormalizedUserName)
                   .HasMaxLength(256);
@@ -111,13 +116,13 @@ namespace VCC_Projekt.Data
                 // Korrekte Beziehung zu Event
                 entity.HasOne(g => g.Event)
                       .WithMany(e => e.Gruppen)  // Ein Event kann viele Gruppen haben
-                      .HasForeignKey(g => g.EventID)
+                      .HasForeignKey(g => g.Event_EventID)
                       .HasPrincipalKey(e => e.EventID);
 
                 // Korrekte Beziehung zum Gruppenleiter
                 entity.HasOne(g => g.GruppenleiterNavigation)
                       .WithMany()
-                      .HasForeignKey(g => g.Gruppenleiter)
+                      .HasForeignKey(g => g.GruppenleiterId)
                       .HasPrincipalKey(u => u.UserName);
             });
 
@@ -130,7 +135,7 @@ namespace VCC_Projekt.Data
                 // Korrekte Beziehung zu Event
                 entity.HasOne(l => l.Event)
                       .WithMany(e => e.Levels)  // Ein Event kann viele Levels haben
-                      .HasForeignKey(l => l.EventID)
+                      .HasForeignKey(l => l.Event_EventID)
                       .HasPrincipalKey(e => e.EventID);
             });
 
@@ -145,16 +150,16 @@ namespace VCC_Projekt.Data
             modelBuilder.Entity<GruppeAbsolviertLevel>(entity =>
             {
                 entity.ToTable("vcc_gruppe_absolviert_level");
-                entity.HasKey(gcl => new { gcl.GruppeID, gcl.LevelID });
+                entity.HasKey(gcl => new { gcl.Gruppe_GruppeID, gcl.Level_LevelID });
 
                 entity.HasOne(gcl => gcl.Gruppe)
                       .WithMany()
-                      .HasForeignKey(gcl => gcl.GruppeID)
+                      .HasForeignKey(gcl => gcl.Gruppe_GruppeID)
                       .HasPrincipalKey(g => g.GruppenID);
 
                 entity.HasOne(gcl => gcl.Level)
                       .WithMany()
-                      .HasForeignKey(gcl => gcl.LevelID)
+                      .HasForeignKey(gcl => gcl.Level_LevelID)
                       .HasPrincipalKey(l => l.LevelID);
             });
 
@@ -167,7 +172,7 @@ namespace VCC_Projekt.Data
                 // Korrekte Beziehung zu Level
                 entity.HasOne(t => t.Level)
                       .WithMany()
-                      .HasForeignKey(t => t.LevelID)
+                      .HasForeignKey(t => t.Level_LevelID)
                       .HasPrincipalKey(l => l.LevelID);
             });
         }

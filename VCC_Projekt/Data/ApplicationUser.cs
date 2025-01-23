@@ -22,9 +22,13 @@ namespace VCC_Projekt.Data
 
         // Der Nachname des Benutzers
         public string? Lastname { get; set; }
+        public int? Gruppe_GruppenID { get; set; }
 
-        [ForeignKey("Gruppenleiter")]
-        public ICollection<Gruppe> Gruppen { get; set; }
+        
+        public ICollection<Gruppe> GruppenleiterNavigation { get; set; }
+
+        [ForeignKey("Gruppe_GruppenID")]
+        public virtual Gruppe Gruppe { get; set; }
     }
 
 
