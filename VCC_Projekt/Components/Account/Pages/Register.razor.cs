@@ -1,15 +1,14 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 using System.Text;
-using VCC_Projekt.Data;
-using System.Text.RegularExpressions;
+using System.Text.Encodings.Web;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
+    
     public partial class Register
     {
         private IEnumerable<IdentityError>? identityErrors;
@@ -20,16 +19,29 @@ namespace VCC_Projekt.Components.Account.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+        private string? Message => identityErrors is null ? null : $"Fehler: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
         public async Task RegisterUser(EditContext editContext)
         {
-            var user = CreateUser();
-            
-            await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
-            var emailStore = GetEmailStore();
-            await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-            var result = await UserManager.CreateAsync(user, Input.Password);
+            IdentityResult result = new();
+            ApplicationUser user = new();
+            try
+            {
+                user = CreateUser();
+                user.Firstname = Input.Firstname;
+                user.Lastname = Input.Lastname;
+                await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
+                var emailStore = GetEmailStore();
+                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                result = await UserManager.CreateAsync(user, Input.Password);
+            }
+            catch (Exception ex)
+            {
+                result = IdentityResult.Failed(new IdentityError
+                {
+                    Description = ex.Message
+                });
+            }
 
             if (!result.Succeeded)
             {
@@ -38,6 +50,15 @@ namespace VCC_Projekt.Components.Account.Pages
             }
 
             Logger.LogInformation("User created a new account with password.");
+
+
+            // Gibt den Benutzer automatisch die Rolle
+            result = await UserManager.AddToRoleAsync(user, "Benutzer");
+            if (result.Succeeded)
+            {
+                Logger.LogInformation($"Benutzer {user.Id} wurde erfolgreich der Rolle 'Benutzer' zugewiesen.");
+            }
+
 
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -85,9 +106,10 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required(ErrorMessage = "E-Mail ist erforderlich.")]
             [EmailAddress]
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$", 
+            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$",
                 ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
                 "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
+            [UniqueEmail(ErrorMessage = "Diese Email existiert bereits")]
             [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
 
@@ -101,17 +123,19 @@ namespace VCC_Projekt.Components.Account.Pages
             [Display(Name = "Nachname")]
             public string Lastname { get; set; } = "";
 
-            [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+            
             [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
             [RegularExpression(@"^(?!.*@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]).*$",
                 ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
             [DataType(DataType.Text)]
             [Display(Name = "Benutzername")]
+            [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+            [UniqueUsername(ErrorMessage = "Benutzername existiert bereits")]
             public string Username { get; set; } = "";
 
             [Required(ErrorMessage = "Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
-            [RegularExpression( @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$", 
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$",
                 ErrorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß-/Kleinbuchstaben, Zahlen sowie Sonderzeichen enthalten.")]
             [Display(Name = "Passwort")]
             public string Password { get; set; } = "";
@@ -121,6 +145,44 @@ namespace VCC_Projekt.Components.Account.Pages
             [Display(Name = "Passwort bestätigen")]
             [Compare("Password", ErrorMessage = "Das Passwort und das Bestätigungspasswort stimmen nicht überein.")]
             public string ConfirmPassword { get; set; } = "";
+        }
+
+        /// <summary>
+        /// Custom Validations for UniqueUsername
+        /// </summary>
+        public class UniqueUsernameAttribute : ValidationAttribute
+        {
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+            {
+                var context = validationContext.GetService<ApplicationDbContext>();
+                if (context.ApplicationUsers.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
+                {
+                    return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
+                }
+                return ValidationResult.Success;
+
+            }
+
+
+        }
+
+        /// <summary>
+        /// Custom Validations for UniqueEmail
+        /// </summary>
+        public class UniqueEmailAttribute : ValidationAttribute
+        {
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+            {
+                var context = validationContext.GetService<ApplicationDbContext>();
+                if (context.ApplicationUsers.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
+                {
+                    return new ValidationResult(ErrorMessage, new[] {validationContext.MemberName });
+                }
+                return ValidationResult.Success;
+
+            }
+
+
         }
     }
 }
