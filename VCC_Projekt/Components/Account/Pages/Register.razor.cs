@@ -32,7 +32,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 user.Lastname = Input.Lastname;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
-                await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                await emailStore.SetEmailAsync(user, Input.Email.ToLower(), CancellationToken.None);
                 result = await UserManager.CreateAsync(user, Input.Password);
             }
             catch (Exception ex)
