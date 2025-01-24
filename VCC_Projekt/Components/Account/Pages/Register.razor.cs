@@ -8,7 +8,7 @@ using System.Text.Encodings.Web;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
-    
+
     public partial class Register
     {
         private IEnumerable<IdentityError>? identityErrors;
@@ -123,7 +123,7 @@ namespace VCC_Projekt.Components.Account.Pages
             [Display(Name = "Nachname")]
             public string Lastname { get; set; } = "";
 
-            
+
             [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
             [RegularExpression(@"^(?!.*@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]).*$",
                 ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
@@ -160,10 +160,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
                 }
                 return ValidationResult.Success;
-
             }
-
-
         }
 
         /// <summary>
@@ -176,13 +173,10 @@ namespace VCC_Projekt.Components.Account.Pages
                 var context = validationContext.GetService<ApplicationDbContext>();
                 if (context.ApplicationUsers.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
                 {
-                    return new ValidationResult(ErrorMessage, new[] {validationContext.MemberName });
+                    return new ValidationResult(ErrorMessage, memberNames: [validationContext.MemberName]);
                 }
                 return ValidationResult.Success;
-
             }
-
-
         }
     }
 }
