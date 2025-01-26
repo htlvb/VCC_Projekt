@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using MailKit.Security;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
+using MimeKit;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
 using System.Text;
+using System.Text.Encodings.Web;
 using VCC_Projekt.Data;
-using System.Text.RegularExpressions;
+using System.Net;
+using System.Net.Mail;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
@@ -25,7 +28,8 @@ namespace VCC_Projekt.Components.Account.Pages
         public async Task RegisterUser(EditContext editContext)
         {
             var user = CreateUser();
-            
+            user.Firstname = Input.Firstname;
+            user.Lastname = Input.Lastname;
             await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
             var emailStore = GetEmailStore();
             await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -47,6 +51,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
 
             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+            Logger.LogInformation("Email sent");
 
             if (UserManager.Options.SignIn.RequireConfirmedAccount)
             {
@@ -81,11 +86,47 @@ namespace VCC_Projekt.Components.Account.Pages
             return (IUserEmailStore<ApplicationUser>)UserStore;
         }
 
+        public interface IEmailSender
+        {
+            Task<bool> SendConfirmationLinkAsync(ApplicationUser user, string email, string callbackUrl);
+        }
+
+        public class EmailSenderService : IEmailSender
+        {
+            public async Task<bool> SendConfirmationLinkAsync(ApplicationUser user, string email, string callbackUrl)
+            {
+                var message = new MailMessage();
+                message.From = new MailAddress("vcc.htlvb@gmail.com");
+                message.To.Add(email); // Empfänger-E-Mail-Adresse
+                message.Subject = "Bestätige deine E-Mail-Adresse";
+                message.Body = $"Bitte klicke auf den folgenden Link, um deine E-Mail-Adresse zu bestätigen: <a href='{callbackUrl}'>Bestätige deine E-Mail-Adresse</a>";
+                message.IsBodyHtml = true; // HTML-Inhalt
+
+                using (var smtpClient = new SmtpClient("smtp.gmail.com", 587))
+                {
+                    smtpClient.Credentials = new NetworkCredential("vcc.htlvb@gmail.com", "!Passw0rd");
+                    smtpClient.EnableSsl = true; // SSL aktivieren
+
+                    try
+                    {
+                        await smtpClient.SendMailAsync(message);
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Hier kannst du den Fehler protokollieren oder eine Ausnahme werfen
+                        Console.WriteLine($"Fehler beim Senden der E-Mail: {ex.Message}");
+                        return false;
+                    }
+                }
+            }
+        }
+
         private sealed class InputModel
         {
             [Required(ErrorMessage = "E-Mail ist erforderlich.")]
             [EmailAddress]
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$", 
+            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$",
                 ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
                 "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
             [Display(Name = "E-Mail")]
@@ -111,7 +152,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             [Required(ErrorMessage = "Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
-            [RegularExpression( @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$", 
+            [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$",
                 ErrorMessage = "Das Passwort muss mindestens 8 Zeichen lang sein und Groß-/Kleinbuchstaben, Zahlen sowie Sonderzeichen enthalten.")]
             [Display(Name = "Passwort")]
             public string Password { get; set; } = "";
@@ -119,7 +160,7 @@ namespace VCC_Projekt.Components.Account.Pages
             [Required(ErrorMessage = "Bestätigungspasswort ist erforderlich.")]
             [DataType(DataType.Password)]
             [Display(Name = "Passwort bestätigen")]
-            [Compare("Password", ErrorMessage = "Das Passwort und das Bestätigungspasswort stimmen nicht überein.")]
+            [Compare("Password", ErrorMessage = "Die Passwörter stimmen nicht überein.")]
             public string ConfirmPassword { get; set; } = "";
         }
     }
