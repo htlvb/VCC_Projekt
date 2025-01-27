@@ -22,9 +22,9 @@
                 <h2>Mit Account anmelden.</h2>
                 <hr />
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <InputText @bind-Value="Input.EmailOrUsername" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                     <label for="email" class="form-label">Benutzername oder Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                    <ValidationMessage For="() => Input.EmailOrUsername" class="text-danger" />
                 </div>
                 <div class="form-floating mb-3">
                     <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />

@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
     public partial class Login
     {
         private string? errorMessage;
+        
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -17,6 +19,9 @@ namespace VCC_Projekt.Components.Account.Pages
 
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
+
+        [Inject]
+        private UserManager<ApplicationUser> UserManager { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {
@@ -29,36 +34,44 @@ namespace VCC_Projekt.Components.Account.Pages
 
         public async Task LoginUser()
         {
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-            if (result.Succeeded)
-            {
-                Logger.LogInformation("User logged in.");
-                RedirectManager.RedirectTo(ReturnUrl);
-            }
-            else if (result.RequiresTwoFactor)
-            {
-                RedirectManager.RedirectTo(
-                    "Account/LoginWith2fa",
-                    new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
-            }
-            else if (result.IsLockedOut)
-            {
-                Logger.LogWarning("User account locked out.");
-                RedirectManager.RedirectTo("Account/Lockout");
-            }
-            else
+            var user = await UserManager.FindByEmailAsync(Input.EmailOrUsername) 
+                ?? await UserManager.FindByNameAsync(Input.EmailOrUsername);
+
+            if (user == null)
             {
                 errorMessage = "Error: Invalid login attempt.";
+                return;
+            }
+
+            var result = await SignInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            switch (result)
+            {
+                case { Succeeded: true }:
+                    Logger.LogInformation("User logged in.");
+                    RedirectManager.RedirectTo(ReturnUrl);
+                    break;
+
+                case { RequiresTwoFactor: true }:
+                    RedirectManager.RedirectTo(
+                        "Account/LoginWith2fa",
+                        new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+                    break;
+
+                case { IsLockedOut: true }:
+                    Logger.LogWarning("User account locked out.");
+                    RedirectManager.RedirectTo("Account/Lockout");
+                    break;
+
+                default:
+                    errorMessage = "Error: Invalid login attempt.";
+                    break;
             }
         }
 
         private sealed class InputModel
         {
-            [Required(ErrorMessage = "E-Mail ist erforderlich.")]
-            [EmailAddress]
-            public string Email { get; set; } = "";
+            [Required(ErrorMessage = "E-Mail oder Benutzername ist erforderlich.")]
+            public string EmailOrUsername { get; set; } = "";
 
             [Required(ErrorMessage = "Passwort ist erforderlich.")]
             [DataType(DataType.Password)]
