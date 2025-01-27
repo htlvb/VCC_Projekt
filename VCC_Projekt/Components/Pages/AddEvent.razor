@@ -1,0 +1,96 @@
+﻿@page "/add-event"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VCC_Projekt.Data
+
+<PageTitle>Wettbewerb anlegen</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Wettbewerb anlegen</h1>
+        <p class="lead text-muted">
+            Fülle die folgenden Informationen aus, um einen neuen Wettbewerb zu erstellen.
+        </p>
+    </div>
+
+    <div class="mt-4">
+        <EditForm Model="@eventData" OnValidSubmit="@HandleSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.EventName" class="form-control" placeholder="Wettbewerbsname" />
+                <label for="eventname">Wettbewerbsname</label>
+                <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputDate @bind-Value="Input.EventDate" class="form-control" placeholder="Datum" TValue="DateTime" />
+                <label for="eventdate">Datum</label>
+                <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <div class="form-floating">
+                        <InputTime @bind="Input.StartTime" class="form-control" placeholder="Startzeit" TValue="TimeSpan" />
+                        <label for="starttime">Startzeit</label>
+                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-floating">
+                        <InputTime @bind="Input.EndTime" class="form-control" placeholder="Endzeit" TValue="TimeSpan" />
+                        <label for="endtime">Endzeit</label>
+                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputNumber @bind-Value="Input.PenaltyMinutes" class="form-control" placeholder="Strafminuten" TValue="int" />
+                <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
+                <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Wettbewerb anlegen</button>
+        </EditForm>
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-link" href="/events">Zurück zu den Events</a>
+    </div>
+</div>
+
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+    .btn-success:hover {
+        background-color: #2f5e91;
+        border-color: #2f5e91;
+    }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+    .form-control:focus {
+        border-color: #2f5e91;
+        box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+    }
+</style>

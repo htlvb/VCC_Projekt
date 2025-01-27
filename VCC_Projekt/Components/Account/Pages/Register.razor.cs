@@ -1,16 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
-using System.Text.Encodings.Web;
-using VCC_Projekt.Data;
 
 namespace VCC_Projekt.Components.Account.Pages
 {

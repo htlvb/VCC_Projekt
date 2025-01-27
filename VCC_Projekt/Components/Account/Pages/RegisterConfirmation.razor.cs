@@ -6,7 +6,6 @@ namespace VCC_Projekt.Components.Account.Pages
 {
     public partial class RegisterConfirmation
     {
-        private string? emailConfirmationLink;
         private string? statusMessage;
 
         [CascadingParameter]

@@ -5,7 +5,7 @@
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4">Anmeldung für Event</h1>
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für Event</h1>
         <p class="lead text-muted">
             Wähle deine Teilnahmeart und registriere dich für das Event.
         </p>
@@ -51,8 +51,50 @@
                 </div>
             }
 
-            <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+            <button type="submit" class="btn btn-success w-100">Anmelden</button>
         </EditForm>
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-link" href="/events">Zurück zu den Events</a>
     </div>
 </div>
 
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+        }
+
+    .input-group .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+        .input-group .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+</style>
