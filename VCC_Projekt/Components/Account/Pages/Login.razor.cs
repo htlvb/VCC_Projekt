@@ -34,13 +34,8 @@ namespace VCC_Projekt.Components.Account.Pages
 
         public async Task LoginUser()
         {
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-            bool isEmail = domainCheckReg.IsMatch(Input.EmailOrUsername);
-
-            var user = isEmail
-                ? await UserManager.FindByEmailAsync(Input.EmailOrUsername)
-                : await UserManager.FindByNameAsync(Input.EmailOrUsername);
+            var user = await UserManager.FindByEmailAsync(Input.EmailOrUsername) 
+                ?? await UserManager.FindByNameAsync(Input.EmailOrUsername);
 
             if (user == null)
             {
