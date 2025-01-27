@@ -1,5 +1,6 @@
 ﻿@page "/auth"
-
+@using VCC_Projekt.Data
+@inject VCC_Projekt.Data.ApplicationDbContext context
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize(Roles = "Admin,Editor,Benutzer")]

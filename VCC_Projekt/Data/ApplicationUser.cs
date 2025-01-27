@@ -17,8 +17,18 @@ namespace VCC_Projekt.Data
             get => UserName;
             set => UserName = value;
         }
-        public new string? Firstname { get; set; }
-        public new string? Lastname { get; set; }
+        // Der Vorname des Benutzers
+        public string? Firstname { get; set; }
+
+        // Der Nachname des Benutzers
+        public string? Lastname { get; set; }
+        public int? Gruppe_GruppenID { get; set; }
+
+        
+        public ICollection<Gruppe> GruppenleiterNavigation { get; set; }
+
+        [ForeignKey("Gruppe_GruppenID")]
+        public virtual Gruppe Gruppe { get; set; }
     }
 
 
