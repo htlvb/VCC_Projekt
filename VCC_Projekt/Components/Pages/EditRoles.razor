@@ -1,0 +1,53 @@
+﻿@page "/change-roles"
+@using System.Collections.Generic
+
+<h3>Rollen ändern</h3>
+
+<div>
+    <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="400" @bind-Value="selectedUser" Label="Benutzer"></MudAutocomplete>
+    <MudAutocomplete T="Role" SearchFunc="SearchRoles" DebounceInterval="400" @bind-Value="selectedRole" Label="Role"></MudAutocomplete>
+    <button @onclick="AddRole">Rolle hinzufügen</button>
+</div>
+
+<MudDataGrid T="User" MultiSelection="false" Items="@users" SortMode="SortMode.Multiple" Filterable="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Benutzer</MudText>
+        <MudSpacer />
+        <MudTextField Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="User" />
+        <PropertyColumn Property="u => u.Email" Title="Email"/>
+        <PropertyColumn Property="u => u.Username" Title="Benutzername"/>
+        <PropertyColumn Property="u => u.role.RoleName" Title="Role"/>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="User" />
+    </PagerContent>
+</MudDataGrid>
+
+<style>
+        .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .search-bar input {
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        flex-grow: 1;
+    }
+
+    .search-bar button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+</style>
