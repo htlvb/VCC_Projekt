@@ -1,3 +1,11 @@
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using VCC_Projekt.Components;
+using VCC_Projekt.Components.Account;
+using VCC_Projekt.Data;
+using Pomelo.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +36,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.Configure<MailOptions>(
+    builder.Configuration.GetSection(MailOptions.MailOptionsKey));
+
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
 
 var app = builder.Build();
 
