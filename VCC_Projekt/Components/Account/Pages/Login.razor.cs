@@ -9,7 +9,7 @@ namespace VCC_Projekt.Components.Account.Pages
     public partial class Login
     {
         private string? errorMessage;
-        private static readonly Regex domainCheckReg = new(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$", RegexOptions.Compiled);
+        
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
