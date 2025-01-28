@@ -20,9 +20,6 @@ namespace VCC_Projekt.Components.Account.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        [Inject]
-        private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
         protected override async Task OnInitializedAsync()
         {
             if (HttpMethods.IsGet(HttpContext.Request.Method))
@@ -34,8 +31,8 @@ namespace VCC_Projekt.Components.Account.Pages
 
         public async Task LoginUser()
         {
-            var user = await UserManager.FindByEmailAsync(Input.EmailOrUsername) 
-                ?? await UserManager.FindByNameAsync(Input.EmailOrUsername);
+            var user = await Usermanager.FindByEmailAsync(Input.EmailOrUsername) 
+                ?? await Usermanager.FindByNameAsync(Input.EmailOrUsername);
 
             if (user == null)
             {
