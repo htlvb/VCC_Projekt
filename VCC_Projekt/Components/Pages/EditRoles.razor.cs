@@ -101,8 +101,9 @@ namespace VCC_Projekt.Components.Pages
         {
             if (string.IsNullOrWhiteSpace(_searchString))
                 return true;
+            _searchString = _searchString.ToLower();
 
-            if ($"{x.Email} {x.Fullname} {x.Username} {x.Rolename}".Contains(_searchString))
+            if ($"{x.Email} {x.Fullname.ToLower()} {x.Username.ToLower()} {x.Rolename.ToLower()}".Contains(_searchString))
                 return true;
 
             return false;
