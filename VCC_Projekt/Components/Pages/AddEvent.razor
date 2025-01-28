@@ -1,4 +1,5 @@
-﻿@* @page "/add-event"
+@page "/add-event"
+@rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -6,6 +7,8 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using VCC_Projekt.Data
+@using Microsoft.AspNetCore.Components.Forms;
+@using System;
 
 <PageTitle>Wettbewerb anlegen</PageTitle>
 
@@ -18,17 +21,17 @@
     </div>
 
     <div class="mt-4">
-        <EditForm Model="@eventData" OnValidSubmit="@HandleSubmit">
+        <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="addEvent">
             <DataAnnotationsValidator />
 
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.EventName" class="form-control" placeholder="Wettbewerbsname" />
+                <InputText @bind-Value="Input.EventName" class="form-control"/>
                 <label for="eventname">Wettbewerbsname</label>
                 <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
             </div>
 
             <div class="form-floating mb-3">
-                <InputDate @bind-Value="Input.EventDate" class="form-control" placeholder="Datum" TValue="DateTime" />
+                <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" />
                 <label for="eventdate">Datum</label>
                 <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
             </div>
@@ -36,14 +39,20 @@
             <div class="row mb-3">
                 <div class="col">
                     <div class="form-floating">
-                        <InputTime @bind="Input.StartTime" class="form-control" placeholder="Startzeit" TValue="TimeSpan" />
+                        <input type="time"
+                               value="@Input.StartTime.ToString(@"hh\:mm")"
+                               @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
+                               class="form-control" />
                         <label for="starttime">Startzeit</label>
                         <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                     </div>
                 </div>
                 <div class="col">
                     <div class="form-floating">
-                        <InputTime @bind="Input.EndTime" class="form-control" placeholder="Endzeit" TValue="TimeSpan" />
+                        <input type="time"
+                               value="@Input.EndTime.ToString(@"hh\:mm")"
+                               @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
+                               class="form-control" />
                         <label for="endtime">Endzeit</label>
                         <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                     </div>
@@ -51,7 +60,7 @@
             </div>
 
             <div class="form-floating mb-3">
-                <InputNumber @bind-Value="Input.PenaltyMinutes" class="form-control" placeholder="Strafminuten" TValue="int" />
+                <InputNumber @bind-Value="Input.PenaltyMinutes" class="form-control" TValue="int" />
                 <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
                 <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
             </div>
