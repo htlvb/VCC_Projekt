@@ -1,54 +1,68 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
-@using MudBlazor
+@rendermode InteractiveServer
 
-<h3>Rollen ändern</h3>
+<MudThemeProvider />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-<div>
-    <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="400" @bind-Value="selectedUser" Label="Benutzer"></MudAutocomplete>
-    <MudAutocomplete T="Role" SearchFunc="SearchRoles" DebounceInterval="400" @bind-Value="selectedRole" Label="Role"></MudAutocomplete>
-    <button @onclick="AddRole">Rolle hinzufügen</button>
-</div>
 
-<MudDataGrid T="User" MultiSelection="false" Items="@users" SortMode="SortMode.Multiple" Filterable="true">
-    <ToolBarContent>
-        <MudText Typo="Typo.h6">Benutzer</MudText>
-        <MudSpacer />
-        <MudTextField Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-    </ToolBarContent>
-    <Columns>
-        <SelectColumn T="User" />
-        <PropertyColumn Property="u => u.Email" Title="Email"/>
-        <PropertyColumn Property="u => u.Username" Title="Benutzername"/>
-        <PropertyColumn Property="u => u.role.RoleName" Title="Role"/>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="User" />
-    </PagerContent>
-</MudDataGrid>
+<PageTitle>Rolle ändern</PageTitle>
 
-<style>
-        .search-bar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 20px 0;
-    }
 
-    .search-bar input {
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        flex-grow: 1;
-    }
+<h1 class="page-title">Rollen ändern</h1>
 
-    .search-bar button {
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-</style>
+    <!-- Controls (Autocomplete und Button) -->
+    <div class="controls">
+        <EditForm OnValidSubmit="AddRole" Model="@modelUser">
+            <DataAnnotationsValidator />
+            <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="300" @bind-Value="modelUser.User" Label="Benutzer" Class="autocomplete" 
+                             ToStringFunc="@(e => e == null ? null : e.ToString())"
+                             AdornmentIcon="@Icons.Material.Filled.Search" For="@(()=>modelUser.User)" Margin="Margin.Normal"/>
+            <MudSelect @bind-Value="modelUser.Role" Label="Rolle" For="@(()=>modelUser.Role)" Margin="Margin.Normal">
+                @foreach(string role in roles)
+                {
+                    <MudSelectItem Value="role">@role</MudSelectItem>
+                }
+            </MudSelect>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Absenden</MudButton>
+        </EditForm>
+        @if (showErrorAlert)
+        {
+            <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Error"))">@errorMessage</MudAlert>
+        }
+        @if (showSuccessAlert)
+        {
+            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Success"))">@successMessage</MudAlert>
+        }
+        
+    </div>
+
+    <!-- DataGrid -->
+    <div class="datagrid">
+        <MudDataGrid T="User" Items="@users" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Benutzer</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="u => u.Email" Title="Email" />
+                <PropertyColumn Property="u => u.Username" Title="Benutzername" />
+                <PropertyColumn Property="u => u.Fullname" Title="Name" />
+                <PropertyColumn Property="u => u.Rolename" Title="Rolle" />
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudButton Size="@Size.Medium" Variant="@Variant.Filled" Color="@Color.Primary" OnClick="() => RemoveRole(context.Item)">
+                            Rolle entfernen
+                        </MudButton>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="User" />
+            </PagerContent>
+        </MudDataGrid>
+    </div>
