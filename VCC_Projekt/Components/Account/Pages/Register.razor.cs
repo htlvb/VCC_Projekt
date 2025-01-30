@@ -29,6 +29,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 user = CreateUser();
                 user.Firstname = Input.Firstname;
                 user.Lastname = Input.Lastname;
+                user.Id = null;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, Input.Email.ToLower(), CancellationToken.None);
