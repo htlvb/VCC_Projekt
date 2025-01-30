@@ -6,6 +6,12 @@
     // Entität für die Tabelle _aufgaben
     public class Aufgabe
     {
+        public Aufgabe(byte[] input_txt, byte[] ergebnis_txt, int level_levelId)
+        {
+            Input_TXT = input_txt;
+            Ergebnis_TXT = ergebnis_txt;
+            Level_LevelID = level_levelId;
+        }
         public int AufgabenID { get; set; }
 
         public int Aufgabennr { get; set; }

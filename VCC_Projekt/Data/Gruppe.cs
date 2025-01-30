@@ -7,6 +7,13 @@
     // Entität für die Tabelle _gruppe
     public class Gruppe
     {
+        public Gruppe(string gruppenname, int event_EventID, string gruppenleiterId, string teilnehmertyp)
+        {
+            Gruppenname = gruppenname;
+            Event_EventID = event_EventID;
+            GruppenleiterId = gruppenleiterId;
+        }
+
         public int GruppenID { get; set; }
 
         public string Gruppenname { get; set; }
