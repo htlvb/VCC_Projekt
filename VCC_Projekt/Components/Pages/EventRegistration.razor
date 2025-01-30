@@ -12,46 +12,49 @@
     </div>
 
     <div class="mt-4">
-        <EditForm Model="@registrationData" OnValidSubmit="@HandleSubmit">
+        <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
             <DataAnnotationsValidator />
 
             <div class="form-check mb-3">
-                <InputRadioGroup @bind-Value="registrationData.ParticipationType">
+                <InputRadioGroup @bind-Value="Input.ParticipationType" Name="participation">
                     <InputRadio Value="@ParticipationTypeSingle" id="single" />
                     <label for="single">@ParticipationTypeSingle</label>
                     <br />
-                    <InputRadio Value="@ParticipationTypeTeam" id="team" />
+                    <InputRadio Value="@ParticipationTypeTeam" id="team"/>
                     <label for="team">@ParticipationTypeTeam</label>
                 </InputRadioGroup>
-                <ValidationMessage For="@(() => registrationData.ParticipationType)" class="text-danger" />
+                <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
             </div>
 
-            @if (registrationData.ParticipationType == ParticipationTypeTeam)
+            @if (Input.ParticipationType == ParticipationTypeTeam)
             {
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="registrationData.TeamName" class="form-control" placeholder="Teamname" />
+                    <InputText @bind-Value="Input.TeamName" class="form-control"/>
                     <label for="teamname">Teamname</label>
-                    <ValidationMessage For="@(() => registrationData.TeamName)" class="text-danger" />
+                    <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
                 </div>
 
                 <div class="mb-3">
                     <h5>Teammitglieder hinzufügen</h5>
-                    @foreach (var email in registrationData.TeamMembers)
+                    @foreach (var email in Input.TeamMembers)
                     {
                         <div class="input-group mb-2">
                             <input type="email" class="form-control" value="@email" readonly />
-                            <button type="button" class="btn btn-danger" @onclick="() => RemoveMember(email)">Entfernen</button>
+                            <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
                         </div>
                     }
                     <div class="input-group">
-                        <input type="email" class="form-control" @bind="newMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                        <input type="email" class="form-control" @bind="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
                         <button type="button" class="btn btn-success" @onclick="AddMember">Hinzufügen</button>
+                        <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                     </div>
-                    <ValidationMessage For="@(() => newMemberEmail)" class="text-danger" />
+                    <ValidationMessage For="@(() => Input.TeamMembers)" class="text-danger" />
                 </div>
             }
 
-            <button type="submit" class="btn btn-success w-100">Anmelden</button>
+            <div class="text-center mt-5">
+                <button type="submit" class="w-25 btn btn-lg btn-success">Anmelden</button>
+            </div>
         </EditForm>
     </div>
 
@@ -86,15 +89,5 @@
         .form-control:focus {
             border-color: #2f5e91;
             box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
-        }
-
-    .input-group .btn-danger {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-
-        .input-group .btn-danger:hover {
-            background-color: #c82333;
-            border-color: #bd2130;
         }
 </style>
