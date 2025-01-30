@@ -159,7 +159,9 @@ namespace VCC_Projekt.Components.Account
                     </body>
                     </html>",
                 IsBodyHtml = true,
-            }; message.To.Add(email);
+            }; 
+            
+            message.To.Add(email);
 
             using var smtpClient = new SmtpClient();
             smtpClient.Host = _options.Host;
@@ -238,7 +240,9 @@ namespace VCC_Projekt.Components.Account
                     </body>
                     </html>",
                 IsBodyHtml = true,
-            }; message.To.Add(email);
+            }; 
+            
+            message.To.Add(email);
 
             using var smtpClient = new SmtpClient();
             smtpClient.Host = _options.Host;
