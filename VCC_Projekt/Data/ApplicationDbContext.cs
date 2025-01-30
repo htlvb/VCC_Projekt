@@ -37,7 +37,7 @@ namespace VCC_Projekt.Data
             user.Ignore(e => e.PhoneNumber);
             user.Ignore(e => e.PhoneNumberConfirmed);
             user.Ignore(e => e.TwoFactorEnabled);
-            user.Property(e => e.Id).ValueGeneratedNever().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore) ;
+            user.Ignore(e => e.Id);
 
 
             // Tabelle vcc_AspNetRoles konfigurieren
