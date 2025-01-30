@@ -7,14 +7,6 @@
     // Entität für die Tabelle _event
     public class Event
     {
-        public Event(string bezeichnung, DateTime beginn, int dauer, int strafminutenProFehlversuch)
-        {
-            Bezeichnung = bezeichnung;
-            Beginn = beginn;
-            Dauer = dauer;
-            StrafminutenProFehlversuch = strafminutenProFehlversuch;
-        }
-
         public int EventID { get; set; }
 
         public string Bezeichnung { get; set; }
