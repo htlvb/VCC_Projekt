@@ -7,12 +7,6 @@
     // Entität für die Tabelle _level
     public class Level
     {
-        public Level(byte[] angabe_PDF, int event_EventID)
-        {
-            Angabe_PDF = angabe_PDF;
-            Event_EventID = event_EventID;
-        }
-
         public int LevelID { get; set; }
 
         public int Levelnr { get; set; }

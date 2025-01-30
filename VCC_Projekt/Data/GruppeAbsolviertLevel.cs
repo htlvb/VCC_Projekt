@@ -7,17 +7,8 @@
     // Entität für die Tabelle _gruppe_absolviert_level
     public class GruppeAbsolviertLevel
     {
-        public GruppeAbsolviertLevel(int gruppe_GruppeID, Gruppe gruppe, int level_LevelID, int fehlversuche)
-        {
-            Gruppe_GruppeID = gruppe_GruppeID;
-            Gruppe = gruppe;
-            Level_LevelID = level_LevelID;
-            Fehlversuche = fehlversuche;
-        }
-
         // Fremdschlüssel zu Gruppe
         public int Gruppe_GruppeID { get; set; }
-
         [ForeignKey("Gruppe_GruppeID")]
         public virtual Gruppe Gruppe { get; set; }  // Navigation Property zu Gruppe
 
