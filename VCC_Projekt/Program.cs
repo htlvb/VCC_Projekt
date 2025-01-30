@@ -6,6 +6,7 @@ using VCC_Projekt.Components.Account;
 using VCC_Projekt.Data;
 using Pomelo.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +28,8 @@ builder.Services.AddAuthentication(options =>
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)),
+    ServiceLifetime.Transient);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -40,6 +42,7 @@ builder.Services.Configure<MailOptions>(
     builder.Configuration.GetSection(MailOptions.MailOptionsKey));
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 

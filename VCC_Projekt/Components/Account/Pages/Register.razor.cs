@@ -155,7 +155,7 @@ namespace VCC_Projekt.Components.Account.Pages
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
             {
                 var context = validationContext.GetService<ApplicationDbContext>();
-                if (context.ApplicationUsers.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
+                if (context.Users.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
                 {
                     return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
                 }
@@ -171,7 +171,7 @@ namespace VCC_Projekt.Components.Account.Pages
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
             {
                 var context = validationContext.GetService<ApplicationDbContext>();
-                if (context.ApplicationUsers.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
+                if (context.Users.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
                 {
                     return new ValidationResult(ErrorMessage, memberNames: [validationContext.MemberName]);
                 }

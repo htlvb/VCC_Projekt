@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace VCC_Projekt.Data
 {
@@ -9,6 +10,7 @@ namespace VCC_Projekt.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+            Database.SetCommandTimeout(20);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -35,7 +37,7 @@ namespace VCC_Projekt.Data
             user.Ignore(e => e.PhoneNumber);
             user.Ignore(e => e.PhoneNumberConfirmed);
             user.Ignore(e => e.TwoFactorEnabled);
-            user.Ignore(e => e.Id);
+            user.Property(e => e.Id).ValueGeneratedNever().Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Ignore) ;
 
 
             // Tabelle vcc_AspNetRoles konfigurieren
@@ -184,10 +186,11 @@ namespace VCC_Projekt.Data
         public DbSet<Level> Levels { get; set; }
         public DbSet<GruppeAbsolviertLevel> GruppeAbsolviertLevels { get; set; }
         public DbSet<Aufgabe> Aufgabe { get; set; }
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
+
     }
 
-    
 
-    
+
+
 }
