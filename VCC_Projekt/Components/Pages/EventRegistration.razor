@@ -28,6 +28,13 @@
 
             @if (Input.ParticipationType == ParticipationTypeTeam)
             {
+                <div class="text-center">
+                    <p class="lead text-muted">
+                        Um als Team am Event teilzunehmen, sollte der Gruppenmanager eine Gruppe mit Teamnamen anlegen & die E-Mail-Adressen deiner Freunde hinzufügen. <br>
+                        Diese erhalten automatisch ein Einladungsmail - nachdem sie dieses bestätigt haben, sind sie Mitglieder deiner Gruppe.
+                    </p>
+                </div>
+
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.TeamName" class="form-control"/>
                     <label for="teamname">Teamname</label>
@@ -49,6 +56,20 @@
                         <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                     </div>
                     <ValidationMessage For="@(() => Input.TeamMembers)" class="text-danger" />
+                </div>
+            }
+
+            @if (Input.ParticipationType == ParticipationTypeSingle)
+            {
+                <div class="text-center">
+                    <p class="lead text-muted">
+                        Um als Einzelkämpfer am Event teilzunehmen, kontrolliere bitte deinen Benutzername und bestätige.
+                    </p>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="@User.Identity.Name" class="form-control" disabled/>
+                    <label for="teamname">Benutzername</label>
                 </div>
             }
 
