@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using System.Net.Mail;
+﻿using Microsoft.Extensions.Options;
 using System.Net;
-using VCC_Projekt.Data;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
+using System.Net.Mail;
 
 namespace VCC_Projekt.Components.Account
 {
@@ -159,8 +155,8 @@ namespace VCC_Projekt.Components.Account
                     </body>
                     </html>",
                 IsBodyHtml = true,
-            }; 
-            
+            };
+
             message.To.Add(email);
 
             using var smtpClient = new SmtpClient();
@@ -181,7 +177,7 @@ namespace VCC_Projekt.Components.Account
 
         }
 
-        public async Task SendInvationLinkAsync(ApplicationUser user, string email, string  invationLink)
+        public async Task SendInvitationLinkAsync(ApplicationUser user, string email, string teamName, string invationLink)
         {
             MailMessage message = new MailMessage
             {
@@ -232,16 +228,18 @@ namespace VCC_Projekt.Components.Account
                     <body>
                         <div class='container'>
                             <h1>Gruppeneinladung!</h1>
-                            <p>Um der Gruppe beizutreten, klicke bitte auf den folgenden Button:</p>
-                            <a href='" + invationLink + @"' class='button'>Gruppe beitreten</a>
+                            <p>Du wurdest von <strong>" + user + @"</strong> eingeladen, um der Gruppe <strong>" + teamName + @"</strong> beizutreten.</p>
+                            < p > Um der Gruppe beizutreten,
+                                    klicke bitte auf den folgenden Button:</ p >
+                            < a href = '" + invationLink + @"' class='button'>Gruppe beitreten</a>
                             <p>Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>
                             <p>Mit freundlichen Grüßen,<br>Dein VCC-Team</p>
                         </div>
                     </body>
                     </html>",
                 IsBodyHtml = true,
-            }; 
-            
+            };
+
             message.To.Add(email);
 
             using var smtpClient = new SmtpClient();

@@ -3,10 +3,10 @@
 
 
 
-<PageTitle>Rollen hinzufügen/entfernen</PageTitle>
+<PageTitle>Rolle ändern</PageTitle>
 
 
-<h1 class="page-title">Rollen hinzufügen/entfernen</h1>
+<h1 class="page-title">Rollen ändern</h1>
 
     <!-- Controls (Autocomplete und Button) -->
     <div class="controls">
@@ -21,7 +21,7 @@
                     <MudSelectItem Value="role">@role</MudSelectItem>
                 }
             </MudSelect>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Rolle hinzufügen</MudButton>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Absenden</MudButton>
         </EditForm>
         @if (showErrorAlert)
         {
@@ -38,7 +38,7 @@
     <div class="datagrid">
         <MudDataGrid T="User" Items="@users" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Rollen der Users</MudText>
+                <MudText Typo="Typo.h6">Benutzer</MudText>
                 <MudSpacer />
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
