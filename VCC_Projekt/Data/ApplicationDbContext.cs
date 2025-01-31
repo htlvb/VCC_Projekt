@@ -21,7 +21,7 @@ namespace VCC_Projekt.Data
 
 
         // DbSets for the tables
-        public DbSet<Gruppe> Groups { get; set; }
+        public DbSet<Gruppe> Gruppen { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<GruppeAbsolviertLevel> GruppeAbsolviertLevels { get; set; }
