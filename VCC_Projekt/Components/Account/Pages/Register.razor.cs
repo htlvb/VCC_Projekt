@@ -27,8 +27,8 @@ namespace VCC_Projekt.Components.Account.Pages
             try
             {
                 user = CreateUser();
-                user.Firstname = Input.Firstname;
-                user.Lastname = Input.Lastname;
+                user.Firstname = char.ToUpper(Input.Firstname[0]) + Input.Firstname.Substring(1).ToLower();
+                user.Lastname = char.ToUpper(Input.Lastname[0]) + Input.Lastname.Substring(1).ToLower();
                 user.Id = null;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
@@ -116,10 +116,12 @@ namespace VCC_Projekt.Components.Account.Pages
 
             [Required(ErrorMessage = "Vorname ist erforderlich.")]
             [DataType(DataType.Text)]
+            [StringLength(100, ErrorMessage = "Der Vorname darf nicht länger als {1} Zeichen sein.", MinimumLength = 2)]
             [Display(Name = "Vorname")]
             public string Firstname { get; set; } = "";
 
             [Required(ErrorMessage = "Nachname ist erforderlich.")]
+            [StringLength(100, ErrorMessage = "Der Nachname darf nicht länger als {1} Zeichen sein.", MinimumLength = 2)]
             [DataType(DataType.Text)]
             [Display(Name = "Nachname")]
             public string Lastname { get; set; } = "";
