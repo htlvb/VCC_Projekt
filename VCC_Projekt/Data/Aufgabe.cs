@@ -14,8 +14,6 @@ public class Aufgabe
 
     public Aufgabe(byte[] input_TXT, byte[] ergebnis_TXT, int level_LevelID)
     {
-        AufgabenID = aufgabenID;
-        Aufgabennr = aufgabennr;
         Input_TXT = input_TXT;
         Ergebnis_TXT = ergebnis_TXT;
         Level_LevelID = level_LevelID;
