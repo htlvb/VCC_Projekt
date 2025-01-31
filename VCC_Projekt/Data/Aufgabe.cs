@@ -12,7 +12,7 @@ public class Aufgabe
     {
     }
 
-    public Aufgabe(int aufgabenID, int aufgabennr, byte[] input_TXT, byte[] ergebnis_TXT, int level_LevelID)
+    public Aufgabe(byte[] input_TXT, byte[] ergebnis_TXT, int level_LevelID)
     {
         AufgabenID = aufgabenID;
         Aufgabennr = aufgabennr;
