@@ -36,7 +36,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (user == null)
             {
-                errorMessage = "Error: Invalid login attempt.";
+                errorMessage = "Error: Benutzer existiert nicht";
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     break;
 
                 default:
-                    errorMessage = "Error: Invalid login attempt.";
+                    errorMessage = "Error: Email wurde noch nicht bestätigt.";
                     break;
             }
         }
