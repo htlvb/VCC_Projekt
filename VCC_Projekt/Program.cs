@@ -15,6 +15,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<EmailSender>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
@@ -41,7 +42,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.Configure<MailOptions>(
     builder.Configuration.GetSection(MailOptions.MailOptionsKey));
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, EmailSender>();
+// builder.Services.AddSingleto
 builder.Services.AddMudServices();
 
 var app = builder.Build();

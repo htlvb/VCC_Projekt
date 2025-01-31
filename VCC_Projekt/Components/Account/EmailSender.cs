@@ -177,7 +177,7 @@ namespace VCC_Projekt.Components.Account
 
         }
 
-        public async Task SendInvitationLinkAsync(ApplicationUser user, string email, string teamName, string invitationLink)
+        public async Task SendInvitationLinkAsync(string user, string email, string teamName, string invitationLink)
         {
             MailMessage message = new MailMessage
             {
@@ -229,9 +229,8 @@ namespace VCC_Projekt.Components.Account
                         <div class='container'>
                             <h1>Gruppeneinladung!</h1>
                             <p>Du wurdest von <strong>" + user + @"</strong> eingeladen, um der Gruppe <strong>" + teamName + @"</strong> beizutreten.</p>
-                            < p > Um der Gruppe beizutreten,
-                                    klicke bitte auf den folgenden Button:</ p >
-                            < a href = '" + invitationLink + @"' class='button'>Gruppe beitreten</a>
+                            <p>Um der Gruppe beizutreten, klicke bitte auf den folgenden Button:</p>
+                            <a href = '" + invitationLink + @"' class='button'>Gruppe beitreten</a>
                             <p>Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>
                             <p>Mit freundlichen Grüßen,<br>Dein VCC-Team</p>
                         </div>

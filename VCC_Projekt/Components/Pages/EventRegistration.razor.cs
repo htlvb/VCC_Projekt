@@ -45,10 +45,9 @@ namespace VCC_Projekt.Components.Pages
                 //Datenbankeintrag in Gruppentabelle
 
                 var teamId = 1; // Die ID des Teams
-                var teamName = "hallo";
-                var groupManager = Input.Username;
+                var teamName = "hallo"; // Teamname
+                var groupManager = Input.Username; // Person, die die gruppe anlegt (aktueller user)
 
-                // Einladung für jedes Teammitglied versenden
                 foreach (var memberEmail in Input.TeamMembers)
                 {
                     var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
@@ -57,16 +56,13 @@ namespace VCC_Projekt.Components.Pages
                         NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
                         new Dictionary<string, object?> { ["inviteToken"] = inviteToken, ["email"] = memberEmail });
 
-                    await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
-
-                    //Logger.LogInformation($"Einladung an {memberEmail} gesendet.");
-
+                     await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
                 }
             }
 
             if (Input.ParticipationType == ParticipationTypeSingle)
             {
-
+                //Datenbankeintrag mit benutzername als teamname 
             }
         }
 
@@ -77,7 +73,7 @@ namespace VCC_Projekt.Components.Pages
 
             if (user.Identity is not null && user.Identity.IsAuthenticated)
             {
-                Input.Username = user.Identity.Name; // Benutzername abrufen
+                Input.Username = user.Identity.Name;
             }
         }
 
