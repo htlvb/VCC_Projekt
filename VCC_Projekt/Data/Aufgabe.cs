@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 public class Aufgabe
 {
 
-    private Aufgabe()
+    public Aufgabe()
     {
     }
 
