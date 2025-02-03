@@ -107,9 +107,9 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required(ErrorMessage = "E-Mail ist erforderlich.")]
             [EmailAddress]
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$",
+            [RegularExpression(@"(?i)^.+@htlvb\.at$",
                 ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
-                "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
+                "E-Mail-Adresse ein.")]
             [UniqueEmail(ErrorMessage = "Diese Email existiert bereits")]
             [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
@@ -128,7 +128,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
 
             [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
-            [RegularExpression(@"^(?!.*@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]).*$",
+            [RegularExpression(@"(?i)^(?!.*@htlvb\.at$).+$",
                 ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
             [DataType(DataType.Text)]
             [Display(Name = "Benutzername")]
