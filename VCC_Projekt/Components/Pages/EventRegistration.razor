@@ -1,5 +1,11 @@
 ﻿@page "/signup-event"
 @using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject EmailSender EmailSender
+@inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Event-Anmeldung</PageTitle>
 
@@ -15,28 +21,37 @@
         <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
             <DataAnnotationsValidator />
 
-            <div class="form-check mb-3">
-                <InputRadioGroup @bind-Value="Input.ParticipationType" Name="participation">
-                    <InputRadio Value="@ParticipationTypeSingle" id="single" />
-                    <label for="single">@ParticipationTypeSingle</label>
-                    <br />
-                    <InputRadio Value="@ParticipationTypeTeam" id="team"/>
-                    <label for="team">@ParticipationTypeTeam</label>
-                </InputRadioGroup>
-                <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeTeam">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">#Team</h3>
+                            <p class="card-text">Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeSingle">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">#Single</h3>
+                            <p class="card-text">Melde dich alleine an und zeig, was du drauf hast.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             @if (Input.ParticipationType == ParticipationTypeTeam)
             {
-                <div class="text-center">
-                    <p class="lead text-muted">
-                        Um als Team am Event teilzunehmen, sollte der Gruppenmanager eine Gruppe mit Teamnamen anlegen & die E-Mail-Adressen deiner Freunde hinzufügen. <br>
-                        Diese erhalten automatisch ein Einladungsmail - nachdem sie dieses bestätigt haben, sind sie Mitglieder deiner Gruppe.
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Team</h3>
+                    <p class="mt-4">
+                        Um als Team am Event teilzunehmen, erstellt der Gruppenmanager eine Gruppe mit einem Teamnamen und fügt die E-Mail-Adressen der Teammitglieder hinzu. <br />
+                        Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams.
                     </p>
                 </div>
 
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.TeamName" class="form-control"/>
+                    <InputText @bind-Value="Input.TeamName" class="form-control" />
                     <label for="teamname">Teamname</label>
                     <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
                 </div>
@@ -61,14 +76,15 @@
 
             @if (Input.ParticipationType == ParticipationTypeSingle)
             {
-                <div class="text-center">
-                    <p class="lead text-muted">
-                        Um als Einzelkämpfer am Event teilzunehmen, kontrolliere bitte deinen Benutzername und bestätige.
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Single</h3>
+                    <p class="mt-4">
+                        Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst, und bestätige deine Teilnahme.
                     </p>
                 </div>
 
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="@User.Identity.Name" class="form-control" disabled/>
+                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
                     <label for="teamname">Benutzername</label>
                 </div>
             }
@@ -111,4 +127,18 @@
             border-color: #2f5e91;
             box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
         }
+
+    .card {
+        transition: transform 0.2s;
+        border: 2px solid #134883;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card:selected{
+            transform: scale(1.05);
+        }
+
 </style>

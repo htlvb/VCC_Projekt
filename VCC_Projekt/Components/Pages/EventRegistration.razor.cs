@@ -1,24 +1,32 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
 using static VCC_Projekt.Components.Account.Pages.Register;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class EventRegistration
     {
-        private InputModel Input = new();
+        [SupplyParameterFromForm]
+        private InputModel Input { get; set; } = new();
+
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
 
+        [SupplyParameterFromQuery]
+        private string? ReturnUrl { get; set; }
+
         private void AddMember()
         {
-            if(!Input.NewMemberEmail.ToLower().EndsWith("@htlvb.at"))
+            if (!Input.NewMemberEmail.ToLower().EndsWith("@htlvb.at"))
             {
-
+                //Fehler
             }
-            
-            if (!string.IsNullOrWhiteSpace(Input.NewMemberEmail) && Input.TeamMembers.Count < 5 && !Input.TeamMembers.Contains(Input.NewMemberEmail))
+
+            if (!string.IsNullOrWhiteSpace(Input.NewMemberEmail) && Input.TeamMembers.Count < 4 && !Input.TeamMembers.Contains(Input.NewMemberEmail))
             {
                 Input.TeamMembers.Add(Input.NewMemberEmail);
                 Input.NewMemberEmail = string.Empty;
@@ -30,9 +38,43 @@ namespace VCC_Projekt.Components.Pages
             Input.TeamMembers.Remove(email);
         }
 
-        private void HandleSubmit()
+        private async void HandleSubmit()
         {
-            // Logik zum Speichern der Anmeldung
+            if (Input.ParticipationType == ParticipationTypeTeam)
+            {
+                //Datenbankeintrag in Gruppentabelle
+
+                var teamId = 1; // Die ID des Teams
+                var teamName = "hallo"; // Teamname
+                var groupManager = Input.Username; // Person, die die gruppe anlegt (aktueller user)
+
+                foreach (var memberEmail in Input.TeamMembers)
+                {
+                    var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
+
+                    var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                        NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
+                        new Dictionary<string, object?> { ["inviteToken"] = inviteToken, ["email"] = memberEmail });
+
+                     await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
+                }
+            }
+
+            if (Input.ParticipationType == ParticipationTypeSingle)
+            {
+                //Datenbankeintrag mit benutzername als teamname 
+            }
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                Input.Username = user.Identity.Name;
+            }
         }
 
         private class InputModel
@@ -58,6 +100,10 @@ namespace VCC_Projekt.Components.Pages
             [UniqueEmail(ErrorMessage = "Diese E-Mail-Adresse existiert bereits")]
             [Display(Name = "E-Mail-Adressen der Teammitglieder")]
             public string NewMemberEmail { get; set; } = "";
+
+            [DataType(DataType.Text)]
+            [Display(Name = "Benutzername")]
+            public string Username { get; set; } = "";
         }
 
 
