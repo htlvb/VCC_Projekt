@@ -21,7 +21,7 @@
     </div>
 
     <div class="mt-4">
-        <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="addEvent">
+        <EditForm EditContext="@editContext" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
             <DataAnnotationsValidator />
 
             <div class="form-floating mb-3">

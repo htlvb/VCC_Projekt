@@ -1,14 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel.DataAnnotations;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class AddEvent
     {
+        private EditContext editContext;
+
+        protected override void OnInitialized()
+        {
+            Input = new();
+            editContext = new EditContext(Input);
+        }
+
         private void UpdateStartTime(string value)
         {
             if (TimeSpan.TryParse(value, out TimeSpan time))
             {
                 Input.StartTime = time;
+                editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.StartTime));
             }
         }
 
@@ -17,23 +27,22 @@ namespace VCC_Projekt.Components.Pages
             if (TimeSpan.TryParse(value, out TimeSpan time))
             {
                 Input.EndTime = time;
+                editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.EndTime));
             }
-            
         }
 
-
-        private async Task<(bool isValid, string[] errors)> ValidateInput(InputModel model)
+        private async Task<(bool isValid, string[] errors)> ValidateInput(InputModel input)
         {
             var errors = new List<string>();
             bool isValid = true;
 
             // Validate EventName
-            if (string.IsNullOrWhiteSpace(model.EventName))
+            if (string.IsNullOrWhiteSpace(input.EventName))
             {
                 errors.Add("Bitte den Wettbewerbsnamen angeben.");
                 isValid = false;
             }
-            else if (model.EventName.Length < 3)
+            else if (input.EventName.Length < 3)
             {
                 errors.Add("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.");
                 isValid = false;
@@ -41,19 +50,19 @@ namespace VCC_Projekt.Components.Pages
 
             // Validate Date and Time together
             var currentTime = DateTime.Now.TimeOfDay;
-            var eventStart = model.EventDate.Date + model.StartTime;
-            var eventEnd = model.EventDate.Date + model.EndTime;
+            var eventStart = input.EventDate.Date + input.StartTime;
+            var eventEnd = input.EventDate.Date + input.EndTime;
 
             // Check if date is in the past
-            if (model.EventDate.Date < DateTime.Today)
+            if (input.EventDate.Date < DateTime.Today)
             {
                 errors.Add("Das Datum darf nicht in der Vergangenheit liegen.");
                 isValid = false;
             }
             // If date is today, check time constraints
-            else if (model.EventDate.Date == DateTime.Today)
+            else if (input.EventDate.Date == DateTime.Today)
             {
-                if (model.StartTime < currentTime)
+                if (input.StartTime < currentTime)
                 {
                     errors.Add("Die Startzeit muss in der Zukunft liegen wenn das Event heute stattfindet.");
                     isValid = false;
@@ -68,7 +77,7 @@ namespace VCC_Projekt.Components.Pages
             }
 
             // Validate PenaltyMinutes
-            if (model.PenaltyMinutes < 0)
+            if (input.PenaltyMinutes < 0)
             {
                 errors.Add("Die Strafminuten dürfen nicht negativ sein.");
                 isValid = false;
@@ -81,38 +90,41 @@ namespace VCC_Projekt.Components.Pages
         {
             try
             {
-                // Assuming we have access to the current InputModel instance as 'model'
-                var (isValid, errors) = await ValidateInput(Input);
+                // Manuelle Validierung der Eingabedaten über DataAnnotations
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(Input);
+                bool isValid = Validator.TryValidateObject(Input, validationContext, validationResults, true);
 
+                // Benutzerdefinierte Validierungen durchführen
+                var (customValid, customErrors) = await ValidateInput(Input);
+                isValid = isValid && customValid;
+
+                // Fehler in die Fehlerliste aufnehmen
+                validationResults.AddRange(customErrors.Select(error => new ValidationResult(error)));
+
+                // Überprüfen, ob die Validierung erfolgreich war
                 if (!isValid)
                 {
-                    // Handle validation errors
-                    foreach (var error in errors)
+                    // Alle Fehler ausgeben
+                    foreach (var validationResult in validationResults)
                     {
-                        Console.WriteLine($"Validation Error: {error}");
+                        Console.WriteLine($"Validation Error: {validationResult.ErrorMessage}");
                     }
+                    // Fehler anzeigen oder eine benutzerdefinierte Fehlerbehandlung durchführen
                     return;
                 }
 
-                // If validation passes, proceed with saving the competition
+                // Falls die Validierung erfolgreich war, Speichern der Eingabedaten
                 await SaveCompetition(Input);
             }
             catch (Exception ex)
             {
-                // Handle any exceptions that occur during submission
                 Console.WriteLine($"Error during submission: {ex.Message}");
-                // Add appropriate error handling for your application
             }
         }
 
         private async Task SaveCompetition(InputModel model)
         {
-            // Implement your competition saving logic here
-            // This could include:
-            // - API calls
-            // - Database operations
-            // - State updates
-
             try
             {
                 int duration = (int)(model.EndTime - model.StartTime).TotalMinutes;
@@ -134,34 +146,78 @@ namespace VCC_Projekt.Components.Pages
                 Console.WriteLine(ex.Message);
             }
         }
+
         private InputModel Input { get; set; } = new();
 
-        private sealed class InputModel
+        public sealed class InputModel : IValidatableObject
         {
-            [Required(ErrorMessage = "Bitte den Wettbewerbsnamen angeben.")]
-            [MinLength(3, ErrorMessage = "Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.")]
             [DataType(DataType.Text)]
             [Display(Name = "Wettbewerbsname")]
             public string EventName { get; set; }
 
-            [Required(ErrorMessage = "Bitte ein Datum auswählen.")]
             [DataType(DataType.DateTime)]
             [Display(Name = "Datum")]
             public DateTime EventDate { get; set; } = DateTime.Today;
 
-            [Required(ErrorMessage = "Bitte eine Startzeit angeben.")]
             [DataType(DataType.Time)]
             [Display(Name = "Startzeit")]
             public TimeSpan StartTime { get; set; }
 
-            [Required(ErrorMessage = "Bitte eine Endzeit angeben.")]
             [DataType(DataType.Time)]
             [Display(Name = "Endzeit")]
             public TimeSpan EndTime { get; set; }
 
-            [Range(0, int.MaxValue, ErrorMessage = "Die Strafminuten dürfen nicht negativ sein.")]
             [Display(Name = "Strafminuten")]
             public int PenaltyMinutes { get; set; } = 0;
+
+            public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+            {
+                var errors = new List<ValidationResult>();
+
+                // Validate EventName
+                if (string.IsNullOrWhiteSpace(EventName))
+                {
+                    errors.Add(new ValidationResult("Bitte den Wettbewerbsnamen angeben.", new[] { nameof(EventName) }));
+                }
+                else if (EventName.Length < 3)
+                {
+                    errors.Add(new ValidationResult("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.", new[] { nameof(EventName) }));
+                }
+
+                // Validate Date and Time together
+                var currentTime = DateTime.Now.TimeOfDay;
+                var eventStart = EventDate.Date + StartTime;
+                var eventEnd = EventDate.Date + EndTime;
+
+                // Check if date is in the past
+                if (EventDate.Date < DateTime.Today)
+                {
+                    errors.Add(new ValidationResult("Das Datum darf nicht in der Vergangenheit liegen.", new[] { nameof(EventDate) }));
+                }
+                // If date is today, check time constraints
+                else if (EventDate.Date == DateTime.Today)
+                {
+                    if (StartTime < currentTime)
+                    {
+                        errors.Add(new ValidationResult("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", new[] { nameof(StartTime) }));
+                    }
+                }
+
+                // Validate End Time is after Start Time
+                if (eventEnd <= eventStart)
+                {
+                    errors.Add(new ValidationResult("Die Endzeit muss nach der Startzeit liegen.", new[] { nameof(EndTime) }));
+                }
+
+                // Validate PenaltyMinutes
+                if (PenaltyMinutes < 0)
+                {
+                    errors.Add(new ValidationResult("Die Strafminuten dürfen nicht negativ sein.", new[] { nameof(PenaltyMinutes) }));
+                }
+
+                return errors;
+            }
         }
+
     }
 }
