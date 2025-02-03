@@ -42,10 +42,11 @@
 
             @if (Input.ParticipationType == ParticipationTypeTeam)
             {
-                <div class="text-center">
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Team</h3>
                     <p class="mt-4">
                         Um als Team am Event teilzunehmen, erstellt der Gruppenmanager eine Gruppe mit einem Teamnamen und fügt die E-Mail-Adressen der Teammitglieder hinzu. <br />
-                        Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams. 
+                        Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams.
                     </p>
                 </div>
 
@@ -75,9 +76,10 @@
 
             @if (Input.ParticipationType == ParticipationTypeSingle)
             {
-                <div class="text-center">
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Single</h3>
                     <p class="mt-4">
-                        Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst, und bestätige deine Teilnahme. 
+                        Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst, und bestätige deine Teilnahme.
                     </p>
                 </div>
 
