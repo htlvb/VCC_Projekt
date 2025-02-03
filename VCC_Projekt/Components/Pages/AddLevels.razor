@@ -1,0 +1,154 @@
+﻿@page "/add-levels"
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.Collections.Generic;
+
+<PageTitle>Levels anlegen</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Levels anlegen</h1>
+        <p class="lead text-muted">
+            Geben Sie die Anzahl der Levels für das Event an.
+        </p>
+    </div>
+
+    <div class="mt-4">
+        <EditForm EditContext="@editContext" OnValidSubmit="@HandleLevelCountSubmit">
+            <DataAnnotationsValidator />
+
+            <div class="form-floating mb-3">
+                <InputNumber @bind-Value="levelCount" class="form-control" min="1" />
+                <label for="levelCount">Anzahl der Levels</label>
+                <ValidationMessage For="@(() => levelCount)" class="text-danger" />
+            </div>
+
+            <div class="text-center mt-5">
+                <button type="button" class="w-25 btn btn-lg btn-success">Levels bestätigen</button>
+            </div>
+        </EditForm>
+    </div>
+
+    @if (levels != null && levels.Count > 0)
+    {
+        <div class="mt-5">
+            <h2 class="text-center">Levels</h2>
+            <div class="row">
+                @for (int i = 0; i < levels.Count; i++)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card" draggable="true" @ondragstart="@((e) => OnDragStart(e, i))" @ondrop="@((e) => OnDrop(e, i))" @ondragover="@((e) => OnDragOver(e))">
+                            <div class="card-body">
+                                <h5 class="card-title">Level @levels[i].LevelNumber</h5>
+                                <InputFile OnChange="@((e) => OnFileChange(e, i))" />
+                                <InputNumber @bind-Value="levels[i].TaskCount" class="form-control mt-2" min="1" />
+                                <label>Aufgabenanzahl</label>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private EditContext editContext;
+    private int levelCount;
+    private List<Level> levels;
+    private int draggedIndex = -1; // Variable zum Speichern des gezogenen Index
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(this);
+    }
+
+    private void HandleLevelCountSubmit()
+    {
+        levels = new List<Level>();
+        for (int i = 0; i < levelCount; i++)
+        {
+            levels.Add(new Level { LevelNumber = i + 1 });
+        }
+        
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs e, int index)
+    {
+        var file = e.File;
+        // Hier können Sie den Code zum Speichern der Datei hinzufügen
+        // Beispiel: await SaveFileAsync(file);
+    }
+
+    private void OnDragStart(DragEventArgs e, int index)
+    {
+        draggedIndex = index; // Speichern des gezogenen Index
+    }
+
+    private void OnDrop(DragEventArgs e, int index)
+    {
+        if (draggedIndex != -1 && draggedIndex != index)
+        {
+            var draggedLevel = levels[draggedIndex];
+            levels.RemoveAt(draggedIndex);
+            levels.Insert(index, draggedLevel);
+            UpdateLevelNumbers();
+        }
+        draggedIndex = -1; // Zurücksetzen des gezogenen Index
+    }
+
+    private void OnDragOver(DragEventArgs e)
+    {
+        // Hier können Sie das Standardverhalten nicht verhindern, aber Sie können visuelle Hinweise geben
+        // z.B. ändern Sie den Stil des Ziel-Elements
+    }
+
+    private void UpdateLevelNumbers()
+    {
+        for (int i = 0; i < levels.Count; i++)
+        {
+            levels[i].LevelNumber = i + 1;
+        }
+    }
+
+    public class Level
+    {
+        public int LevelNumber { get; set; }
+        public int TaskCount { get; set; }
+        public IBrowserFile UploadedFile { get; set; }
+    }
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+        }
+
+    .card {
+        cursor: move;
+    }
+</style>
