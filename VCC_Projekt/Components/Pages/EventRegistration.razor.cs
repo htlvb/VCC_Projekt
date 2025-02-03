@@ -1,9 +1,12 @@
 ﻿using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using static VCC_Projekt.Components.Account.Pages.Register;
 
 namespace VCC_Projekt.Components.Pages
@@ -11,26 +14,51 @@ namespace VCC_Projekt.Components.Pages
     public partial class EventRegistration
     {
         [SupplyParameterFromForm]
+
         private InputModel Input { get; set; } = new();
 
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
+
+        string error = string.Empty;
 
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
         private void AddMember()
         {
-            if (!Input.NewMemberEmail.ToLower().EndsWith("@htlvb.at"))
+            string newMember = Input.NewMemberEmail;
+
+            if (string.IsNullOrWhiteSpace(newMember))
             {
-                //Fehler
+                error = "Bitte geben Sie eine E-Mail-Adresse ein.";
+                Console.WriteLine(error);
+                return;
             }
 
-            if (!string.IsNullOrWhiteSpace(Input.NewMemberEmail) && Input.TeamMembers.Count < 4 && !Input.TeamMembers.Contains(Input.NewMemberEmail))
+            if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
             {
-                Input.TeamMembers.Add(Input.NewMemberEmail);
-                Input.NewMemberEmail = string.Empty;
+                error = "Bitte geben Sie eine gültige @htlvb.at E-Mail-Adresse ein.";
+                Console.WriteLine(error);
+                return;
             }
+
+            if (Input.TeamMembers.Contains(newMember))
+            {
+                error = "Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.";
+                Console.WriteLine(error);
+                return;
+            }
+
+            if (Input.TeamMembers.Count >= 4)
+            {
+                error = "Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.";
+                Console.WriteLine(error);
+                return;
+            }
+
+            Input.TeamMembers.Add(Input.NewMemberEmail);
+            Input.NewMemberEmail = string.Empty;
         }
 
         private void RemoveMember(string email)
@@ -40,13 +68,33 @@ namespace VCC_Projekt.Components.Pages
 
         private async void HandleSubmit()
         {
+            var teamName = Input.TeamName; // Teamname
+            var groupManager = Input.Username;
+            var eventId = 1;
+
             if (Input.ParticipationType == ParticipationTypeTeam)
             {
+
+                try
+                {
+                    Gruppe team = new Gruppe();
+
+                    team.Gruppenname = teamName;
+                    team.Event_EventID = eventId;
+                    team.GruppenleiterId = groupManager;
+                    team.Teilnehmertyp = Input.ParticipationType; 
+
+                    dbContext.Gruppen.Add(team);
+                    dbContext.SaveChanges();
+                }
+                catch (Exception ex) 
+                {
+                    Console.WriteLine(ex.Message);
+                }
                 //Datenbankeintrag in Gruppentabelle
 
                 var teamId = 1; // Die ID des Teams
-                var teamName = "hallo"; // Teamname
-                var groupManager = Input.Username; // Person, die die gruppe anlegt (aktueller user)
+
 
                 foreach (var memberEmail in Input.TeamMembers)
                 {
@@ -60,12 +108,28 @@ namespace VCC_Projekt.Components.Pages
                 }
             }
 
-            if (Input.ParticipationType == ParticipationTypeSingle)
+            else
             {
                 //Datenbankeintrag mit benutzername als teamname 
+                try
+                {
+
+                    Gruppe single = new Gruppe();
+
+                    single.Gruppenname = groupManager;
+                    single.Event_EventID = eventId;
+                    single.GruppenleiterId = groupManager;
+                    single.Teilnehmertyp = Input.ParticipationType;
+
+                    dbContext.Gruppen.Add(single);
+                    dbContext.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
-
         protected override async Task OnInitializedAsync()
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -94,7 +158,7 @@ namespace VCC_Projekt.Components.Pages
             [Display(Name = "Gruppenmitglieder")]
             public List<string> TeamMembers { get; set; } = new();
 
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$",
+            [RegularExpression(@"(?i)^.+@htlvb\.at$",
                     ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
                     "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
             [UniqueEmail(ErrorMessage = "Diese E-Mail-Adresse existiert bereits")]
