@@ -131,7 +131,7 @@ namespace VCC_Projekt.Components.Pages
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error");
+                Console.WriteLine(ex.Message);
             }
         }
         private InputModel Input { get; set; } = new();

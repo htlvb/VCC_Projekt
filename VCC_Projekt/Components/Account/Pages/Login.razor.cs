@@ -39,8 +39,8 @@ namespace VCC_Projekt.Components.Account.Pages
                 errorMessage = "Error: Invalid login attempt.";
                 return;
             }
-
-            var result = await SignInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            string userName = user.UserName ?? "";
+            var result = await SignInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             switch (result)
             {
                 case { Succeeded: true }:
