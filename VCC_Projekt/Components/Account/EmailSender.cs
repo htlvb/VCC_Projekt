@@ -231,7 +231,7 @@ namespace VCC_Projekt.Components.Account
                             <p>Du wurdest von <strong>" + user + @"</strong> eingeladen, um der Gruppe <strong>" + teamName + @"</strong> beizutreten.</p>
                             <p>Um der Gruppe beizutreten, klicke bitte auf den folgenden Button:</p>
                             <a href = '" + invitationLink + @"' class='button'>Gruppe beitreten</a>
-                            <p>Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>
+                            <p>Wenn du dieser Gruppe nicht betreten willst, kannst du diese E-Mail ignorieren.</p>
                             <p>Mit freundlichen Grüßen,<br>Dein VCC-Team</p>
                         </div>
                     </body>
