@@ -8,42 +8,45 @@
 
 <h1 class="page-title">Rollen ändern</h1>
 
-    <!-- Controls (Autocomplete und Button) -->
-    <div class="controls">
-        <EditForm OnValidSubmit="AddRole" Model="@modelUser">
-            <DataAnnotationsValidator />
-            <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="300" @bind-Value="modelUser.User" Label="Benutzer" Class="autocomplete" 
-                             ToStringFunc="@(e => e == null ? null : e.ToString())"
-                             AdornmentIcon="@Icons.Material.Filled.Search" For="@(()=>modelUser.User)" Margin="Margin.Normal"/>
-            <MudSelect @bind-Value="modelUser.Role" Label="Rolle" For="@(()=>modelUser.Role)" Margin="Margin.Normal">
-                @foreach(string role in roles)
-                {
-                    <MudSelectItem Value="role">@role</MudSelectItem>
-                }
-            </MudSelect>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Absenden</MudButton>
-        </EditForm>
-        @if (showErrorAlert)
-        {
-            <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Error"))">@errorMessage</MudAlert>
-        }
-        @if (showSuccessAlert)
-        {
-            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Success"))">@successMessage</MudAlert>
-        }
-        
-    </div>
+<!-- Controls (Autocomplete und Button) -->
+<div class="controls">
+    <EditForm OnValidSubmit="AddRole" Model="@modelUser">
+        <DataAnnotationsValidator />
+        <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="300" @bind-Value="modelUser.User" Label="Benutzer" Class="autocomplete" 
+        ToStringFunc="@(e => e == null ? null : e.ToString())"
+        AdornmentIcon="@Icons.Material.Filled.Search" For="@(()=>modelUser.User)" Margin="Margin.Normal"/>
+        <MudSelect @bind-Value="modelUser.Role" Label="Rolle" For="@(()=>modelUser.Role)" Margin="Margin.Normal">
+            @foreach(string role in roles)
+            {
+                <MudSelectItem Value="role">@role</MudSelectItem>
+            }
+        </MudSelect>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Rolle hinzufügen</MudButton>
+    </EditForm>
+    @if (showErrorAlert)
+    {
+        <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Error"))">@errorMessage</MudAlert>
+    }
+    @if (showSuccessAlert)
+    {
+        <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Success"))">@successMessage</MudAlert>
+    }
 
-    <!-- DataGrid -->
-    <div class="datagrid">
-        <MudDataGrid T="User" Items="@users" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Benutzer</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <Columns>
+</div>
+
+<!-- DataGrid -->
+<div class="datagrid">
+    <MudDataGrid T="User" Items="@users" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Rollen der Users</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+
+        <Columns>
+            @if (!string.IsNullOrEmpty(_searchString))
+            {
                 <PropertyColumn Property="u => u.Email" Title="Email" />
                 <PropertyColumn Property="u => u.Username" Title="Benutzername" />
                 <PropertyColumn Property="u => u.Fullname" Title="Name" />
@@ -55,9 +58,13 @@
                         </MudButton>
                     </CellTemplate>
                 </TemplateColumn>
-            </Columns>
-            <PagerContent>
+            }
+        </Columns>
+        <PagerContent>
+            @if (!string.IsNullOrEmpty(_searchString))
+            {
                 <MudDataGridPager T="User" />
-            </PagerContent>
+            }
+        </PagerContent>
         </MudDataGrid>
     </div>
