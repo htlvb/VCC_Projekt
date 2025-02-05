@@ -9,20 +9,7 @@
 <h1 class="page-title">Rollen ändern</h1>
 
 <!-- Controls (Autocomplete und Button) -->
-<div class="controls">
-    <EditForm OnValidSubmit="AddRole" Model="@modelUser">
-        <DataAnnotationsValidator />
-        <MudAutocomplete T="User" SearchFunc="SearchUsers" DebounceInterval="300" @bind-Value="modelUser.User" Label="Benutzer" Class="autocomplete" 
-        ToStringFunc="@(e => e == null ? null : e.ToString())"
-        AdornmentIcon="@Icons.Material.Filled.Search" For="@(()=>modelUser.User)" Margin="Margin.Normal"/>
-        <MudSelect @bind-Value="modelUser.Role" Label="Rolle" For="@(()=>modelUser.Role)" Margin="Margin.Normal">
-            @foreach(string role in roles)
-            {
-                <MudSelectItem Value="role">@role</MudSelectItem>
-            }
-        </MudSelect>
-        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Rolle hinzufügen</MudButton>
-    </EditForm>
+<div class="alerts">
     @if (showErrorAlert)
     {
         <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Error"))">@errorMessage</MudAlert>
@@ -36,7 +23,10 @@
 
 <!-- DataGrid -->
 <div class="datagrid">
-    <MudDataGrid T="User" Items="@users" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+    <MudDataGrid T="EditRoleUser" Items="@users"
+        SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
+                 QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
+        CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Rollen der Users</MudText>
             <MudSpacer />
@@ -47,15 +37,23 @@
         <Columns>
             @if (!string.IsNullOrEmpty(_searchString))
             {
-                <PropertyColumn Property="u => u.Email" Title="Email" />
-                <PropertyColumn Property="u => u.Username" Title="Benutzername" />
-                <PropertyColumn Property="u => u.Fullname" Title="Name" />
-                <PropertyColumn Property="u => u.Rolename" Title="Rolle" />
+                <PropertyColumn Property="u => u.Email" Title="Email" Editable="false"/>
+                <PropertyColumn Property="u => u.Username" Title="Benutzername" Editable="false"/>
+                <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false"/>
+                <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" >
+                    <EditTemplate>
+                        <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="true" Required Margin="Margin.Normal">
+                            @foreach (var role in roles) 
+                            {
+                                <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </EditTemplate>
+                </PropertyColumn>
+                    
                 <TemplateColumn CellClass="d-flex justify-end">
                     <CellTemplate>
-                        <MudButton Size="@Size.Medium" Variant="@Variant.Filled" Color="@Color.Primary" OnClick="() => RemoveRole(context.Item)">
-                            Rolle entfernen
-                        </MudButton>
+                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                     </CellTemplate>
                 </TemplateColumn>
             }
@@ -63,8 +61,13 @@
         <PagerContent>
             @if (!string.IsNullOrEmpty(_searchString))
             {
-                <MudDataGridPager T="User" />
+                <MudDataGridPager T="EditRoleUser" />
             }
         </PagerContent>
         </MudDataGrid>
     </div>
+
+@code
+{
+
+}
