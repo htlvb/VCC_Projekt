@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using MudBlazor;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -54,6 +53,7 @@ namespace VCC_Projekt.Components.Pages
             if (index >= 0 && index < _levels.Count)
             {
                 _levels.RemoveAt(index);
+                ReorderLevels();
             }
         }
 
@@ -117,35 +117,75 @@ namespace VCC_Projekt.Components.Pages
             if (_selectedEventId == 0)
                 return;
 
-            var levels = _levels.Select(level => new Level
+            try
             {
-                Levelnr = level.Levelnr,
-                Event_EventID = level.Event_EventID,
-                Angabe_PDF = level.Angabe_PDF,
-                Aufgaben = level.Aufgaben
-            }).ToList();
+                // Retrieve existing levels from the database
+                var existingLevels = await dbContext.Levels
+                                                    .Where(l => l.Event_EventID == _selectedEventId)
+                                                    .ToListAsync();
 
-            dbContext.Levels.UpdateRange(levels);
-            await dbContext.SaveChangesAsync();
-            Console.WriteLine("Levels gespeichert!");
+                // Update existing levels and add new levels
+                foreach (var level in _levels)
+                {
+                    var existingLevel = existingLevels.FirstOrDefault(l => l.Levelnr == level.Levelnr);
+                    if (existingLevel != null)
+                    {
+                        existingLevel.Angabe_PDF = level.Angabe_PDF;
+                        existingLevel.Aufgaben = level.Aufgaben;
+                    }
+                    else
+                    {
+                        dbContext.Levels.Add(new Level
+                        {
+                            Levelnr = level.Levelnr,
+                            Event_EventID = level.Event_EventID,
+                            Angabe_PDF = level.Angabe_PDF,
+                            Aufgaben = level.Aufgaben
+                        });
+                    }
+                }
+
+                // Remove levels that are no longer present
+                var levelsToRemove = existingLevels.Where(existingLevel => !_levels.Any(level => level.Levelnr == existingLevel.Levelnr)).ToList();
+                dbContext.Levels.RemoveRange(levelsToRemove);
+
+                await dbContext.SaveChangesAsync();
+                Snackbar.Add("Levels erfolgreich gespeichert!", Severity.Success, config =>
+                {
+                    config.Icon = Icons.Material.Filled.CheckCircle;
+                });
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Fehler beim Speichern der Levels: {ex.Message}", Severity.Error, config =>
+                {
+                    config.Icon = Icons.Material.Filled.Error;
+                });
+            }
         }
 
         private void OnOrderChanged()
         {
-            // Handle order change if needed
+            ReorderLevels();
         }
 
-        public class LevelViewModel
+        private void ReorderLevels()
         {
-            public int Levelnr { get; set; }
-            public int Event_EventID { get; set; }
-            public byte[] Angabe_PDF { get; set; }
-            public List<Aufgabe> Aufgaben { get; set; }
-            public bool IsExpanded { get; set; } // This property is for UI state
+            for (int i = 0; i < _levels.Count; i++)
+            {
+                _levels[i].Levelnr = i + 1;
+            }
         }
-
-
     }
 
-    
+    public class LevelViewModel
+    {
+        public int Levelnr { get; set; }
+        public int Event_EventID { get; set; }
+        public byte[] Angabe_PDF { get; set; }
+        public List<Aufgabe> Aufgaben { get; set; }
+        public bool IsExpanded { get; set; } // This property is for UI state
+    }
+
+
 }
