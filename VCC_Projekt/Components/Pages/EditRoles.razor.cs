@@ -16,7 +16,6 @@
         // For the Grid
         private List<EditRoleUser> users;
 
-
         protected override void OnInitialized()
         {
             users = dbContext.Users
@@ -44,9 +43,11 @@
         {
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
-
-            if ($"{x.Email}{x.Fullname}{x.Username}{string.Join("", x.Roles)}".ToLower().Contains(_searchString))
-                return true;
+            
+            if(x.Email.ToLower().StartsWith(_searchString)) return true;
+            if (x.Fullname.ToLower().StartsWith(_searchString)) return true;
+            if (x.Username.ToLower().StartsWith(_searchString)) return true;
+            if (x.Roles.Any(r => r.ToLower().StartsWith(_searchString))) return true;
 
             return false;
         };
@@ -142,7 +143,6 @@
         public string Email { get; set; }
         public List<string> Roles { get; set; }
 
-        // Konstruktor
         public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles)
         {
             Username = username;
@@ -152,10 +152,8 @@
             Roles = roles;
         }
 
-        // Berechnetes Property
         public string Fullname => $"{Firstname} {Lastname}";
 
-        // Überschreibung der ToString-Methode
         public override string ToString()
         {
             return $"{Username} ({Email})";
