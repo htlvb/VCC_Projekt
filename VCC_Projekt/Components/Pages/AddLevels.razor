@@ -39,10 +39,6 @@
                                     </MudButton>
                                 </ActivatorContent>
                             </MudFileUpload>
-                            @if (_levels[index].UploadProgress > 0)
-                            {
-                                <MudProgressLinear Value="@_levels[index].UploadProgress" Color="Color.Primary" />
-                            }
                             @if (_levels[index].Angabe_PDF != null)
                             {
                                 <div class="file-preview">
@@ -73,6 +69,14 @@
                                                             </MudButton>
                                                         </ActivatorContent>
                                                     </MudFileUpload>
+                                                    @if (_levels[index].Aufgaben[taskIndex].Input_TXT != null)
+                                                    {
+                                                        <div class="file-preview">
+                                                            <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Input_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Input{taskIndex}.txt")" class="download-link">Input.txt herunterladen</a>
+                                                            <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
+                                                        </div>
+                                                    }
+                                                    <br />
                                                     <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt" Disabled="@IsEventInPast">
                                                         <ActivatorContent>
                                                             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">

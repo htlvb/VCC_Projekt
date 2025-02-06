@@ -105,10 +105,12 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (file != null)
                 {
-                    _levels[levelIndex].Angabe_PDF = new byte[] { };
+                    _levels[levelIndex].Angabe_PDF = await ConvertToBytesAsync(file);
                 }
             }
         }
+
+        
 
         private async Task UploadTaskFile(IBrowserFile file, int levelIndex, int taskIndex, string type)
         {
@@ -116,13 +118,11 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (file != null)
                 {
-                    using var memoryStream = new MemoryStream();
-                    await file.OpenReadStream().CopyToAsync(memoryStream);
 
                     if (type == "input")
-                        _levels[levelIndex].Aufgaben[taskIndex].Input_TXT = memoryStream.ToArray();
+                        _levels[levelIndex].Aufgaben[taskIndex].Input_TXT = await ConvertToBytesAsync(file);
                     else if (type == "output")
-                        _levels[levelIndex].Aufgaben[taskIndex].Ergebnis_TXT = memoryStream.ToArray();
+                        _levels[levelIndex].Aufgaben[taskIndex].Ergebnis_TXT = await ConvertToBytesAsync(file);
                 }
             }
             Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success, config =>
@@ -130,6 +130,14 @@ namespace VCC_Projekt.Components.Pages
                 config.Icon = Icons.Material.Filled.CheckCircle;
             });
             StateHasChanged();
+        }
+
+        private async Task<byte[]> ConvertToBytesAsync(IBrowserFile file)
+        {
+            const long maxFileSize = 5 * 1024 * 1024;
+            using var memoryStream = new MemoryStream();
+            await file.OpenReadStream(maxAllowedSize: maxFileSize).CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
         }
 
         private async Task SaveLevels()
