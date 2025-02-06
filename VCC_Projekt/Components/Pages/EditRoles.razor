@@ -11,17 +11,6 @@
         </p>
     </div>
 
-    <div class="alerts">
-        @if (showErrorAlert)
-        {
-            <MudAlert Severity="Severity.Error" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Error"))">@errorMessage</MudAlert>
-        }
-        @if (showSuccessAlert)
-        {
-            <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" ShowCloseIcon="true" CloseIconClicked="@(() => CloseMe("Success"))">@successMessage</MudAlert>
-        }
-    </div>
-
     <!-- DataGrid -->
     <div class="datagrid">
         <MudDataGrid T="EditRoleUser " Items="@users"
