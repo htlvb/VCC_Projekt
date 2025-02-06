@@ -1,7 +1,6 @@
 ﻿@page "/add-levels"
 @using Microsoft.AspNetCore.Components.Forms
 @inject ISnackbar Snackbar
-@using MudBlazor
 
 <MudContainer MaxWidth="MaxWidth.False">
     <MudGrid>
@@ -13,7 +12,7 @@
                         <MudSelectItem Value="0">Bitte wählen...</MudSelectItem>
                         @foreach (var ev in _events)
                         {
-                            <MudSelectItem Value="@ev.EventID">@ev.Bezeichnung</MudSelectItem>
+                            <MudSelectItem Value="@ev.EventID">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
                         }
                     </MudSelect>
                 </MudCardContent>
@@ -31,13 +30,13 @@
                         <MudText Typo="Typo.h6">@($"Level {index + 1}")</MudText>
                         <MudSpacer />
                         <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="() => ToggleLevel(index)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveLevel(index)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveLevel(index)" Disabled="@IsEventInPast" />
                     </MudCardHeader>
                     <MudCollapse Expanded="@_levels[index].IsExpanded">
                         <MudCardContent>
-                            <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, index))" Accept=".pdf">
+                            <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, index))" Accept=".pdf" Disabled="@IsEventInPast">
                                 <ActivatorContent>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
                                         PDF hochladen
                                     </MudButton>
                                 </ActivatorContent>
@@ -59,9 +58,9 @@
                                         <MudCard Class="task-card">
                                             <MudCardContent>
                                                 <MudText Typo="Typo.body1">Aufgabe @(taskIndex + 1)</MudText>
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt" Disabled="@IsEventInPast">
                                                     <ActivatorContent>
-                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
                                                             Input.txt hochladen
                                                         </MudButton>
                                                     </ActivatorContent>
@@ -73,9 +72,9 @@
                                                         <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
                                                     </div>
                                                 }
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt" Disabled="@IsEventInPast">
                                                     <ActivatorContent>
-                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
                                                             Output.txt hochladen
                                                         </MudButton>
                                                     </ActivatorContent>
@@ -87,14 +86,14 @@
                                                         <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)</pre>
                                                     </div>
                                                 }
-                                                <MudButton OnClick="() => RemoveTask(index, taskIndex)" Color="Color.Error" Class="mt-2">Aufgabe entfernen</MudButton>
+                                                <MudButton OnClick="() => RemoveTask(index, taskIndex)" Color="Color.Error" Class="mt-2" Disabled="@IsEventInPast">Aufgabe entfernen</MudButton>
                                             </MudCardContent>
                                         </MudCard>
                                     </li>
                                 }
                             </ul>
 
-                            <MudButton OnClick="() => AddTask(index)" Color="Color.Success" Class="mt-2">Neue Aufgabe hinzufügen</MudButton>
+                            <MudButton OnClick="() => AddTask(index)" Color="Color.Success" Class="mt-2" Disabled="@IsEventInPast">Neue Aufgabe hinzufügen</MudButton>
                         </MudCardContent>
                     </MudCollapse>
                 </MudCard>
@@ -105,7 +104,7 @@
         <MudItem xs="12">
             <MudCard class="mt-3">
                 <MudCardContent>
-                    <MudButton OnClick="AddLevel" Disabled="@(_levels.Count >= 5 || _selectedEventId == 0)" Color="Color.Primary">Neues Level hinzufügen</MudButton>
+                    <MudButton OnClick="AddLevel" Disabled="@(_levels.Count >= 5 || _selectedEventId == 0 || IsEventInPast)" Color="Color.Primary">Neues Level hinzufügen</MudButton>
                 </MudCardContent>
             </MudCard>
         </MudItem>
@@ -113,7 +112,7 @@
 
     <MudCard class="mt-3">
         <MudCardContent>
-            <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEventId == 0)">Levels speichern</MudButton>
+            <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEventId == 0 || IsEventInPast)">Levels speichern</MudButton>
         </MudCardContent>
     </MudCard>
 </MudContainer>

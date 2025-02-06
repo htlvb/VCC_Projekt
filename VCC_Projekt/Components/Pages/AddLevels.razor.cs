@@ -8,10 +8,11 @@ namespace VCC_Projekt.Components.Pages
         private List<LevelViewModel> _levels = new();
         private List<Event> _events = new();
         private int _selectedEventId;
+        private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEventId)?.Beginn < DateTime.Now;
 
         protected override async Task OnInitializedAsync()
         {
-            _events = await dbContext.Events.ToListAsync();
+            _events = await dbContext.Events.OrderByDescending(ev => ev.Beginn).ToListAsync();
         }
 
         private async Task OnEventSelected(int eventId)
@@ -42,7 +43,7 @@ namespace VCC_Projekt.Components.Pages
 
         private void AddLevel()
         {
-            if (_levels.Count < 5 && _selectedEventId != 0)
+            if (_levels.Count < 5 && _selectedEventId != 0 && !IsEventInPast)
             {
                 _levels.Add(new LevelViewModel { Levelnr = _levels.Count + 1, Event_EventID = _selectedEventId, Aufgaben = new List<Aufgabe>(), IsExpanded = false });
             }
@@ -50,7 +51,7 @@ namespace VCC_Projekt.Components.Pages
 
         private void RemoveLevel(int index)
         {
-            if (index >= 0 && index < _levels.Count)
+            if (index >= 0 && index < _levels.Count && !IsEventInPast)
             {
                 _levels.RemoveAt(index);
                 ReorderLevels();
@@ -59,7 +60,7 @@ namespace VCC_Projekt.Components.Pages
 
         private void AddTask(int levelIndex)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count)
+            if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
             {
                 _levels[levelIndex].Aufgaben.Add(new Aufgabe { Aufgabennr = _levels[levelIndex].Aufgaben.Count + 1 });
             }
@@ -68,7 +69,7 @@ namespace VCC_Projekt.Components.Pages
         private void RemoveTask(int levelIndex, int taskIndex)
         {
             if (levelIndex >= 0 && levelIndex < _levels.Count &&
-                taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count)
+                taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count && !IsEventInPast)
             {
                 _levels[levelIndex].Aufgaben.RemoveAt(taskIndex);
             }
@@ -84,7 +85,7 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task UploadFile(IBrowserFile file, int levelIndex)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count)
+            if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
             {
                 if (file != null)
                 {
@@ -97,7 +98,7 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task UploadTaskFile(IBrowserFile file, int levelIndex, int taskIndex, string type)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count && taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count)
+            if (levelIndex >= 0 && levelIndex < _levels.Count && taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count && !IsEventInPast)
             {
                 if (file != null)
                 {
@@ -114,7 +115,7 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task SaveLevels()
         {
-            if (_selectedEventId == 0)
+            if (_selectedEventId == 0 || IsEventInPast)
                 return;
 
             try
@@ -162,11 +163,6 @@ namespace VCC_Projekt.Components.Pages
                     config.Icon = Icons.Material.Filled.Error;
                 });
             }
-        }
-
-        private void OnOrderChanged()
-        {
-            ReorderLevels();
         }
 
         private void ReorderLevels()
