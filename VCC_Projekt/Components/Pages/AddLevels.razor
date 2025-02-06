@@ -35,7 +35,7 @@
                     </MudCardHeader>
                     <MudCollapse Expanded="@_levels[index].IsExpanded">
                         <MudCardContent>
-                            <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, index))">
+                            <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, index))" Accept=".pdf">
                                 <ActivatorContent>
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
                                         PDF hochladen
@@ -59,7 +59,7 @@
                                         <MudCard Class="task-card">
                                             <MudCardContent>
                                                 <MudText Typo="Typo.body1">Aufgabe @(taskIndex + 1)</MudText>
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt">
                                                     <ActivatorContent>
                                                         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
                                                             Input.txt hochladen
@@ -73,7 +73,7 @@
                                                         <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
                                                     </div>
                                                 }
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt">
                                                     <ActivatorContent>
                                                         <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
                                                             Output.txt hochladen
