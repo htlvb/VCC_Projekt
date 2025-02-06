@@ -8,11 +8,10 @@
             <MudCard>
                 <MudCardContent>
                     <MudText Typo="Typo.h6">Event auswählen</MudText>
-                    <MudSelect T="int" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))">
-                        <MudSelectItem Value="0">Bitte wählen...</MudSelectItem>
+                    <MudSelect T="Event" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))">
                         @foreach (var ev in _events)
                         {
-                            <MudSelectItem Value="@ev.EventID">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
                         }
                     </MudSelect>
                 </MudCardContent>
@@ -44,7 +43,7 @@
                             @if (_levels[index].Angabe_PDF != null)
                             {
                                 <div class="file-preview">
-                                    <a href="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" download="@($"Level_{index}.pdf")" class="download-link">PDF herunterladen</a>
+                                    <a href="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}.pdf")" class="download-link">PDF herunterladen</a>
                                     <iframe src="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" class="pdf-preview"></iframe>
                                 </div>
                             }
@@ -68,7 +67,7 @@
                                                 @if (_levels[index].Aufgaben[taskIndex].Input_TXT != null)
                                                 {
                                                     <div class="file-preview">
-                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Input_TXT)" download="@($"Input_{index}_{taskIndex}.txt")" class="download-link">Input.txt herunterladen</a>
+                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Input_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Input{taskIndex}.txt")" class="download-link">Input.txt herunterladen</a>
                                                         <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
                                                     </div>
                                                 }
@@ -82,7 +81,7 @@
                                                 @if (_levels[index].Aufgaben[taskIndex].Ergebnis_TXT != null)
                                                 {
                                                     <div class="file-preview">
-                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)" download="@($"Output_{index}_{taskIndex}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
+                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Output{taskIndex}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
                                                         <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)</pre>
                                                     </div>
                                                 }

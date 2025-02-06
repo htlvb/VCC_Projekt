@@ -8,16 +8,19 @@ namespace VCC_Projekt.Components.Pages
         private List<LevelViewModel> _levels = new();
         private List<Event> _events = new();
         private int _selectedEventId;
+        private Event _selectedEvent;
         private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEventId)?.Beginn < DateTime.Now;
 
         protected override async Task OnInitializedAsync()
         {
             _events = await dbContext.Events.OrderByDescending(ev => ev.Beginn).ToListAsync();
+            Console.WriteLine();
         }
 
-        private async Task OnEventSelected(int eventId)
+        private async Task OnEventSelected(Event eventId)
         {
-            _selectedEventId = eventId;
+            _selectedEventId = eventId.EventID;
+            _selectedEvent = eventId;
 
             if (_selectedEventId != 0)
             {
