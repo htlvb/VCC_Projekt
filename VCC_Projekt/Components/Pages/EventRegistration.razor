@@ -1,4 +1,4 @@
-﻿@page "/signup-event"
+﻿@page "/signup-event/{eventId:int}"
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
 @inject EmailSender EmailSender
@@ -11,7 +11,7 @@
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für Event</h1>
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für @eventId</h1>
         <p class="lead text-muted">
             Wähle deine Teilnahmeart und registriere dich für das Event.
         </p>
@@ -71,9 +71,18 @@
                         }
 
                         <div class="input-group">
-                            <input type="email" class="form-control" @bind="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                            <InputText @bind-Value="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" class="form-control"/>
                             <button type="button" class="btn btn-success" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</button>
                         </div>
+                        @if (addMemberErrors.Any())
+                        {
+                            <div class="text-danger">
+                                @foreach (var error in addMemberErrors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
                         <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                     }
                     else

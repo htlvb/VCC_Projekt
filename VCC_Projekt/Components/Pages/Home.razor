@@ -1,4 +1,6 @@
 ﻿@page "/"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Home</PageTitle>
 
@@ -27,21 +29,24 @@
         </ul>
     </div>
 
-    <div class="col-md-6 d-flex">
-        <div class="card mx-auto" style="flex: 1; border-color: #134883;">
-            <div class="card-body d-flex flex-column">
-                <h3 class="card-title">Frühjahrs-Coding Contest</h3>
-                <p class="card-text flex-grow-1">
-                    <strong>Datum:</strong> 15. April 2025<br>
-                    <strong>Ort:</strong> HTL Vöcklabruck<br>
-                    <strong>Beschreibung:</strong> Ein spannender Wettbewerb für alle Informatikklassen. Tritt alleine oder im Team an und zeig dein Können!
-                </p>
-                <div class="text-center mt-auto">
-                    <a href="/signup-event" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+    <div class="mt-4">
+        <h2>Nächstes Event:</h2>
+        <div class="col-md-6 d-flex">
+            <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                <div class="card-body d-flex flex-column">
+                    <h3 class="card-title">@dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().Bezeichnung</h3>
+                    <p class="card-text flex-grow-1">
+                        <strong>Datum:</strong> @dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).Select(e => e.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))).First()<br>
+                    </p>
+                    <div class="text-center mt-auto">
+                        <a href="@buttonLink" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
+
 
     <div class="text-center mt-5">
         <div class="text-center mt-auto">

@@ -29,10 +29,10 @@ public class Event
     public int StrafminutenProFehlversuch { get; set; }
 
     // Navigation zu Gruppen
-    public virtual ICollection<Gruppe> Gruppen { get; set; }
+    public virtual ICollection<Gruppe>? Gruppen { get; set; }
 
     // Navigation zu Levels
-    public virtual ICollection<Level> Levels { get; set; }
+    public virtual ICollection<Level>? Levels { get; set; }
 }
 
 public class EventConfiguration : IEntityTypeConfiguration<Event>

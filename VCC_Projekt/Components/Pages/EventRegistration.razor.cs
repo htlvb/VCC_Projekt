@@ -15,8 +15,10 @@ namespace VCC_Projekt.Components.Pages
     public partial class EventRegistration
     {
         [SupplyParameterFromForm]
-
         private InputModel Input { get; set; } = new();
+
+        [Parameter] public int eventId { get; set; }
+        private Event selectedEvent;
 
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
@@ -26,6 +28,9 @@ namespace VCC_Projekt.Components.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
+        private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
+
+
         private bool CanAddMember()
         {
             return Input.TeamMembers.Count < 4 && !string.IsNullOrWhiteSpace(Input.NewMemberEmail);
@@ -33,12 +38,34 @@ namespace VCC_Projekt.Components.Pages
 
         private void AddMember()
         {
-            //Fehler prüfen
-            
-            Input.TeamMembers.Add(Input.NewMemberEmail);
-            Input.NewMemberEmail = string.Empty;
+            addMemberErrors.Clear();
+            var newMember = Input.NewMemberEmail;
 
+            if (!string.IsNullOrWhiteSpace(newMember))
+            {
+                if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
+                {
+                    addMemberErrors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Input.NewMemberEmail) }));
+                }
+                else if (Input.TeamMembers.Contains(newMember))
+                {
+                    addMemberErrors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Input.NewMemberEmail) }));
+                }
+                else if (Input.TeamMembers.Count >= 4)
+                {
+                    addMemberErrors.Add(new ValidationResult("Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.", new[] { nameof(Input.NewMemberEmail) }));
+                }
+            }
+
+            if (addMemberErrors.Count == 0)
+            {
+                Input.TeamMembers.Add(newMember);
+                Input.NewMemberEmail = string.Empty;
+            }
+
+            StateHasChanged();
         }
+
 
         private void RemoveMember(string email)
         {
@@ -94,7 +121,7 @@ namespace VCC_Projekt.Components.Pages
                         var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
 
                         var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                            NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
+                            NavigationManager.ToAbsoluteUri("/signup-event-confirmation").AbsoluteUri,
                             new Dictionary<string, object?> { ["inviteToken"] = inviteToken, ["email"] = memberEmail });
 
                         await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
@@ -137,6 +164,14 @@ namespace VCC_Projekt.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            selectedEvent = await dbContext.Events.FindAsync(eventId);
+
+            if (selectedEvent == null)
+            {
+                // Falls das Event nicht gefunden wurde, leite auf die Event-Seite zurück
+                NavigationManager.NavigateTo("/events");
+            }
+
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
@@ -193,24 +228,6 @@ namespace VCC_Projekt.Components.Pages
                     if (TeamMembers.Count == 0)
                     {
                         errors.Add(new ValidationResult("Bitte mindestens ein Gruppenmitglied hinzufügen.", new[] { nameof(NewMemberEmail) }));
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(newMember))
-                    {
-                        if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
-                        {
-                            errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(NewMemberEmail) }));
-                        }
-
-                        else if (TeamMembers.Contains(newMember))
-                        {
-                            errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(NewMemberEmail) }));
-                        }
-
-                        else if (TeamMembers.Count >= 4)
-                        {
-                            errors.Add(new ValidationResult("Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.", new[] { nameof(NewMemberEmail) }));
-                        }
                     }
                 }
 

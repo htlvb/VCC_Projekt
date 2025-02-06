@@ -40,7 +40,7 @@ public class Gruppe
     public string Teilnehmertyp { get; set; }
 
     // Beziehung zu 'GruppeAbsolviertLevel' 
-    public ICollection<GruppeAbsolviertLevel> Absolviert { get; set; }
+    public ICollection<GruppeAbsolviertLevel>? Absolviert { get; set; }
 
     public ICollection<ApplicationUser> Mitglieder { get; set; }
 }
@@ -64,5 +64,9 @@ public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
                               .WithMany()
                               .HasForeignKey(g => g.GruppenleiterId)
                               .HasPrincipalKey(u => u.UserName);
+        builder.HasMany(g => g.Absolviert)
+               .WithOne(gal => gal.Gruppe)
+               .HasForeignKey(gal => gal.Gruppe_GruppeID)
+               .OnDelete(DeleteBehavior.Cascade);
     }
 }
