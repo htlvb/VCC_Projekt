@@ -1,12 +1,9 @@
 ﻿namespace VCC_Projekt.Data;
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-// Add profile data for application users by adding properties to the ApplicationUser class
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// Entität für die Tabelle _gruppe_absolviert_level
 public class GruppeAbsolviertLevel
 {
     public GruppeAbsolviertLevel() { }
@@ -17,15 +14,14 @@ public class GruppeAbsolviertLevel
         Fehlversuche = fehlversuche;
     }
 
-    // Fremdschlüssel zu Gruppe
     public int Gruppe_GruppeID { get; set; }
     [ForeignKey("Gruppe_GruppeID")]
-    public virtual Gruppe Gruppe { get; set; }  // Navigation Property zu Gruppe
+    public virtual Gruppe Gruppe { get; set; }
 
-    // Fremdschlüssel zu Level
+
     [ForeignKey("Level_LevelID")]
     public int Level_LevelID { get; set; }
-    public virtual Level Level { get; set; }  // Navigation Property zu Level
+    public virtual Level Level { get; set; }
 
     public TimeSpan BenoetigteZeit { get; set; }
     public int Fehlversuche { get; set; }
@@ -46,6 +42,8 @@ public class GruppeAbsolviertLevelConfiguration : IEntityTypeConfiguration<Grupp
               .WithMany()
               .HasForeignKey(gcl => gcl.Level_LevelID)
               .HasPrincipalKey(l => l.LevelID);
+        
+
     }
 }
 

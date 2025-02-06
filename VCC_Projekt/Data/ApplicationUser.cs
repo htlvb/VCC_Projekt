@@ -13,7 +13,7 @@ public class ApplicationUser : IdentityUser<string>
     {
     }
 
-    public ApplicationUser(string? firstname, string? lastname, int? gruppe_GruppenID)
+    public ApplicationUser(string firstname, string lastname, int? gruppe_GruppenID)
     {
         Firstname = firstname;
         Lastname = lastname;
@@ -26,15 +26,12 @@ public class ApplicationUser : IdentityUser<string>
         get => UserName;
         set => UserName = value;
     }
-    // Der Vorname des Benutzers
-    public string? Firstname { get; set; }
+    public string Firstname { get; set; }
 
-    // Der Nachname des Benutzers
-    public string? Lastname { get; set; }
+    public string Lastname { get; set; }
     public int? Gruppe_GruppenID { get; set; }
 
-    
-    public ICollection<Gruppe> GruppenleiterNavigation { get; set; }
+    public ICollection<Gruppe>? GruppenleiterNavigation { get; set; }
 
     [ForeignKey("Gruppe_GruppenID")]
     public virtual Gruppe Gruppe { get; set; }

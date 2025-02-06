@@ -10,7 +10,7 @@ namespace VCC_Projekt.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-            Database.SetCommandTimeout(20);
+            Database.SetCommandTimeout(60);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

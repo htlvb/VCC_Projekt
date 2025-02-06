@@ -30,7 +30,7 @@ public class Level
     public virtual Event Event { get; set; }
 
     // Beziehung zu 'GruppeAbsolviertLevel'
-    public virtual ICollection<GruppeAbsolviertLevel> Absolviert { get; set; }
+    public virtual ICollection<GruppeAbsolviertLevel>? Absolviert { get; set; }
 }
 
 public class LevelConfiguration : IEntityTypeConfiguration<Level>
@@ -43,5 +43,10 @@ public class LevelConfiguration : IEntityTypeConfiguration<Level>
               .WithMany(e => e.Levels)
               .HasForeignKey(l => l.Event_EventID)
               .HasPrincipalKey(e => e.EventID);
+        entity.HasMany(g => g.Absolviert)
+               .WithOne(gal => gal.Level)
+               .HasForeignKey(gal => gal.Gruppe_GruppeID)
+               .OnDelete(DeleteBehavior.Cascade);
+
     }
 }
