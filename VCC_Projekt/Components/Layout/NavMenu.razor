@@ -18,11 +18,11 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
+@*         <div class="nav-item px-3">
             <NavLink class="nav-link" href="auth">
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
             </NavLink>
-        </div>
+        </div> *@
 
         <AuthorizeView>
             <Authorized>
@@ -40,6 +40,14 @@
                         </button>
                     </form>
                 </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="/signup-event">
+                        <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Eventanmeldung
+                    </NavLink>
+                </div>
+
+
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
@@ -52,14 +60,10 @@
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
+
             </NotAuthorized>
         </AuthorizeView>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="events">
-                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Events
-            </NavLink>
-        </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="/add-event">
@@ -74,8 +78,14 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/signup-event">
-                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Eventanmeldung
+            <NavLink class="nav-link" href="/change-roles">
+                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Rollen verändern
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="events">
+                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Events
             </NavLink>
         </div>
 
@@ -84,7 +94,6 @@
                 <span class="bi bi-info-square-nav-menu" aria-hidden="true"></span> Info
             </NavLink>
         </div>
-
     </nav>
 </div>
 

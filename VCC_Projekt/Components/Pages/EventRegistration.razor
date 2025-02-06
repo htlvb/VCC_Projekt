@@ -71,9 +71,18 @@
                         }
 
                         <div class="input-group">
-                            <input type="email" class="form-control" @bind="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                            <InputText @bind-Value="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" class="form-control"/>
                             <button type="button" class="btn btn-success" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</button>
                         </div>
+                        @if (addMemberErrors.Any())
+                        {
+                            <div class="text-danger">
+                                @foreach (var error in addMemberErrors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
                         <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                     }
                     else
