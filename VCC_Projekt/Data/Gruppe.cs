@@ -40,9 +40,9 @@ public class Gruppe
     public string Teilnehmertyp { get; set; }
 
     // Beziehung zu 'GruppeAbsolviertLevel' 
-    public ICollection<GruppeAbsolviertLevel>? Absolviert { get; set; }
+    public List<GruppeAbsolviertLevel>? Absolviert { get; set; }
 
-    public ICollection<ApplicationUser> Mitglieder { get; set; }
+    public List<ApplicationUser> Mitglieder { get; set; }
 }
 
 public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
