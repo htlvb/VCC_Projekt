@@ -44,8 +44,9 @@
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
             
-            if(x.Email.ToLower().StartsWith(_searchString)) return true;
-            if (x.Fullname.ToLower().StartsWith(_searchString)) return true;
+            if (x.Email.ToLower().StartsWith(_searchString)) return true;
+            if (x.Firstname.ToLower().StartsWith(_searchString)) return true;
+            if (x.Lastname.ToLower().StartsWith(_searchString)) return true;
             if (x.Username.ToLower().StartsWith(_searchString)) return true;
             if (x.Roles.Any(r => r.ToLower().StartsWith(_searchString))) return true;
 
