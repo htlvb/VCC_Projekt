@@ -39,6 +39,8 @@
                     </div>
                 </div>
             </div>
+            <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
+
 
             @if (Input.ParticipationType == ParticipationTypeTeam)
             {
@@ -58,19 +60,34 @@
 
                 <div class="mb-3">
                     <h5>Teammitglieder hinzufügen (@Input.TeamMembers.Count/4)</h5>
-                    @foreach (var email in Input.TeamMembers)
+                    @if (Input.TeamMembers.Count < 4)
                     {
-                        <div class="input-group mb-2">
-                            <input type="email" class="form-control" value="@email" readonly />
-                            <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
+                        foreach (var email in Input.TeamMembers)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="email" class="form-control" value="@email" readonly />
+                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
+                            </div>
+                        }
+
+                        <div class="input-group">
+                            <input type="email" class="form-control" @bind="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                            <button type="button" class="btn btn-success" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</button>
                         </div>
-                    }
-                    <div class="input-group">
-                        <input type="email" class="form-control" @bind="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
-                        <button type="button" class="btn btn-success" @onclick="AddMember">Hinzufügen</button>
                         <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
-                    </div>
-                    <ValidationMessage For="@(() => Input.TeamMembers)" class="text-danger" />
+                    }
+                    else
+                    {
+                        foreach (var email in Input.TeamMembers)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="email" class="form-control" value="@email" readonly />
+                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
+                            </div>
+                        }
+
+                        <p>Maximale Anzahl von Teammitgliedern erreicht.</p>
+                    }
                 </div>
             }
 

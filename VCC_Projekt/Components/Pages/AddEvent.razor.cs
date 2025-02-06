@@ -31,90 +31,23 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
-        private async Task<(bool isValid, string[] errors)> ValidateInput(InputModel input)
-        {
-            var errors = new List<string>();
-            bool isValid = true;
-
-            // Validate EventName
-            if (string.IsNullOrWhiteSpace(input.EventName))
-            {
-                errors.Add("Bitte den Wettbewerbsnamen angeben.");
-                isValid = false;
-            }
-            else if (input.EventName.Length < 3)
-            {
-                errors.Add("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.");
-                isValid = false;
-            }
-
-            // Validate Date and Time together
-            var currentTime = DateTime.Now.TimeOfDay;
-            var eventStart = input.EventDate.Date + input.StartTime;
-            var eventEnd = input.EventDate.Date + input.EndTime;
-
-            // Check if date is in the past
-            if (input.EventDate.Date < DateTime.Today)
-            {
-                errors.Add("Das Datum darf nicht in der Vergangenheit liegen.");
-                isValid = false;
-            }
-            // If date is today, check time constraints
-            else if (input.EventDate.Date == DateTime.Today)
-            {
-                if (input.StartTime < currentTime)
-                {
-                    errors.Add("Die Startzeit muss in der Zukunft liegen wenn das Event heute stattfindet.");
-                    isValid = false;
-                }
-            }
-
-            // Validate End Time is after Start Time
-            if (eventEnd <= eventStart)
-            {
-                errors.Add("Die Endzeit muss nach der Startzeit liegen.");
-                isValid = false;
-            }
-
-            // Validate PenaltyMinutes
-            if (input.PenaltyMinutes < 0)
-            {
-                errors.Add("Die Strafminuten dürfen nicht negativ sein.");
-                isValid = false;
-            }
-
-            return (isValid, errors.ToArray());
-        }
-
         private async Task HandleSubmit()
         {
             try
             {
-                // Manuelle Validierung der Eingabedaten über DataAnnotations
                 var validationResults = new List<ValidationResult>();
                 var validationContext = new ValidationContext(Input);
                 bool isValid = Validator.TryValidateObject(Input, validationContext, validationResults, true);
 
-                // Benutzerdefinierte Validierungen durchführen
-                var (customValid, customErrors) = await ValidateInput(Input);
-                isValid = isValid && customValid;
-
-                // Fehler in die Fehlerliste aufnehmen
-                validationResults.AddRange(customErrors.Select(error => new ValidationResult(error)));
-
-                // Überprüfen, ob die Validierung erfolgreich war
                 if (!isValid)
                 {
-                    // Alle Fehler ausgeben
                     foreach (var validationResult in validationResults)
                     {
                         Console.WriteLine($"Validation Error: {validationResult.ErrorMessage}");
                     }
-                    // Fehler anzeigen oder eine benutzerdefinierte Fehlerbehandlung durchführen
                     return;
                 }
 
-                // Falls die Validierung erfolgreich war, Speichern der Eingabedaten
                 await SaveCompetition(Input);
             }
             catch (Exception ex)
