@@ -1,4 +1,6 @@
-﻿namespace VCC_Projekt.Components.Pages
+﻿using MudBlazor;
+
+namespace VCC_Projekt.Components.Pages
 {
     public partial class EditRoles
     {
@@ -6,10 +8,6 @@
         private List<string> roles;
 
         private string _searchString;
-        bool showSuccessAlert = false;
-        bool showErrorAlert = false;
-        string errorMessage = "";
-        string successMessage = "";
         List<string> currRoles = new();
 
 
@@ -44,8 +42,9 @@
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
             
-            if(x.Email.ToLower().StartsWith(_searchString)) return true;
-            if (x.Fullname.ToLower().StartsWith(_searchString)) return true;
+            if (x.Email.ToLower().StartsWith(_searchString)) return true;
+            if (x.Firstname.ToLower().StartsWith(_searchString)) return true;
+            if (x.Lastname.ToLower().StartsWith(_searchString)) return true;
             if (x.Username.ToLower().StartsWith(_searchString)) return true;
             if (x.Roles.Any(r => r.ToLower().StartsWith(_searchString))) return true;
 
@@ -54,8 +53,6 @@
 
         private void CommittedItemChanges(EditRoleUser item)
         {
-            showErrorAlert = false;
-            showSuccessAlert = false;
             Task.Run(async () =>
             {
                 try
@@ -63,8 +60,7 @@
                     ApplicationUser? user = await Usermanager.FindByEmailAsync(item.Email);
                     if (user == null)
                     {
-                        showErrorAlert = true;
-                        errorMessage = "Benutzer nicht gefunden, um die Rolle zu ändern!";
+                        Snackbar.Add("Benutzer nicht gefunden, um die Rolle zu ändern!", Severity.Error);
                         await InvokeAsync(StateHasChanged);
                         return;
                     }
@@ -82,16 +78,13 @@
                         await Usermanager.AddToRolesAsync(user, rolesToAdd.ToArray());
                     }
 
-                    showSuccessAlert = true;
-                    successMessage = "Rollen erfolgreich geändert!";
+                    Snackbar.Add($"Rollen erfolgreich geändert! ({item.Email}; {string.Join(",",item.Roles)})", Severity.Success);
 
                     await InvokeAsync(StateHasChanged);
                 }
                 catch (Exception ex)
                 {
-                    // Fehlerbehandlung
-                    showErrorAlert = true;
-                    errorMessage = $"Fehler bei der Änderung der Rollen: {ex.Message}";
+                    Snackbar.Add($"Fehler bei der Änderung der Rollen: {ex.Message}", Severity.Error);
                     await InvokeAsync(StateHasChanged);
                 }
             }).ConfigureAwait(false);
@@ -116,18 +109,6 @@
             else
             {
                 user.Roles = updatedRoles;
-            }
-        }
-
-        private void CloseMe(string name)
-        {
-            if (name == "Error")
-            {
-                showErrorAlert = false;
-            }
-            else if (name == "Success")
-            {
-                showSuccessAlert = false;
             }
         }
     }
