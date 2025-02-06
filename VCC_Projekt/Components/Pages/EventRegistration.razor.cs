@@ -15,8 +15,10 @@ namespace VCC_Projekt.Components.Pages
     public partial class EventRegistration
     {
         [SupplyParameterFromForm]
-
         private InputModel Input { get; set; } = new();
+
+        [Parameter] public int eventId { get; set; }
+        private Event selectedEvent;
 
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
@@ -162,6 +164,14 @@ namespace VCC_Projekt.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            selectedEvent = await dbContext.Events.FindAsync(eventId);
+
+            if (selectedEvent == null)
+            {
+                // Falls das Event nicht gefunden wurde, leite auf die Event-Seite zurück
+                NavigationManager.NavigateTo("/events");
+            }
+
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
