@@ -18,12 +18,6 @@
             </NavLink>
         </div>
 
-@*         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div> *@
-
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
@@ -40,14 +34,6 @@
                         </button>
                     </form>
                 </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="/signup-event">
-                        <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Eventanmeldung
-                    </NavLink>
-                </div>
-
-
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
@@ -65,19 +51,25 @@
         </AuthorizeView>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/add-event">
+            <NavLink class="nav-link" href="signup-event">
+                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Eventanmeldung
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="add-event">
                 <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Events hinzufügen
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/add-levels">
+            <NavLink class="nav-link" href="add-levels">
                 <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Levels hinzufügen
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/change-roles">
+            <NavLink class="nav-link" href="change-roles">
                 <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Rollen verändern
             </NavLink>
         </div>
