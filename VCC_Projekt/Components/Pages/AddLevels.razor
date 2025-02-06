@@ -39,10 +39,14 @@
                                     </MudButton>
                                 </ActivatorContent>
                             </MudFileUpload>
+                            @if (_levels[index].UploadProgress > 0)
+                            {
+                                <MudProgressLinear Value="@_levels[index].UploadProgress" Color="Color.Primary" />
+                            }
                             @if (_levels[index].Angabe_PDF != null)
                             {
                                 <div class="file-preview">
-                                    <a href="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}.pdf")" class="download-link">PDF herunterladen</a>
+                                    <a href="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" download="@($"Level_{index}.pdf")" class="download-link">PDF herunterladen</a>
                                     <iframe src="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" class="pdf-preview"></iframe>
                                 </div>
                             }
@@ -54,38 +58,38 @@
                                     <!-- Index innerhalb der Schleife speichern -->
                                     <li class="list-group-item">
                                         <MudCard Class="task-card">
-                                            <MudCardContent>
+                                            <MudCardHeader>
                                                 <MudText Typo="Typo.body1">Aufgabe @(taskIndex + 1)</MudText>
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt" Disabled="@IsEventInPast">
-                                                    <ActivatorContent>
-                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
-                                                            Input.txt hochladen
-                                                        </MudButton>
-                                                    </ActivatorContent>
-                                                </MudFileUpload>
-                                                @if (_levels[index].Aufgaben[taskIndex].Input_TXT != null)
-                                                {
-                                                    <div class="file-preview">
-                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Input_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Input{taskIndex}.txt")" class="download-link">Input.txt herunterladen</a>
-                                                        <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
-                                                    </div>
-                                                }
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt" Disabled="@IsEventInPast">
-                                                    <ActivatorContent>
-                                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
-                                                            Output.txt hochladen
-                                                        </MudButton>
-                                                    </ActivatorContent>
-                                                </MudFileUpload>
-                                                @if (_levels[index].Aufgaben[taskIndex].Ergebnis_TXT != null)
-                                                {
-                                                    <div class="file-preview">
-                                                        <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Output{taskIndex}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
-                                                        <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)</pre>
-                                                    </div>
-                                                }
-                                                <MudButton OnClick="() => RemoveTask(index, taskIndex)" Color="Color.Error" Class="mt-2" Disabled="@IsEventInPast">Aufgabe entfernen</MudButton>
-                                            </MudCardContent>
+                                                <MudSpacer />
+                                                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="() => ToggleTask(index, taskIndex)" />
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveTask(index, taskIndex)" Disabled="@IsEventInPast" />
+                                            </MudCardHeader>
+                                            <MudCollapse Expanded="@_levels[index].Aufgaben[taskIndex].IsExpanded">
+                                                <MudCardContent>
+                                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt" Disabled="@IsEventInPast">
+                                                        <ActivatorContent>
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
+                                                                Input.txt hochladen
+                                                            </MudButton>
+                                                        </ActivatorContent>
+                                                    </MudFileUpload>
+                                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt" Disabled="@IsEventInPast">
+                                                        <ActivatorContent>
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
+                                                                Output.txt hochladen
+                                                            </MudButton>
+                                                        </ActivatorContent>
+                                                    </MudFileUpload>
+                                                    @if (_levels[index].Aufgaben[taskIndex].Ergebnis_TXT != null)
+                                                    {
+                                                        <div class="file-preview">
+                                                            <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index}_Output{taskIndex}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
+                                                            <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)</pre>
+                                                        </div>
+                                                    }
+                                                    <MudButton OnClick="() => RemoveTask(index, taskIndex)" Color="Color.Error" Class="mt-2" Disabled="@IsEventInPast">Aufgabe entfernen</MudButton>
+                                                </MudCardContent>
+                                            </MudCollapse>
                                         </MudCard>
                                     </li>
                                 }
@@ -154,7 +158,7 @@
 
     .pdf-preview {
         width: 100%;
-        height: 300px;
+        height: 500px;
         border: none;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

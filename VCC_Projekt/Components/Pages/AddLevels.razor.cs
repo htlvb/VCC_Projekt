@@ -14,13 +14,12 @@ namespace VCC_Projekt.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             _events = await dbContext.Events.OrderByDescending(ev => ev.Beginn).ToListAsync();
-            Console.WriteLine();
         }
 
         private async Task OnEventSelected(Event eventId)
         {
             _selectedEventId = eventId.EventID;
-            _selectedEvent = eventId;
+            _selectedEvent =  eventId;
 
             if (_selectedEventId != 0)
             {
@@ -34,7 +33,13 @@ namespace VCC_Projekt.Components.Pages
                     Levelnr = level.Levelnr,
                     Event_EventID = level.Event_EventID,
                     Angabe_PDF = level.Angabe_PDF,
-                    Aufgaben = level.Aufgaben,
+                    Aufgaben = level.Aufgaben.Select(aufgabe => new AufgabeViewModel
+                    {
+                        Aufgabennr = aufgabe.Aufgabennr,
+                        Input_TXT = aufgabe.Input_TXT,
+                        Ergebnis_TXT = aufgabe.Ergebnis_TXT,
+                        IsExpanded = false
+                    }).ToList(),
                     IsExpanded = false
                 }).ToList();
             }
@@ -48,7 +53,7 @@ namespace VCC_Projekt.Components.Pages
         {
             if (_levels.Count < 5 && _selectedEventId != 0 && !IsEventInPast)
             {
-                _levels.Add(new LevelViewModel { Levelnr = _levels.Count + 1, Event_EventID = _selectedEventId, Aufgaben = new List<Aufgabe>(), IsExpanded = false });
+                _levels.Add(new LevelViewModel { Levelnr = _levels.Count + 1, Event_EventID = _selectedEventId, Aufgaben = new List<AufgabeViewModel>(), IsExpanded = false });
             }
         }
 
@@ -65,7 +70,7 @@ namespace VCC_Projekt.Components.Pages
         {
             if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
             {
-                _levels[levelIndex].Aufgaben.Add(new Aufgabe { Aufgabennr = _levels[levelIndex].Aufgaben.Count + 1 });
+                _levels[levelIndex].Aufgaben.Add(new AufgabeViewModel { Aufgabennr = _levels[levelIndex].Aufgaben.Count + 1, IsExpanded = false });
             }
         }
 
@@ -86,15 +91,21 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private void ToggleTask(int levelIndex, int taskIndex)
+        {
+            if (levelIndex >= 0 && levelIndex < _levels.Count && taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count)
+            {
+                _levels[levelIndex].Aufgaben[taskIndex].IsExpanded = !_levels[levelIndex].Aufgaben[taskIndex].IsExpanded;
+            }
+        }
+
         private async Task UploadFile(IBrowserFile file, int levelIndex)
         {
             if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
             {
                 if (file != null)
                 {
-                    using var memoryStream = new MemoryStream();
-                    await file.OpenReadStream().CopyToAsync(memoryStream);
-                    _levels[levelIndex].Angabe_PDF = memoryStream.ToArray();
+                    _levels[levelIndex].Angabe_PDF = new byte[] { };
                 }
             }
         }
@@ -114,6 +125,11 @@ namespace VCC_Projekt.Components.Pages
                         _levels[levelIndex].Aufgaben[taskIndex].Ergebnis_TXT = memoryStream.ToArray();
                 }
             }
+            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success, config =>
+            {
+                config.Icon = Icons.Material.Filled.CheckCircle;
+            });
+            StateHasChanged();
         }
 
         private async Task SaveLevels()
@@ -131,11 +147,29 @@ namespace VCC_Projekt.Components.Pages
                 // Update existing levels and add new levels
                 foreach (var level in _levels)
                 {
+                    if (level.Angabe_PDF == null)
+                    {
+                        throw new ArgumentException($"Es muss eine PDF bei Level {level.Levelnr} hochgeladen werden!");
+                    }
+
+                    foreach (var aufgabe in level.Aufgaben)
+                    {
+                        if (aufgabe.Input_TXT == null || aufgabe.Ergebnis_TXT == null)
+                        {
+                            throw new ArgumentException($"Die Aufgabe {aufgabe.Aufgabennr} im Level {level.Levelnr} muss sowohl eine Input.txt als auch eine Output.txt Datei haben!");
+                        }
+                    }
+
                     var existingLevel = existingLevels.FirstOrDefault(l => l.Levelnr == level.Levelnr);
                     if (existingLevel != null)
                     {
                         existingLevel.Angabe_PDF = level.Angabe_PDF;
-                        existingLevel.Aufgaben = level.Aufgaben;
+                        existingLevel.Aufgaben = level.Aufgaben.Select(aufgabe => new Aufgabe
+                        {
+                            Aufgabennr = aufgabe.Aufgabennr,
+                            Input_TXT = aufgabe.Input_TXT,
+                            Ergebnis_TXT = aufgabe.Ergebnis_TXT
+                        }).ToList();
                     }
                     else
                     {
@@ -144,7 +178,12 @@ namespace VCC_Projekt.Components.Pages
                             Levelnr = level.Levelnr,
                             Event_EventID = level.Event_EventID,
                             Angabe_PDF = level.Angabe_PDF,
-                            Aufgaben = level.Aufgaben
+                            Aufgaben = level.Aufgaben.Select(aufgabe => new Aufgabe
+                            {
+                                Aufgabennr = aufgabe.Aufgabennr,
+                                Input_TXT = aufgabe.Input_TXT,
+                                Ergebnis_TXT = aufgabe.Ergebnis_TXT
+                            }).ToList()
                         });
                     }
                 }
@@ -161,7 +200,8 @@ namespace VCC_Projekt.Components.Pages
             }
             catch (Exception ex)
             {
-                Snackbar.Add($"Fehler beim Speichern der Levels: {ex.Message}", Severity.Error, config =>
+                string result = ex.InnerException == null ? ex.Message : ex.InnerException.ToString();
+                Snackbar.Add($"Fehler beim Speichern der Levels: {ex.InnerException?.ToString() ?? ex.Message}", Severity.Error, config =>
                 {
                     config.Icon = Icons.Material.Filled.Error;
                 });
@@ -182,8 +222,16 @@ namespace VCC_Projekt.Components.Pages
         public int Levelnr { get; set; }
         public int Event_EventID { get; set; }
         public byte[] Angabe_PDF { get; set; }
-        public List<Aufgabe> Aufgaben { get; set; }
-        public bool IsExpanded { get; set; } // This property is for UI state
+        public List<AufgabeViewModel> Aufgaben { get; set; }
+        public bool IsExpanded { get; set; }
+    }
+
+    public class AufgabeViewModel
+    {
+        public int Aufgabennr { get; set; }
+        public byte[] Input_TXT { get; set; }
+        public byte[] Ergebnis_TXT { get; set; }
+        public bool IsExpanded { get; set; }
     }
 
 
