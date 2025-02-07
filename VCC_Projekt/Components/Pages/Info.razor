@@ -1,4 +1,6 @@
 ﻿@page "/info"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Info</PageTitle>
 
@@ -65,10 +67,13 @@
         </p>
     </div>
 
-    <div class="text-center mt-5">
-        <a class="w-25 btn btn-lg btn-success" href="/Account/Login">Jetzt anmelden</a>
-        <p></p>
-    </div>
+    @if(!isLoggedIn)
+    {
+        <div class="text-center mt-5">
+            <a class="w-25 btn btn-lg btn-success" href="/Account/Login">Jetzt anmelden</a>
+            <p></p>
+        </div>
+    }
 </div>
 
 <style>
