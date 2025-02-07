@@ -1,14 +1,10 @@
-﻿using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static VCC_Projekt.Components.Account.Pages.Register;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -16,9 +12,6 @@ namespace VCC_Projekt.Components.Pages
     {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
-
-        [Parameter] public int eventId { get; set; }
-        private Event selectedEvent;
 
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
@@ -30,6 +23,18 @@ namespace VCC_Projekt.Components.Pages
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
 
+        private int eventId;
+
+        protected override void OnInitialized()
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("eventId", out var eventIdValue) && int.TryParse(eventIdValue, out int parsedEventId))
+            {
+                eventId = parsedEventId;
+            }
+        }
 
         private bool CanAddMember()
         {
@@ -66,7 +71,6 @@ namespace VCC_Projekt.Components.Pages
             StateHasChanged();
         }
 
-
         private void RemoveMember(string email)
         {
             Input.TeamMembers.Remove(email);
@@ -89,59 +93,61 @@ namespace VCC_Projekt.Components.Pages
                     return;
                 }
 
-                var teamName = Input.TeamName; // Teamname
+                var teamName = Input.TeamName;
                 var groupManager = Input.Username;
-                var eventId = 1;
 
                 if (Input.ParticipationType == ParticipationTypeTeam)
                 {
-
                     try
                     {
-                        Gruppe team = new Gruppe();
-
-                        team.Gruppenname = teamName;
-                        team.Event_EventID = eventId;
-                        team.GruppenleiterId = groupManager;
-                        team.Teilnehmertyp = Input.ParticipationType;
+                        Gruppe team = new Gruppe
+                        {
+                            Gruppenname = teamName,
+                            Event_EventID = eventId,
+                            GruppenleiterId = groupManager,
+                            Teilnehmertyp = Input.ParticipationType
+                        };
 
                         dbContext.Gruppen.Add(team);
                         dbContext.SaveChanges();
 
+                        var teamId = dbContext.Gruppen
+                            .Where(u => u.Gruppenname == teamName)
+                            .Select(u => u.GruppenID)
+                            .FirstOrDefault();
+
+                        foreach (var memberEmail in Input.TeamMembers)
+                        {
+                            var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
+
+                            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                                NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
+                                new Dictionary<string, object?>
+                                {
+                                    ["inviteToken"] = inviteToken,
+                                    ["email"] = memberEmail
+                                });
+
+                            await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
+                        }
+
+                        NavigationManager.NavigateTo("/signup-event-confirmation");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        Console.WriteLine($"Error in Team Registration: {ex.Message}");
                     }
-
-                    var teamId = dbContext.Gruppen.Where(u => u.Gruppenname == teamName).Select(u => u.GruppenID);
-
-                    foreach (var memberEmail in Input.TeamMembers)
-                    {
-                        var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
-
-                        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                            NavigationManager.ToAbsoluteUri("/signup-event-confirmation").AbsoluteUri,
-                            new Dictionary<string, object?> { ["inviteToken"] = inviteToken, ["email"] = memberEmail });
-
-                        await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
-                    }
-
-                    NavigationManager.NavigateTo("/signup-event-confirmation");
-
                 }
-
                 else
                 {
                     try
                     {
-                        Gruppe single = new Gruppe();
-
-                        //Gruppenname = Null (wegen Einzelspieler, mit Spalt besprochen)
-
-                        single.Event_EventID = eventId;
-                        single.Teilnehmertyp = Input.ParticipationType;
-                        single.GruppenleiterId = groupManager;
+                        Gruppe single = new Gruppe
+                        {
+                            Event_EventID = eventId,
+                            Teilnehmertyp = Input.ParticipationType,
+                            GruppenleiterId = groupManager
+                        };
 
                         dbContext.Gruppen.Add(single);
                         dbContext.SaveChanges();
@@ -150,7 +156,7 @@ namespace VCC_Projekt.Components.Pages
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        Console.WriteLine($"Error in Single Registration: {ex.Message}");
                     }
                 }
             }
@@ -158,20 +164,10 @@ namespace VCC_Projekt.Components.Pages
             {
                 Console.WriteLine($"Error during submission: {ex.Message}");
             }
-
-
         }
 
         protected override async Task OnInitializedAsync()
         {
-            selectedEvent = await dbContext.Events.FindAsync(eventId);
-
-            if (selectedEvent == null)
-            {
-                // Falls das Event nicht gefunden wurde, leite auf die Event-Seite zurück
-                NavigationManager.NavigateTo("/events");
-            }
-
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
@@ -201,7 +197,6 @@ namespace VCC_Projekt.Components.Pages
             [Display(Name = "Benutzername")]
             public string Username { get; set; } = "";
 
-
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
@@ -211,15 +206,8 @@ namespace VCC_Projekt.Components.Pages
                     errors.Add(new ValidationResult("Bitte eine Teilnahmeart eingeben.", new[] { nameof(ParticipationType) }));
                 }
 
-                if (ParticipationType == ParticipationTypeSingle)
-                {
-                    //Keine Fehler
-                }
-
                 if (ParticipationType == ParticipationTypeTeam)
                 {
-                    string newMember = NewMemberEmail;
-
                     if (string.IsNullOrWhiteSpace(TeamName))
                     {
                         errors.Add(new ValidationResult("Bitte einen Gruppenname vergeben.", new[] { nameof(TeamName) }));
@@ -233,7 +221,6 @@ namespace VCC_Projekt.Components.Pages
 
                 return errors;
             }
-
         }
     }
 }

@@ -7,21 +7,26 @@ namespace VCC_Projekt.Components.Pages
         private bool isLoggedIn;
         private string buttonLink;
 
-        private async Task<string> GetEventLink(int eventId)
+        protected override async Task OnInitializedAsync()
+        {
+            await InitializeAuthState();
+        }
+
+        private async Task InitializeAuthState()
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             isLoggedIn = authState.User.Identity.IsAuthenticated;
+        }
 
-
+        private string GetEventLink(int eventId)
+        {
             if (isLoggedIn)
             {
-                // Wenn der Benutzer eingeloggt ist, leite ihn zur Event-Anmeldeseite mit der Event-ID
-                return $"/signup-event/{eventId}";
+                return $"/signup-event?eventId={eventId}";
             }
             else
             {
-                // Wenn der Benutzer nicht eingeloggt ist, leite ihn zur Login- oder Registrierungsseite
-                return "/Account/Register"; // Du kannst hier auch "/Account/Login" verwenden
+                return "/Account/Register";
             }
         }
     }

@@ -39,7 +39,7 @@
                         <strong>Datum:</strong> @dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).Select(e => e.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))).First()<br>
                     </p>
                     <div class="text-center mt-auto">
-                        <a href="@buttonLink" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                        <a href="@GetEventLink(dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().EventID)" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
                     </div>
                 </div>
             </div>

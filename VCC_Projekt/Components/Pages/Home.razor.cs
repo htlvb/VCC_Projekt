@@ -7,18 +7,24 @@
 
         protected override async Task OnInitializedAsync()
         {
+            await InitializeAuthState();
+        }
+
+        private async Task InitializeAuthState()
+        {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             isLoggedIn = authState.User.Identity.IsAuthenticated;
+        }
 
+        private string GetEventLink(int eventId)
+        {
             if (isLoggedIn)
             {
-                // Wenn der Benutzer angemeldet ist, weiterleiten
-                buttonLink = "/signup-event"; // Zielseite für angemeldete Benutzer
+                return $"/signup-event?eventId={eventId}";
             }
             else
             {
-                // Wenn der Benutzer nicht angemeldet ist, setzen Sie den Link für die Anmeldung
-                buttonLink = "/Account/Register"; // Link zur Registrierungsseite
+                return "/Account/Register";
             }
         }
     }

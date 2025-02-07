@@ -1,4 +1,4 @@
-﻿@page "/signup-event/{eventId:int}"
+﻿@page "/signup-event"
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
 @inject EmailSender EmailSender
@@ -11,7 +11,7 @@
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für @eventId</h1>
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für @dbContext.Events.Where(e => e.EventID == eventId).First().Bezeichnung</h1>
         <p class="lead text-muted">
             Wähle deine Teilnahmeart und registriere dich für das Event.
         </p>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -19,6 +20,9 @@ namespace VCC_Projekt.Components.Account.Pages
         private string? ReturnUrl { get; set; }
 
         private string? Message => identityErrors is null ? null : $"Fehler: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+        [BindProperty]
+        public string? InviteToken { get; set; }
 
         public async Task RegisterUser(EditContext editContext)
         {
