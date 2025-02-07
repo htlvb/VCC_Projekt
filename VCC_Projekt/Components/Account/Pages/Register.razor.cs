@@ -1,16 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Net;
-using System.Net.Mail;
-using System.Text;
-using System.Text.Encodings.Web;
-using VCC_Projekt.Data;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
@@ -27,6 +21,9 @@ namespace VCC_Projekt.Components.Account.Pages
 
         private string? Message => identityErrors is null ? null : $"Fehler: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
+        [BindProperty]
+        public string? InviteToken { get; set; }
+
         public async Task RegisterUser(EditContext editContext)
         {
             IdentityResult result = new();
@@ -34,8 +31,9 @@ namespace VCC_Projekt.Components.Account.Pages
             try
             {
                 user = CreateUser();
-                user.Firstname = Input.Firstname;
-                user.Lastname = Input.Lastname;
+                user.Firstname = char.ToUpper(Input.Firstname[0]) + Input.Firstname.Substring(1).ToLower();
+                user.Lastname = char.ToUpper(Input.Lastname[0]) + Input.Lastname.Substring(1).ToLower();
+                user.Id = null;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, Input.Email.ToLower(), CancellationToken.None);
@@ -113,26 +111,28 @@ namespace VCC_Projekt.Components.Account.Pages
         {
             [Required(ErrorMessage = "E-Mail ist erforderlich.")]
             [EmailAddress]
-            [RegularExpression(@"^[a-zA-Z0-9._-]+@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]$",
+            [RegularExpression(@"(?i)^.+@htlvb\.at$",
                 ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
-                "E-Mail-Adresse ein. Erlaubte Sonderzeichen sind ( . - _ )")]
+                "E-Mail-Adresse ein.")]
             [UniqueEmail(ErrorMessage = "Diese Email existiert bereits")]
             [Display(Name = "E-Mail")]
             public string Email { get; set; } = "";
 
             [Required(ErrorMessage = "Vorname ist erforderlich.")]
             [DataType(DataType.Text)]
+            [StringLength(100, ErrorMessage = "Der Vorname darf nicht länger als {1} Zeichen sein.", MinimumLength = 2)]
             [Display(Name = "Vorname")]
             public string Firstname { get; set; } = "";
 
             [Required(ErrorMessage = "Nachname ist erforderlich.")]
+            [StringLength(100, ErrorMessage = "Der Nachname darf nicht länger als {1} Zeichen sein.", MinimumLength = 2)]
             [DataType(DataType.Text)]
             [Display(Name = "Nachname")]
             public string Lastname { get; set; } = "";
 
 
             [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
-            [RegularExpression(@"^(?!.*@[Hh][Tt][Ll][Vv][Bb]\.[Aa][Tt]).*$",
+            [RegularExpression(@"(?i)^(?!.*@htlvb\.at$).+$",
                 ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
             [DataType(DataType.Text)]
             [Display(Name = "Benutzername")]
@@ -162,7 +162,7 @@ namespace VCC_Projekt.Components.Account.Pages
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
             {
                 var context = validationContext.GetService<ApplicationDbContext>();
-                if (context.ApplicationUsers.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
+                if (context.Users.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
                 {
                     return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
                 }
@@ -178,7 +178,7 @@ namespace VCC_Projekt.Components.Account.Pages
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
             {
                 var context = validationContext.GetService<ApplicationDbContext>();
-                if (context.ApplicationUsers.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
+                if (context.Users.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
                 {
                     return new ValidationResult(ErrorMessage, memberNames: [validationContext.MemberName]);
                 }

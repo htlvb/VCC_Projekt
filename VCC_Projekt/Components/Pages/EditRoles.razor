@@ -1,0 +1,97 @@
+﻿@page "/change-roles"
+@using System.Collections.Generic
+
+<PageTitle>Rolle ändern</PageTitle>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Rollen ändern</h1>
+        <p class="lead text-muted">
+            Um die Rollen einer Person zu verändern, bitte die Person suchen und dann die Rollen bearbeiten.
+        </p>
+    </div>
+
+    <!-- DataGrid -->
+    <div class="datagrid">
+        <MudDataGrid T="EditRoleUser " Items="@users"
+            SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
+            QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
+            CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Personen</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+
+            <Columns>
+                @if (!string.IsNullOrEmpty(_searchString))
+                {
+                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false"/>
+                    <PropertyColumn Property="u => u.Username" Title="Benutzername" Editable="false"/>
+                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false"/>
+                    <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" >
+                        <EditTemplate>
+                            <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="true" Required Margin="Margin.Normal">
+                                @foreach (var role in roles) 
+                                {
+                                    <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </EditTemplate>
+                    </PropertyColumn>
+                        
+                    <TemplateColumn CellClass="d-flex justify-end">
+                        <CellTemplate>
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync"/>
+                        </CellTemplate>
+                    </TemplateColumn>
+                }
+            </Columns>
+            <PagerContent>
+                @if (!string.IsNullOrEmpty(_searchString))
+                {
+                    <MudDataGridPager T="EditRoleUser " />
+                }
+            </PagerContent>
+        </MudDataGrid>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa; 
+    }
+
+    h1, h2, h3 {
+        color: #134883; 
+    }
+
+    .btn-success {
+        background-color: #134883; 
+        border-color: #134883; 
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91; 
+            border-color: #2f5e91; 
+        }
+
+    .form-control {
+        border: 2px solid #134883; 
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91; 
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5); 
+        }
+
+    .alerts {
+        margin-bottom: 20px; 
+        margin-top: 20px;
+    }
+
+    .datagrid {
+        margin-top: 20px;
+    }
+</style>

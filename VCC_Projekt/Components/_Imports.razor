@@ -8,4 +8,10 @@
 @using Microsoft.AspNetCore.Components.Web.Virtualization
 @using Microsoft.JSInterop
 @using VCC_Projekt
+@using VCC_Projekt.Data
 @using VCC_Projekt.Components
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject ApplicationDbContext dbContext
+@inject UserManager<ApplicationUser> Usermanager
+@inject RoleManager<ApplicationRole> Rolemanager

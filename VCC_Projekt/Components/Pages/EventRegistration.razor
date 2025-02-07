@@ -1,58 +1,170 @@
 ﻿@page "/signup-event"
 @using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject EmailSender EmailSender
+@inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Event-Anmeldung</PageTitle>
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4">Anmeldung für Event</h1>
+        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für @dbContext.Events.Where(e => e.EventID == eventId).First().Bezeichnung</h1>
         <p class="lead text-muted">
             Wähle deine Teilnahmeart und registriere dich für das Event.
         </p>
     </div>
 
     <div class="mt-4">
-        <EditForm Model="@registrationData" OnValidSubmit="@HandleSubmit">
+        <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
             <DataAnnotationsValidator />
 
-            <div class="form-check mb-3">
-                <InputRadioGroup @bind-Value="registrationData.ParticipationType">
-                    <InputRadio Value="@ParticipationTypeSingle" id="single" />
-                    <label for="single">@ParticipationTypeSingle</label>
-                    <br />
-                    <InputRadio Value="@ParticipationTypeTeam" id="team" />
-                    <label for="team">@ParticipationTypeTeam</label>
-                </InputRadioGroup>
-                <ValidationMessage For="@(() => registrationData.ParticipationType)" class="text-danger" />
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeTeam">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">#Team</h3>
+                            <p class="card-text">Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeSingle">
+                        <div class="card-body text-center">
+                            <h3 class="card-title">#Single</h3>
+                            <p class="card-text">Melde dich alleine an und zeig, was du drauf hast.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
 
-            @if (registrationData.ParticipationType == ParticipationTypeTeam)
+
+            @if (Input.ParticipationType == ParticipationTypeTeam)
             {
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Team</h3>
+                    <p class="mt-4">
+                        Um als Team am Event teilzunehmen, erstellt der Gruppenmanager eine Gruppe mit einem Teamnamen und fügt die E-Mail-Adressen der Teammitglieder hinzu. <br />
+                        Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams.
+                    </p>
+                </div>
+
                 <div class="form-floating mb-3">
-                    <InputText @bind-Value="registrationData.TeamName" class="form-control" placeholder="Teamname" />
+                    <InputText @bind-Value="Input.TeamName" class="form-control" />
                     <label for="teamname">Teamname</label>
-                    <ValidationMessage For="@(() => registrationData.TeamName)" class="text-danger" />
+                    <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
                 </div>
 
                 <div class="mb-3">
-                    <h5>Teammitglieder hinzufügen</h5>
-                    @foreach (var email in registrationData.TeamMembers)
+                    <h5>Teammitglieder hinzufügen (@Input.TeamMembers.Count/4)</h5>
+                    @if (Input.TeamMembers.Count < 4)
                     {
-                        <div class="input-group mb-2">
-                            <input type="email" class="form-control" value="@email" readonly />
-                            <button type="button" class="btn btn-danger" @onclick="() => RemoveMember(email)">Entfernen</button>
+                        foreach (var email in Input.TeamMembers)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="email" class="form-control" value="@email" readonly />
+                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
+                            </div>
+                        }
+
+                        <div class="input-group">
+                            <InputText @bind-Value="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" class="form-control"/>
+                            <button type="button" class="btn btn-success" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</button>
                         </div>
+                        @if (addMemberErrors.Any())
+                        {
+                            <div class="text-danger">
+                                @foreach (var error in addMemberErrors)
+                                {
+                                    <p>@error.ErrorMessage</p>
+                                }
+                            </div>
+                        }
+                        <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                     }
-                    <div class="input-group">
-                        <input type="email" class="form-control" @bind="newMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
-                        <button type="button" class="btn btn-success" @onclick="AddMember">Hinzufügen</button>
-                    </div>
-                    <ValidationMessage For="@(() => newMemberEmail)" class="text-danger" />
+                    else
+                    {
+                        foreach (var email in Input.TeamMembers)
+                        {
+                            <div class="input-group mb-2">
+                                <input type="email" class="form-control" value="@email" readonly />
+                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
+                            </div>
+                        }
+
+                        <p>Maximale Anzahl von Teammitgliedern erreicht.</p>
+                    }
                 </div>
             }
 
-            <button type="submit" class="btn btn-primary w-100">Anmelden</button>
+            @if (Input.ParticipationType == ParticipationTypeSingle)
+            {
+                <div class="mt-4">
+                    <h3 class="card-title" style="color: #134883">#Single</h3>
+                    <p class="mt-4">
+                        Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst, und bestätige deine Teilnahme.
+                    </p>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
+                    <label for="teamname">Benutzername</label>
+                </div>
+            }
+
+            <div class="text-center mt-5">
+                <button type="submit" class="w-25 btn btn-lg btn-success">Anmelden</button>
+            </div>
         </EditForm>
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-link" href="/events">Zurück zu den Events</a>
     </div>
 </div>
 
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+        }
+
+    .card {
+        transition: transform 0.2s;
+        border: 2px solid #134883;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card:selected{
+            transform: scale(1.05);
+        }
+
+</style>

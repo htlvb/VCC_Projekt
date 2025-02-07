@@ -20,9 +20,6 @@ namespace VCC_Projekt.Components.Account.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        [Inject]
-        private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
         protected override async Task OnInitializedAsync()
         {
             if (HttpMethods.IsGet(HttpContext.Request.Method))
@@ -34,16 +31,16 @@ namespace VCC_Projekt.Components.Account.Pages
 
         public async Task LoginUser()
         {
-            var user = await UserManager.FindByEmailAsync(Input.EmailOrUsername) 
-                ?? await UserManager.FindByNameAsync(Input.EmailOrUsername);
+            var user = await Usermanager.FindByEmailAsync(Input.EmailOrUsername) 
+                ?? await Usermanager.FindByNameAsync(Input.EmailOrUsername);
 
             if (user == null)
             {
-                errorMessage = "Error: Invalid login attempt.";
+                errorMessage = "Error: Benutzer existiert nicht";
                 return;
             }
-
-            var result = await SignInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            string userName = user.UserName ?? "";
+            var result = await SignInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             switch (result)
             {
                 case { Succeeded: true }:
@@ -63,7 +60,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     break;
 
                 default:
-                    errorMessage = "Error: Invalid login attempt.";
+                    errorMessage = "Error: Email wurde noch nicht bestätigt.";
                     break;
             }
         }

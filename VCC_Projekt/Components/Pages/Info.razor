@@ -1,4 +1,6 @@
 ﻿@page "/info"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Info</PageTitle>
 
@@ -53,7 +55,7 @@
         <h2>Die Spielregeln:</h2>
         <ul>
             <li><strong>Lade deine Lösungen für jedes Level hoch.</strong> </li>
-            <li><strong>Falsche Lösung?</strong>  Das bedeuten Strafminuten. Diese variieren bei jedem Event.</li>
+            <li><strong>Falsche Lösung?</strong>  Das bedeutet Strafminuten. Diese variieren bei jedem Event.</li>
             <li><strong>Teamregeln:</strong> Jedes Teammitglied darf einen Laptop mitbringen und Lösungen für das Team einreichen.</li>
         </ul>
     </div>
@@ -65,10 +67,13 @@
         </p>
     </div>
 
-    <div class="text-center mt-5">
-        <a class="w-25 btn btn-lg btn-success" href="/Account/Login">Jetzt online anmelden</a>
-        <p></p>
-    </div>
+    @if(!isLoggedIn)
+    {
+        <div class="text-center mt-5">
+            <a class="w-25 btn btn-lg btn-success" href="/Account/Login">Jetzt anmelden</a>
+            <p></p>
+        </div>
+    }
 </div>
 
 <style>
