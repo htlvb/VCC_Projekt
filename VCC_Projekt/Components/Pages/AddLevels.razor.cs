@@ -106,7 +106,15 @@ namespace VCC_Projekt.Components.Pages
                 
                 if (file != null)
                 {
-                    if(file.ContentType != "application/pdf")
+                    if(file.Size > 5 * 1024 * 1024)
+                    {
+                        Snackbar.Add("Die PDF-Datei darf nicht größer als 5MB sein!", Severity.Error, config =>
+                        {
+                            config.Icon = Icons.Material.Filled.Error;
+                        });
+                        return;
+                    }
+                    if (file.ContentType != "application/pdf")
                     {
                         Snackbar.Add("Die Datei muss ein PDF sein!", Severity.Error, config =>
                         {
@@ -132,7 +140,15 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (file != null)
                 {
-                    if(file.ContentType != "text/plain")
+                    if (file.Size > 5 * 1024 * 1024)
+                    {
+                        Snackbar.Add("Die TXT-Datei darf nicht größer als 5MB sein!", Severity.Error, config =>
+                        {
+                            config.Icon = Icons.Material.Filled.Error;
+                        });
+                        return;
+                    }
+                    if (file.ContentType != "text/plain")
                     {
                         Snackbar.Add("Die Datei muss eine Textdatei sein!", Severity.Error, config =>
                         {
