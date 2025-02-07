@@ -1,154 +1,228 @@
 ﻿@page "/add-levels"
-@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
 
-@using Microsoft.AspNetCore.Components.Forms;
-@using System.Collections.Generic;
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Event auswählen</MudText>
+                    <MudSelect T="Event" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => $"{e.Bezeichnung} (EventId:{e.EventID})")">
+                        @foreach (var ev in _events)
+                        {
+                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
 
-<PageTitle>Levels anlegen</PageTitle>
-
-<div class="container mt-5">
-    <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Levels anlegen</h1>
-        <p class="lead text-muted">
-            Geben Sie die Anzahl der Levels für das Event an.
-        </p>
-    </div>
-
-    <div class="mt-4">
-        <EditForm EditContext="@editContext" OnValidSubmit="@HandleLevelCountSubmit">
-            <DataAnnotationsValidator />
-
-            <div class="form-floating mb-3">
-                <InputNumber @bind-Value="levelCount" class="form-control" min="1" />
-                <label for="levelCount">Anzahl der Levels</label>
-                <ValidationMessage For="@(() => levelCount)" class="text-danger" />
-            </div>
-
-            <div class="text-center mt-5">
-                <button type="button" class="w-25 btn btn-lg btn-success">Levels bestätigen</button>
-            </div>
-        </EditForm>
-    </div>
-
-    @if (levels != null && levels.Count > 0)
-    {
-        <div class="mt-5">
-            <h2 class="text-center">Levels</h2>
-            <div class="row">
-                @for (int i = 0; i < levels.Count; i++)
-                {
-                    <div class="col-md-4 mb-4">
-                        <div class="card" draggable="true" @ondragstart="@((e) => OnDragStart(e, i))" @ondrop="@((e) => OnDrop(e, i))" @ondragover="@((e) => OnDragOver(e))">
-                            <div class="card-body">
-                                <h5 class="card-title">Level @levels[i].LevelNumber</h5>
-                                <InputFile OnChange="@((e) => OnFileChange(e, i))" />
-                                <InputNumber @bind-Value="levels[i].TaskCount" class="form-control mt-2" min="1" />
-                                <label>Aufgabenanzahl</label>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    }
-</div>
-
-@code {
-    private EditContext editContext;
-    private int levelCount;
-    private List<Level> levels;
-    private int draggedIndex = -1; // Variable zum Speichern des gezogenen Index
-
-    protected override void OnInitialized()
-    {
-        editContext = new EditContext(this);
-    }
-
-    private void HandleLevelCountSubmit()
-    {
-        levels = new List<Level>();
-        for (int i = 0; i < levelCount; i++)
+        <!-- Levels List -->
+        @for (int i = 0; i < _levels.Count; i++)
         {
-            levels.Add(new Level { LevelNumber = i + 1 });
+            var index = i;
+            <!-- Index innerhalb der Schleife speichern -->
+            <MudItem xs="12" sm="6">
+                <MudCard Class="level-card">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h6">@($"Level {index + 1}")</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="() => ToggleLevel(index)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveLevel(index)" Disabled="@IsEventInPast" />
+                    </MudCardHeader>
+                    <MudCollapse Expanded="@_levels[index].IsExpanded">
+                        <MudCardContent>
+                            <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, index))" Accept=".pdf" Disabled="@IsEventInPast">
+                                <ActivatorContent>
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
+                                        PDF hochladen
+                                    </MudButton>
+                                </ActivatorContent>
+                            </MudFileUpload>
+                            @if (_levels[index].Angabe_PDF != null)
+                            {
+                                <div class="file-preview">
+                                    <a href="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" download="@($"{_selectedEvent.Bezeichnung}_Level{index + 1}.pdf")" class="download-link">PDF herunterladen</a>
+                                    <iframe src="data:application/pdf;base64,@Convert.ToBase64String(_levels[index].Angabe_PDF)" class="pdf-preview"></iframe>
+                                </div>
+                            }
+
+                            <ul class="list-group mt-3">
+                                @for (int j = 0; j < _levels[index].Aufgaben.Count; j++)
+                                {
+                                    var taskIndex = j;
+                                    <!-- Index innerhalb der Schleife speichern -->
+                                    <li class="list-group-item">
+                                        <MudCard Class="task-card">
+                                            <MudCardHeader>
+                                                <MudText Typo="Typo.body1">Aufgabe @(taskIndex + 1)</MudText>
+                                                <MudSpacer />
+                                                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="() => ToggleTask(index, taskIndex)" />
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveTask(index, taskIndex)" Disabled="@IsEventInPast" />
+                                            </MudCardHeader>
+                                            <MudCollapse Expanded="@_levels[index].Aufgaben[taskIndex].IsExpanded">
+                                                <MudCardContent>
+                                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "input"))" Accept=".txt" Disabled="@IsEventInPast">
+                                                        <ActivatorContent>
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
+                                                                Input.txt hochladen
+                                                            </MudButton>
+                                                        </ActivatorContent>
+                                                    </MudFileUpload>
+                                                    @if (_levels[index].Aufgaben[taskIndex].Input_TXT != null)
+                                                    {
+                                                        <div class="file-preview">
+                                                            <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Input_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index + 1}_Input{taskIndex + 1}.txt")" class="download-link">Input.txt herunterladen</a>
+                                                            <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Input_TXT)</pre>
+                                                        </div>
+                                                    }
+                                                    <br />
+                                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadTaskFile(e, index, taskIndex, "output"))" Accept=".txt" Disabled="@IsEventInPast">
+                                                        <ActivatorContent>
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload" Disabled="@IsEventInPast">
+                                                                Result.txt hochladen
+                                                            </MudButton>
+                                                        </ActivatorContent>
+                                                    </MudFileUpload>
+                                                    @if (_levels[index].Aufgaben[taskIndex].Ergebnis_TXT != null)
+                                                    {
+                                                        <div class="file-preview">
+                                                            <a href="data:text/plain;base64,@Convert.ToBase64String(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)" download="@($"{_selectedEvent.Bezeichnung}_Level{index + 1}_Result{taskIndex + 1}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
+                                                            <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(_levels[index].Aufgaben[taskIndex].Ergebnis_TXT)</pre>
+                                                        </div>
+                                                    }
+                                                    <MudButton OnClick="() => RemoveTask(index, taskIndex)" Color="Color.Error" Class="mt-2" Disabled="@IsEventInPast">Aufgabe entfernen</MudButton>
+                                                </MudCardContent>
+                                            </MudCollapse>
+                                        </MudCard>
+                                    </li>
+                                }
+                            </ul>
+
+                            <MudButton OnClick="() => AddTask(index)" Color="Color.Success" Class="mt-2" Disabled="@IsEventInPast">Neue Aufgabe hinzufügen</MudButton>
+                        </MudCardContent>
+                    </MudCollapse>
+                </MudCard>
+            </MudItem>
         }
-        
-    }
 
-    private async Task OnFileChange(InputFileChangeEventArgs e, int index)
-    {
-        var file = e.File;
-        // Hier können Sie den Code zum Speichern der Datei hinzufügen
-        // Beispiel: await SaveFileAsync(file);
-    }
+        <!-- Add Level Button -->
+        <MudItem xs="12">
+            <MudCard class="mt-3">
+                <MudCardContent>
+                    <MudButton OnClick="AddLevel" Disabled="@(_levels.Count >= 5 || _selectedEventId == 0 || IsEventInPast)" Color="Color.Primary">Neues Level hinzufügen</MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 
-    private void OnDragStart(DragEventArgs e, int index)
-    {
-        draggedIndex = index; // Speichern des gezogenen Index
-    }
-
-    private void OnDrop(DragEventArgs e, int index)
-    {
-        if (draggedIndex != -1 && draggedIndex != index)
-        {
-            var draggedLevel = levels[draggedIndex];
-            levels.RemoveAt(draggedIndex);
-            levels.Insert(index, draggedLevel);
-            UpdateLevelNumbers();
-        }
-        draggedIndex = -1; // Zurücksetzen des gezogenen Index
-    }
-
-    private void OnDragOver(DragEventArgs e)
-    {
-        // Hier können Sie das Standardverhalten nicht verhindern, aber Sie können visuelle Hinweise geben
-        // z.B. ändern Sie den Stil des Ziel-Elements
-    }
-
-    private void UpdateLevelNumbers()
-    {
-        for (int i = 0; i < levels.Count; i++)
-        {
-            levels[i].LevelNumber = i + 1;
-        }
-    }
-
-    public class Level
-    {
-        public int LevelNumber { get; set; }
-        public int TaskCount { get; set; }
-        public IBrowserFile UploadedFile { get; set; }
-    }
-}
+    <MudCard class="mt-3">
+        <MudCardContent>
+            <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEventId == 0 || IsEventInPast)">Levels speichern</MudButton>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
 
 <style>
-    body {
-        background-color: #f8f9fa;
+    .container {
+        max-width: 100%;
+        margin: auto;
+        padding: 20px;
     }
 
-    h1, h2, h3 {
-        color: #134883;
+    .level-card, .task-card {
+        margin-bottom: 20px;
+        transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .btn-success {
-        background-color: #134883;
-        border-color: #134883;
-    }
-
-        .btn-success:hover {
-            background-color: #2f5e91;
-            border-color: #2f5e91;
+        .level-card:hover, .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-    .form-control {
-        border: 2px solid #134883;
+    .file-preview {
+        margin-top: 10px;
+        padding: 10px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background-color: #f9f9f9;
     }
 
-        .form-control:focus {
-            border-color: #2f5e91;
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+    .download-link {
+        display: block;
+        margin-bottom: 10px;
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+        .download-link:hover {
+            color: #0056b3;
         }
 
-    .card {
-        cursor: move;
+    .pdf-preview {
+        width: 100%;
+        height: 500px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    .txt-preview {
+        white-space: pre-wrap;
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        background-color: #f5f5f5;
+        padding: 10px 15px;
+        border-bottom: 1px solid #e0e0e0;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .form-select, .form-control-file {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        margin-right: 10px;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 0;
+    }
+
+        .list-group-item .card {
+            margin-bottom: 10px;
+        }
+
+    .task-card {
+        border: 2px solid #007bff;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #f0f8ff;
+    }
+
+        .task-card .file-preview {
+            margin-top: 15px;
+        }
+
+        .task-card .download-link {
+            margin-bottom: 5px;
+        }
+
+        .task-card .txt-preview {
+            margin-bottom: 15px;
+        }
 </style>

@@ -31,7 +31,7 @@ public class ApplicationUser : IdentityUser<string>
     public string Lastname { get; set; }
     public int? Gruppe_GruppenID { get; set; }
 
-    public ICollection<Gruppe>? GruppenleiterNavigation { get; set; }
+    public List<Gruppe>? GruppenleiterNavigation { get; set; }
 
     [ForeignKey("Gruppe_GruppenID")]
     public virtual Gruppe Gruppe { get; set; }
