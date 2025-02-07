@@ -8,8 +8,6 @@ namespace VCC_Projekt.Components.Pages
         private List<string> roles;
 
         private string _searchString;
-        List<string> currRoles = new();
-
 
         // For the Grid
         private List<EditRoleUser> users;
@@ -41,7 +39,7 @@ namespace VCC_Projekt.Components.Pages
         {
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
-            
+
             if (x.Email.ToLower().StartsWith(_searchString)) return true;
             if (x.Firstname.ToLower().StartsWith(_searchString)) return true;
             if (x.Lastname.ToLower().StartsWith(_searchString)) return true;
@@ -78,7 +76,7 @@ namespace VCC_Projekt.Components.Pages
                         await Usermanager.AddToRolesAsync(user, rolesToAdd.ToArray());
                     }
 
-                    Snackbar.Add($"Rollen erfolgreich geändert! ({item.Email}; {string.Join(",",item.Roles)})", Severity.Success);
+                    Snackbar.Add($"Rollen erfolgreich geändert! ({item.Email}; {string.Join(",", item.Roles)})", Severity.Success);
 
                     await InvokeAsync(StateHasChanged);
                 }
