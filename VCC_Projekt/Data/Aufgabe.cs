@@ -44,7 +44,7 @@ public class AufgabenConfiguration : IEntityTypeConfiguration<Aufgabe>
 
         // Korrekte Beziehung zu Level
         builder.HasOne(t => t.Level)
-              .WithMany()
+              .WithMany(t => t.Aufgaben)
               .HasForeignKey(t => t.Level_LevelID)
               .HasPrincipalKey(l => l.LevelID);
     }

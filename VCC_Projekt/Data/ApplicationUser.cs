@@ -13,11 +13,10 @@ public class ApplicationUser : IdentityUser<string>
     {
     }
 
-    public ApplicationUser(string firstname, string lastname, int? gruppe_GruppenID)
+    public ApplicationUser(string firstname, string lastname)
     {
         Firstname = firstname;
         Lastname = lastname;
-        Gruppe_GruppenID = gruppe_GruppenID;
     }
 
     // Der Benutzername wird als ID verwendet
@@ -29,12 +28,10 @@ public class ApplicationUser : IdentityUser<string>
     public string Firstname { get; set; }
 
     public string Lastname { get; set; }
-    public int? Gruppe_GruppenID { get; set; }
 
     public List<Gruppe>? GruppenleiterNavigation { get; set; }
 
-    [ForeignKey("Gruppe_GruppenID")]
-    public virtual Gruppe Gruppe { get; set; }
+    public List<UserInGruppe>? UserInGruppe { get; set; }
 }
 
 public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
@@ -46,11 +43,18 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
         builder.Property(u => u.UserName)
                   .IsRequired()
                   .HasMaxLength(256);
-        builder.HasOne(g => g.Gruppe)
-            .WithMany()
-            .HasForeignKey(g => g.Gruppe_GruppenID)
-            .HasPrincipalKey(k => k.GruppenID)
-            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.UserInGruppe)
+           .WithOne(g => g.User)           
+           .HasForeignKey(g => g.User_UserId)   
+           .HasPrincipalKey(u => u.Id)    
+           .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.GruppenleiterNavigation)
+          .WithOne(g => g.GruppenleiterNavigation)
+          .HasForeignKey(g => g.GruppenleiterId)
+          .HasPrincipalKey(u => u.Id)
+          .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(u => u.NormalizedUserName)
               .HasMaxLength(256);
@@ -60,5 +64,6 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
         builder.Ignore(e => e.PhoneNumberConfirmed);
         builder.Ignore(e => e.TwoFactorEnabled);
         builder.Ignore(e => e.Id);
+        builder.Ignore("GruppenId");
     }
 }

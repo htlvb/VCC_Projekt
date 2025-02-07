@@ -34,12 +34,14 @@ public class GruppeAbsolviertLevelConfiguration : IEntityTypeConfiguration<Grupp
     {
         entity.ToTable("vcc_gruppe_absolviert_level");
         entity.HasKey(gcl => new { gcl.Gruppe_GruppeID, gcl.Level_LevelID });
+
         entity.HasOne(gcl => gcl.Gruppe)
-              .WithMany()
+              .WithMany(g => g.Absolviert)
               .HasForeignKey(gcl => gcl.Gruppe_GruppeID)
               .HasPrincipalKey(g => g.GruppenID);
+
         entity.HasOne(gcl => gcl.Level)
-              .WithMany()
+              .WithMany(g => g.Absolviert)
               .HasForeignKey(gcl => gcl.Level_LevelID)
               .HasPrincipalKey(l => l.LevelID);
         

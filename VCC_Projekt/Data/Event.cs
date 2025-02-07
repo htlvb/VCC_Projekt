@@ -41,5 +41,17 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
     {
         builder.ToTable("vcc_event");
         builder.HasKey(e => e.EventID);
+
+        builder.HasMany(u => u.Gruppen)
+          .WithOne(g => g.Event)
+          .HasForeignKey(g => g.Event_EventID)
+          .HasPrincipalKey(u => u.EventID)
+          .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.Levels)
+          .WithOne(g => g.Event)
+          .HasForeignKey(g => g.Event_EventID)
+          .HasPrincipalKey(u => u.EventID)
+          .OnDelete(DeleteBehavior.Restrict);
     }
 }

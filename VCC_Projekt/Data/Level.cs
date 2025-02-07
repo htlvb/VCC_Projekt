@@ -42,14 +42,17 @@ public class LevelConfiguration : IEntityTypeConfiguration<Level>
     {
         entity.ToTable("vcc_level");
         entity.HasKey(l => l.LevelID);
+
         entity.HasOne(l => l.Event)
               .WithMany(e => e.Levels)
               .HasForeignKey(l => l.Event_EventID)
               .HasPrincipalKey(e => e.EventID);
+
         entity.HasMany(g => g.Absolviert)
                .WithOne(gal => gal.Level)
                .HasForeignKey(gal => gal.Gruppe_GruppeID)
                .OnDelete(DeleteBehavior.Cascade);
+
         entity.HasMany(a => a.Aufgaben)
                 .WithOne(a => a.Level)
                 .HasForeignKey(a => a.Level_LevelID)

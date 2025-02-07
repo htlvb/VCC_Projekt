@@ -42,7 +42,7 @@ public class Gruppe
     // Beziehung zu 'GruppeAbsolviertLevel' 
     public List<GruppeAbsolviertLevel>? Absolviert { get; set; }
 
-    public List<ApplicationUser> Mitglieder { get; set; }
+    public List<UserInGruppe>? UserInGruppe { get; set; }
 }
 
 public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
@@ -60,10 +60,17 @@ public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
                               .HasForeignKey(g => g.Event_EventID)
                               .HasPrincipalKey(e => e.EventID);
 
+        builder.HasMany(g => g.UserInGruppe)
+               .WithOne(ug => ug.Gruppe)
+               .HasForeignKey(ug => ug.Gruppe_GruppenId)
+               .HasPrincipalKey(g => g.GruppenID)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(g => g.GruppenleiterNavigation)
-                              .WithMany()
-                              .HasForeignKey(g => g.GruppenleiterId)
-                              .HasPrincipalKey(u => u.UserName);
+               .WithMany(u => u.GruppenleiterNavigation)
+               .HasForeignKey(g => g.GruppenleiterId)
+               .HasPrincipalKey(u => u.UserName);
+
         builder.HasMany(g => g.Absolviert)
                .WithOne(gal => gal.Gruppe)
                .HasForeignKey(gal => gal.Gruppe_GruppeID)
