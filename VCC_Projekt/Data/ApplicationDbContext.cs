@@ -28,6 +28,8 @@ namespace VCC_Projekt.Data
         public DbSet<Aufgabe> Aufgabe { get; set; }
         public DbSet<IdentityUserRole<string>> UserRoles { get; set; }
 
+        public DbSet<UserInGruppe> UserInGruppes { get; set; }
+
     }
 
 

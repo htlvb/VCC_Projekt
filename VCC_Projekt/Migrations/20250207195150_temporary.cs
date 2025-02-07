@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -20,6 +21,10 @@ namespace VCC_Projekt.Migrations
                 {
                     Name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Id = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Beschreibung = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ConcurrencyStamp = table.Column<string>(type: "longtext", nullable: true)
@@ -37,12 +42,16 @@ namespace VCC_Projekt.Migrations
                 {
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Firstname = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Lastname = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Firstname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
-                    Lastname = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false),
                     NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EmailConfirmed = table.Column<bool>(type: "tinyint(1)", nullable: false),
@@ -57,6 +66,25 @@ namespace VCC_Projekt.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_vcc_AspNetUsers", x => x.UserName);
+                    table.UniqueConstraint("AK_vcc_AspNetUsers_Id", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "vcc_event",
+                columns: table => new
+                {
+                    EventID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Bezeichnung = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Beginn = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Dauer = table.Column<int>(type: "int", nullable: false),
+                    StrafminutenProFehlversuch = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_event", x => x.EventID);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -187,6 +215,136 @@ namespace VCC_Projekt.Migrations
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
+            migrationBuilder.CreateTable(
+                name: "vcc_gruppe",
+                columns: table => new
+                {
+                    GruppenID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Gruppenname = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Event_EventID = table.Column<int>(type: "int", nullable: false),
+                    GruppenleiterId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Teilnehmertyp = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_gruppe", x => x.GruppenID);
+                    table.ForeignKey(
+                        name: "FK_vcc_gruppe_vcc_AspNetUsers_GruppenleiterId",
+                        column: x => x.GruppenleiterId,
+                        principalTable: "vcc_AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_vcc_gruppe_vcc_event_Event_EventID",
+                        column: x => x.Event_EventID,
+                        principalTable: "vcc_event",
+                        principalColumn: "EventID",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "vcc_level",
+                columns: table => new
+                {
+                    LevelID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Levelnr = table.Column<int>(type: "int", nullable: false),
+                    Angabe_PDF = table.Column<byte[]>(type: "longblob", nullable: false),
+                    Event_EventID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_level", x => x.LevelID);
+                    table.ForeignKey(
+                        name: "FK_vcc_level_vcc_event_Event_EventID",
+                        column: x => x.Event_EventID,
+                        principalTable: "vcc_event",
+                        principalColumn: "EventID",
+                        onDelete: ReferentialAction.Restrict);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "vcc_UserInGruppe",
+                columns: table => new
+                {
+                    User_UserId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Gruppe_GruppenId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_UserInGruppe", x => new { x.User_UserId, x.Gruppe_GruppenId });
+                    table.ForeignKey(
+                        name: "FK_vcc_UserInGruppe_vcc_AspNetUsers_User_UserId",
+                        column: x => x.User_UserId,
+                        principalTable: "vcc_AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_vcc_UserInGruppe_vcc_gruppe_Gruppe_GruppenId",
+                        column: x => x.Gruppe_GruppenId,
+                        principalTable: "vcc_gruppe",
+                        principalColumn: "GruppenID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "vcc_aufgaben",
+                columns: table => new
+                {
+                    AufgabenID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Aufgabennr = table.Column<int>(type: "int", nullable: false),
+                    Input_TXT = table.Column<byte[]>(type: "longblob", nullable: false),
+                    Ergebnis_TXT = table.Column<byte[]>(type: "longblob", nullable: false),
+                    Level_LevelID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_aufgaben", x => x.AufgabenID);
+                    table.ForeignKey(
+                        name: "FK_vcc_aufgaben_vcc_level_Level_LevelID",
+                        column: x => x.Level_LevelID,
+                        principalTable: "vcc_level",
+                        principalColumn: "LevelID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "vcc_gruppe_absolviert_level",
+                columns: table => new
+                {
+                    Gruppe_GruppeID = table.Column<int>(type: "int", nullable: false),
+                    Level_LevelID = table.Column<int>(type: "int", nullable: false),
+                    BenoetigteZeit = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    Fehlversuche = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_vcc_gruppe_absolviert_level", x => new { x.Gruppe_GruppeID, x.Level_LevelID });
+                    table.ForeignKey(
+                        name: "FK_vcc_gruppe_absolviert_level_vcc_gruppe_Gruppe_GruppeID",
+                        column: x => x.Gruppe_GruppeID,
+                        principalTable: "vcc_gruppe",
+                        principalColumn: "GruppenID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_vcc_gruppe_absolviert_level_vcc_level_Gruppe_GruppeID",
+                        column: x => x.Gruppe_GruppeID,
+                        principalTable: "vcc_level",
+                        principalColumn: "LevelID",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
             migrationBuilder.CreateIndex(
                 name: "IX_vcc_AspNetRoleClaims_RoleId",
                 table: "vcc_AspNetRoleClaims",
@@ -223,6 +381,31 @@ namespace VCC_Projekt.Migrations
                 table: "vcc_AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vcc_aufgaben_Level_LevelID",
+                table: "vcc_aufgaben",
+                column: "Level_LevelID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vcc_gruppe_Event_EventID",
+                table: "vcc_gruppe",
+                column: "Event_EventID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vcc_gruppe_GruppenleiterId",
+                table: "vcc_gruppe",
+                column: "GruppenleiterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vcc_level_Event_EventID",
+                table: "vcc_level",
+                column: "Event_EventID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_vcc_UserInGruppe_Gruppe_GruppenId",
+                table: "vcc_UserInGruppe",
+                column: "Gruppe_GruppenId");
         }
 
         /// <inheritdoc />
@@ -244,10 +427,28 @@ namespace VCC_Projekt.Migrations
                 name: "vcc_AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "vcc_aufgaben");
+
+            migrationBuilder.DropTable(
+                name: "vcc_gruppe_absolviert_level");
+
+            migrationBuilder.DropTable(
+                name: "vcc_UserInGruppe");
+
+            migrationBuilder.DropTable(
                 name: "vcc_AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "vcc_level");
+
+            migrationBuilder.DropTable(
+                name: "vcc_gruppe");
+
+            migrationBuilder.DropTable(
                 name: "vcc_AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "vcc_event");
         }
     }
 }
