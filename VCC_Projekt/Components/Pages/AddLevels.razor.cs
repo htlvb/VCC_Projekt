@@ -103,9 +103,23 @@ namespace VCC_Projekt.Components.Pages
         {
             if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
             {
+                
                 if (file != null)
                 {
+                    if(file.ContentType != "application/pdf")
+                    {
+                        Snackbar.Add("Die Datei muss ein PDF sein!", Severity.Error, config =>
+                        {
+                            config.Icon = Icons.Material.Filled.Error;
+                        });
+                        return;
+                    }
                     _levels[levelIndex].Angabe_PDF = await ConvertToBytesAsync(file);
+                    Snackbar.Add("PDF erfolgreich hochgeladen!", Severity.Success, config =>
+                    {
+                        config.Icon = Icons.Material.Filled.CheckCircle;
+                    });
+                    return;
                 }
             }
         }
@@ -118,6 +132,14 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (file != null)
                 {
+                    if(file.ContentType != "text/plain")
+                    {
+                        Snackbar.Add("Die Datei muss eine Textdatei sein!", Severity.Error, config =>
+                        {
+                            config.Icon = Icons.Material.Filled.Error;
+                        });
+                        return;
+                    }
 
                     if (type == "input")
                         _levels[levelIndex].Aufgaben[taskIndex].Input_TXT = await ConvertToBytesAsync(file);
@@ -125,7 +147,7 @@ namespace VCC_Projekt.Components.Pages
                         _levels[levelIndex].Aufgaben[taskIndex].Ergebnis_TXT = await ConvertToBytesAsync(file);
                 }
             }
-            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success, config =>
+            Snackbar.Add("Text Datei erfolgreich hochgeladen!", Severity.Success, config =>
             {
                 config.Icon = Icons.Material.Filled.CheckCircle;
             });
