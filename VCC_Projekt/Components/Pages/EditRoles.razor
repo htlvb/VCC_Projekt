@@ -29,17 +29,7 @@
                 @if (!string.IsNullOrEmpty(_searchString))
                 {
                     <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false"/>
-                    <PropertyColumn Property="u => u.Username" Title="Benutzername/Gruppenname" Editable="false">
-                        <CellTemplate>
-                            @if (context.Item.Typ != "Nutzer")
-                            {
-                                <span>@context.Item.Username (Event: @context.Item.Event.EventID, @context.Item.Event.Bezeichnung)</span>
-                            }
-                            else
-                            {
-                                <span>@context.Item.Username</span>
-                            }
-                        </CellTemplate>
+                    <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false">
                     </PropertyColumn>
                     <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false"/>
                     <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />

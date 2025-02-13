@@ -169,6 +169,7 @@ namespace VCC_Projekt.Components.Pages
         public List<string> Roles { get; set; }
         public string Typ { get; set; }
         public Event? Event { get; set; }
+        public string DiplayName => Typ != "Nutzer" ? $"{Username} (Event: {Event.EventID}, {Event.Bezeichnung})": Username;
 
         public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles, string typ, Event? @event)
         {
