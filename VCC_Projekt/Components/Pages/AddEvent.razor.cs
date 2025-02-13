@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using System.ComponentModel.DataAnnotations;
 
 namespace VCC_Projekt.Components.Pages
@@ -73,6 +74,9 @@ namespace VCC_Projekt.Components.Pages
                 dbContext.Events.Add(ev);
                 dbContext.SaveChanges();
 
+                NavigationManager.NavigateTo("/add-event-confirmation");
+
+
             }
             catch (Exception ex)
             {
@@ -101,6 +105,7 @@ namespace VCC_Projekt.Components.Pages
             public TimeSpan EndTime { get; set; }
 
             [Display(Name = "Strafminuten")]
+            [Range(0, int.MaxValue, ErrorMessage = "Strafminuten dürfen nicht negativ sein.")]
             public int PenaltyMinutes { get; set; } = 0;
 
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -140,12 +145,6 @@ namespace VCC_Projekt.Components.Pages
                 if (eventEnd <= eventStart)
                 {
                     errors.Add(new ValidationResult("Die Endzeit muss nach der Startzeit liegen.", new[] { nameof(EndTime) }));
-                }
-
-                // Validate PenaltyMinutes
-                if (PenaltyMinutes < 0)
-                {
-                    errors.Add(new ValidationResult("Die Strafminuten dürfen nicht negativ sein.", new[] { nameof(PenaltyMinutes) }));
                 }
 
                 return errors;
