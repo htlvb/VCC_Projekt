@@ -79,7 +79,7 @@ namespace VCC_Projekt.Components.Pages
                     {
                         Gruppe group = null;
                         if (item.Typ == "Einzelspieler") group = dbContext.Gruppen.FirstOrDefault(g => g.GruppenleiterId == item.Username && g.Event_EventID == item.Event.EventID && g.Teilnehmertyp == item.Typ);
-                        else group = dbContext.Gruppen.FirstOrDefault(g => g.Gruppenname == item.Username);
+                        else group = dbContext.Gruppen.FirstOrDefault(g => g.Gruppenname == item.Username && g.Event_EventID == item.Event.EventID);
                         
                         if (group == null)
                         {
