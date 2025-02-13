@@ -14,7 +14,7 @@ namespace VCC_Projekt.Components.Pages
 
         protected override void OnInitialized()
         {
-            users = dbContext.Users
+            var userList = dbContext.Users
                             .GroupJoin(
                                 dbContext.UserRoles,
                                 u => u.UserName,
@@ -27,10 +27,28 @@ namespace VCC_Projekt.Components.Pages
                                 x.u.Firstname,
                                 x.u.Lastname,
                                 x.u.Email,
-                                x.userRoles.Any() ? x.userRoles.Select(ur => ur.RoleId).ToList() : new List<string> { "Gesperrt" }
+                                x.userRoles.Any() ? x.userRoles.Select(ur => ur.RoleId).ToList() : new List<string> { "Gesperrt" },
+                                "Nutzer",
+                                null
                             ))
                             .AsNoTracking()
                             .ToList();
+
+            var groupList = dbContext.Gruppen
+                                     .Select(g => new EditRoleUser
+                                     (
+                                         g.Gruppenname ?? g.GruppenleiterId,
+                                         string.Empty, // Kein Vorname für Gruppen
+                                         string.Empty, // Kein Nachname für Gruppen
+                                         string.Empty, // Keine E-Mail für Gruppen
+                                         new List<string> { g.Gesperrt ? "Gesperrt" : "Nicht gesperrt" },
+                                         g.Teilnehmertyp,
+                                         g.Event
+                                     ))
+                                     .AsNoTracking()
+                                     .ToList();
+
+            users = userList.Concat(groupList).ToList();
             roles = dbContext.Roles.Select(r => r.Name).ToList();
             roles.Add("Gesperrt");
         }
@@ -39,12 +57,14 @@ namespace VCC_Projekt.Components.Pages
         {
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
+            if(x.Typ.ToLower().StartsWith(_searchString)) return true;
 
             if (x.Email.ToLower().StartsWith(_searchString)) return true;
             if (x.Firstname.ToLower().StartsWith(_searchString)) return true;
             if (x.Lastname.ToLower().StartsWith(_searchString)) return true;
             if (x.Username.ToLower().StartsWith(_searchString)) return true;
             if (x.Roles.Any(r => r.ToLower().StartsWith(_searchString))) return true;
+            if (x.Typ.ToLower().StartsWith(_searchString)) return true;
 
             return false;
         };
@@ -55,6 +75,33 @@ namespace VCC_Projekt.Components.Pages
             {
                 try
                 {
+                    if(item.Typ != "Nutzer")
+                    {
+                        Gruppe group = null;
+                        if (item.Typ == "Einzelspieler") group = dbContext.Gruppen.FirstOrDefault(g => g.GruppenleiterId == item.Username && g.Event_EventID == item.Event.EventID && g.Teilnehmertyp == item.Typ);
+                        else group = dbContext.Gruppen.FirstOrDefault(g => g.Gruppenname == item.Username);
+                        
+                        if (group == null)
+                        {
+                            Snackbar.Add("Gruppe nicht gefunden, um die Rolle zu ändern!", Severity.Error);
+                            await InvokeAsync(StateHasChanged);
+                            return;
+                        }
+                        if (item.Roles.Contains("Gesperrt"))
+                        {
+                            group.Gesperrt = true;
+                        }
+                        else
+                        {
+                            group.Gesperrt = false;
+                        }
+                        dbContext.Gruppen.Update(group);
+                        await dbContext.SaveChangesAsync();
+                        Snackbar.Add($"Rollen des {item.Typ} erfolgreich geändert! ({item.Username}; {string.Join(",", item.Roles)})", Severity.Success);
+                        await InvokeAsync(StateHasChanged);
+                        return;
+                    }
+
                     ApplicationUser? user = await Usermanager.FindByEmailAsync(item.Email);
                     if (user == null)
                     {
@@ -91,6 +138,7 @@ namespace VCC_Projekt.Components.Pages
         private void OnRolesChanged(EditRoleUser user, IEnumerable<string> newRoles)
         {
             var updatedRoles = newRoles.ToList();
+            if (user.Typ != "Nutzer") user.Roles = updatedRoles;
 
             if (updatedRoles.Count == 0 && !user.Roles.Contains("Gesperrt"))
             {
@@ -119,14 +167,18 @@ namespace VCC_Projekt.Components.Pages
         public string Lastname { get; set; }
         public string Email { get; set; }
         public List<string> Roles { get; set; }
+        public string Typ { get; set; }
+        public Event? Event { get; set; }
 
-        public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles)
+        public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles, string typ, Event? @event)
         {
             Username = username;
             Firstname = firstname;
             Lastname = lastname;
             Email = email;
             Roles = roles;
+            Typ = typ;
+            Event = @event;
         }
 
         public string Fullname => $"{Firstname} {Lastname}";

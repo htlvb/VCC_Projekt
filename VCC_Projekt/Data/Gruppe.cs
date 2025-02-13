@@ -21,7 +21,7 @@ public class Gruppe
 
     public int GruppenID { get; set; }
 
-    public string Gruppenname { get; set; }
+    public string? Gruppenname { get; set; }
 
     // Fremdschlüssel für Event
     public int Event_EventID { get; set; }
@@ -36,6 +36,8 @@ public class Gruppe
 
     [ForeignKey("Event_EventID")]
     public virtual Event Event { get; set; }  // Navigation zu Event
+
+    public bool Gesperrt { get; set; }
 
     public string Teilnehmertyp { get; set; }
 

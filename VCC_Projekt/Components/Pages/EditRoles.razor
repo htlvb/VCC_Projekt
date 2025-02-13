@@ -1,13 +1,14 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
 
-<PageTitle>Rolle ändern</PageTitle>
+
+<PageTitle>Rollen ändern</PageTitle>
 
 <div class="container mt-5">
     <div class="text-center">
         <h1 class="display-4 font-weight-bold" style="color: #134883;">Rollen ändern</h1>
         <p class="lead text-muted">
-            Um die Rollen einer Person zu verändern, bitte die Person suchen und dann die Rollen bearbeiten.
+            Um die Rollen einer Person oder Gruppe zu verändern, bitte die Person oder Gruppe suchen und dann die Rollen bearbeiten.
         </p>
     </div>
 
@@ -18,7 +19,7 @@
             QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
             CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
             <ToolBarContent>
-                <MudText Typo="Typo.h6">Personen</MudText>
+                <MudText Typo="Typo.h6">Personen und Gruppen</MudText>
                 <MudSpacer />
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
                 AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
@@ -27,15 +28,35 @@
             <Columns>
                 @if (!string.IsNullOrEmpty(_searchString))
                 {
-                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false"/>
-                    <PropertyColumn Property="u => u.Username" Title="Benutzername" Editable="false"/>
-                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false"/>
+                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false"/>
+                    <PropertyColumn Property="u => u.Username" Title="Benutzername/Gruppenname" Editable="false">
+                        <CellTemplate>
+                            @if (context.Item.Typ != "Nutzer")
+                            {
+                                <span>@context.Item.Username (Event: @context.Item.Event.EventID, @context.Item.Event.Bezeichnung)</span>
+                            }
+                            else
+                            {
+                                <span>@context.Item.Username</span>
+                            }
+                        </CellTemplate>
+                    </PropertyColumn>
+                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false"/>
+                    <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />
                     <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" >
                         <EditTemplate>
-                            <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="true" Required Margin="Margin.Normal">
-                                @foreach (var role in roles) 
+                            <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="@(context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
+                                @if(context.Item.Typ != "Nutzer")
                                 {
-                                    <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Gesperrt")">Gesperrt</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Nicht gesperrt")">Nicht gesperrt</MudSelectItem>
+                                }
+                                else
+                                {
+                                    @foreach (var role in roles)
+                                    {
+                                        <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                    }
                                 }
                             </MudSelect>
                         </EditTemplate>
