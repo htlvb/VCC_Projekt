@@ -1,7 +1,12 @@
 @page "/add-event"
 @rendermode InteractiveServer
-
 @using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject EmailSender EmailSender
+@inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
@@ -60,10 +65,11 @@
             </div>
 
             <div class="form-floating mb-3">
-                <InputNumber @bind-Value="Input.PenaltyMinutes" class="form-control" TValue="int" />
+                <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" />
                 <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
                 <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
             </div>
+
 
             <div class="text-center mt-5">
                 <button type="submit" class="w-25 btn btn-lg btn-success">Wettbewerb anlegen</button>

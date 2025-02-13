@@ -16,13 +16,12 @@ namespace VCC_Projekt.Components.Pages
         private const string ParticipationTypeSingle = "Einzelspieler";
         private const string ParticipationTypeTeam = "Team";
 
-        string error = string.Empty;
-
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
 
+        private string userEmail;
         private int eventId;
 
         protected override void OnInitialized()
@@ -48,7 +47,12 @@ namespace VCC_Projekt.Components.Pages
 
             if (!string.IsNullOrWhiteSpace(newMember))
             {
-                if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
+                if(newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
+                {
+                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] {nameof(Input.NewMemberEmail)}));
+                }
+
+                else if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
                 {
                     addMemberErrors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Input.NewMemberEmail) }));
                 }
