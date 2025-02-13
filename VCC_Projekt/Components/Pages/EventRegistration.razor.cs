@@ -47,11 +47,10 @@ namespace VCC_Projekt.Components.Pages
 
             if (!string.IsNullOrWhiteSpace(newMember))
             {
-                if(newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
+                if (newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
                 {
-                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] {nameof(Input.NewMemberEmail)}));
+                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Input.NewMemberEmail) }));
                 }
-
                 else if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
                 {
                     addMemberErrors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Input.NewMemberEmail) }));
@@ -120,17 +119,38 @@ namespace VCC_Projekt.Components.Pages
                             .Select(u => u.GruppenID)
                             .FirstOrDefault();
 
+                        UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
+
+                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.SaveChanges();
+
                         foreach (var memberEmail in Input.TeamMembers)
                         {
                             var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
+                            var callbackUrl = string.Empty;
 
-                            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                                NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
-                                new Dictionary<string, object?>
-                                {
-                                    ["inviteToken"] = inviteToken,
-                                    ["email"] = memberEmail
-                                });
+                            if(dbContext.Users.Any(u => u.Email == memberEmail))
+                            {
+                                 callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                                            NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={teamId}").AbsoluteUri,
+                                            new Dictionary<string, object?>
+                                            {
+                                                ["inviteToken"] = inviteToken,
+                                                ["email"] = memberEmail
+                                            });
+                            }
+
+                            else
+                            {
+                                 callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                                    NavigationManager.ToAbsoluteUri($"/Account/Register?groupId={teamId}").AbsoluteUri,
+                                    new Dictionary<string, object?>
+                                    {
+                                        ["inviteToken"] = inviteToken,
+                                        ["email"] = memberEmail
+                                    });
+                            }
+
 
                             await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
                         }
@@ -155,6 +175,17 @@ namespace VCC_Projekt.Components.Pages
 
                         dbContext.Gruppen.Add(single);
                         dbContext.SaveChanges();
+
+                        var teamId = dbContext.Gruppen
+                                        .Where(u => u.GruppenleiterId == groupManager && u.Event_EventID == eventId)
+                                        .Select(u => u.GruppenID)
+                                        .FirstOrDefault();
+
+                        UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
+
+                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.SaveChanges();
+
 
                         NavigationManager.NavigateTo("/signup-event-confirmation");
                     }

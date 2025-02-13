@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -23,6 +24,19 @@ namespace VCC_Projekt.Components.Account.Pages
 
         [BindProperty]
         public string? InviteToken { get; set; }
+
+        private int groupId;
+
+        protected override void OnInitialized()
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("group", out var groupIdValue) && int.TryParse(groupIdValue, out int parsedGroupId))
+            {
+                groupId = parsedGroupId;
+            }
+        }
 
         public async Task RegisterUser(EditContext editContext)
         {
@@ -79,6 +93,11 @@ namespace VCC_Projekt.Components.Account.Pages
                 RedirectManager.RedirectTo(
                     "Account/RegisterConfirmation",
                     new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+
+                UserInGruppe gruppe = new UserInGruppe(Input.Username, groupId);
+
+                dbContext.UserInGruppes.Add(gruppe);
+                dbContext.SaveChanges();
             }
 
             await SignInManager.SignInAsync(user, isPersistent: false);
