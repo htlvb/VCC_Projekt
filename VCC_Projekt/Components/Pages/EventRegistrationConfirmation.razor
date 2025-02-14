@@ -1,10 +1,17 @@
 ﻿@page "/signup-event-confirmation"
 
+@inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
+@inject SignInManager<ApplicationUser> SignInManager
+@inject EmailSender EmailSender
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 
-<h3>EventRegistrationConfirmation</h3>
+<h1>Event Registration Confirmation</h1>
 
-Danke fürs Registrieren zum Event!
+Danke fürs Registrieren zum @dbContext.Events.Where(e => e.EventID == eventId).Select(e => e.Bezeichnung).First()!
 
-@code {
-
+@if(teamname != null)
+{
+    <p>Gruppe</p>
 }

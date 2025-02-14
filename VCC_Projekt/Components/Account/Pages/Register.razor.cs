@@ -32,7 +32,7 @@ namespace VCC_Projekt.Components.Account.Pages
             var uri = new Uri(NavigationManager.Uri);
             var queryParams = QueryHelpers.ParseQuery(uri.Query);
 
-            if (queryParams.TryGetValue("group", out var groupIdValue) && int.TryParse(groupIdValue, out int parsedGroupId))
+            if (queryParams.TryGetValue("groupId", out var groupIdValue) && int.TryParse(groupIdValue, out int parsedGroupId))
             {
                 groupId = parsedGroupId;
             }
@@ -47,7 +47,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 user = CreateUser();
                 user.Firstname = char.ToUpper(Input.Firstname[0]) + Input.Firstname.Substring(1).ToLower();
                 user.Lastname = char.ToUpper(Input.Lastname[0]) + Input.Lastname.Substring(1).ToLower();
-                user.Id = null;
+                user.Id = Input.Username;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, Input.Email.ToLower(), CancellationToken.None);
@@ -93,15 +93,23 @@ namespace VCC_Projekt.Components.Account.Pages
                 RedirectManager.RedirectTo(
                     "Account/RegisterConfirmation",
                     new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            }
 
+            await SignInManager.SignInAsync(user, isPersistent: false);
+
+            if(groupId != 0)
+            {
                 UserInGruppe gruppe = new UserInGruppe(Input.Username, groupId);
 
                 dbContext.UserInGruppes.Add(gruppe);
                 dbContext.SaveChanges();
+
+                var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
+                var eventId = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Event_EventID).FirstOrDefault();
+                NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
             }
 
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            RedirectManager.RedirectTo(ReturnUrl);
+            else RedirectManager.RedirectTo(ReturnUrl);
         }
 
         private ApplicationUser CreateUser()

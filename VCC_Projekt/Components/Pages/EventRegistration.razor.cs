@@ -129,6 +129,7 @@ namespace VCC_Projekt.Components.Pages
                             var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
                             var callbackUrl = string.Empty;
 
+                            // wenn User bereits in DB ist --> direkt zur Login-Seite
                             if(dbContext.Users.Any(u => u.Email == memberEmail))
                             {
                                  callbackUrl = NavigationManager.GetUriWithQueryParameters(
@@ -140,6 +141,7 @@ namespace VCC_Projekt.Components.Pages
                                             });
                             }
 
+                            // wenn noch nicht registriert --> zur Registrierseite
                             else
                             {
                                  callbackUrl = NavigationManager.GetUriWithQueryParameters(
@@ -155,7 +157,7 @@ namespace VCC_Projekt.Components.Pages
                             await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
                         }
 
-                        NavigationManager.NavigateTo("/signup-event-confirmation");
+                        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");
                     }
                     catch (Exception ex)
                     {
@@ -186,8 +188,7 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.UserInGruppes.Add(gruppe);
                         dbContext.SaveChanges();
 
-
-                        NavigationManager.NavigateTo("/signup-event-confirmation");
+                        NavigationManager.NavigateTo($"/signup-event-confirmation?eventId={eventId}");
                     }
                     catch (Exception ex)
                     {
