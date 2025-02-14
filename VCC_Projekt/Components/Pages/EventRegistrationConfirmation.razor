@@ -9,9 +9,13 @@
 
 <h1>Event Registration Confirmation</h1>
 
-Danke fürs Registrieren zum @dbContext.Events.Where(e => e.EventID == eventId).Select(e => e.Bezeichnung).First()!
-
-@if(teamname != null)
+@if(eventId != 0)
 {
-    <p>Gruppe</p>
+    <p>Danke fürs Registrieren zum @dbContext.Events.Where(e => e.EventID == eventId).Select(e => e.Bezeichnung).First()!</p>
+
+    @if(teamname != null)
+    {
+        <p>Gruppe</p>
+    }
 }
+

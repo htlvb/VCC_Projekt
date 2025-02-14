@@ -77,39 +77,63 @@ namespace VCC_Projekt.Components.Account.Pages
                 Logger.LogInformation($"Benutzer {user.Id} wurde erfolgreich der Rolle 'Benutzer' zugewiesen.");
             }
 
-
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            var callbackUrl = string.Empty;
+
+            if(groupId != 0)
+            {
+                var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
+                var eventId = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Event_EventID).FirstOrDefault();
+                callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                    NavigationManager.ToAbsoluteUri($"Account/ConfirmEmail?teamname={teamname}&eventId={eventId}").AbsoluteUri,
+                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            }
+
+            else
+            {
+                callbackUrl = NavigationManager.GetUriWithQueryParameters(
+                    NavigationManager.ToAbsoluteUri($"Account/ConfirmEmail").AbsoluteUri,
+                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+            }
+
 
             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
             Logger.LogInformation("Confirmation Mail sent");
 
             if (UserManager.Options.SignIn.RequireConfirmedAccount)
             {
-                RedirectManager.RedirectTo(
-                    "Account/RegisterConfirmation",
-                    new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+                //if(groupId != 0)
+                //{
+                //    RedirectManager.RedirectTo(
+                //        $"Account/RegisterConfirmation?teamname={teamname}&eventId={eventId}",
+                //        new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+
+                //}
+
+                //else
+                //{
+                    RedirectManager.RedirectTo(
+                        $"Account/RegisterConfirmation",
+                        new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+                //}
+
             }
 
             await SignInManager.SignInAsync(user, isPersistent: false);
 
-            if(groupId != 0)
-            {
-                UserInGruppe gruppe = new UserInGruppe(Input.Username, groupId);
+            //if(groupId != 0)
+            //{
+            //    UserInGruppe gruppe = new UserInGruppe(Input.Username, groupId);
 
-                dbContext.UserInGruppes.Add(gruppe);
-                dbContext.SaveChanges();
+            //    dbContext.UserInGruppes.Add(gruppe);
+            //    dbContext.SaveChanges();
 
-                var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
-                var eventId = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Event_EventID).FirstOrDefault();
-                NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
-            }
+            //    NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
+            //}
 
-            else RedirectManager.RedirectTo(ReturnUrl);
+            RedirectManager.RedirectTo(ReturnUrl);
         }
 
         private ApplicationUser CreateUser()

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
@@ -17,6 +18,9 @@ namespace VCC_Projekt.Components.Account.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
+        private string teamname;
+        private int eventId;
+
         protected override async Task OnInitializedAsync()
         {
             if (Email is null)
@@ -29,6 +33,19 @@ namespace VCC_Projekt.Components.Account.Pages
             {
                 HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
                 statusMessage = "Error finding user for unspecified email";
+            }
+
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("teamname", out var teamnameValue))
+            {
+                teamname = teamnameValue;
+            }
+
+            if (queryParams.TryGetValue("eventId", out var eventIdValue) && int.TryParse(eventIdValue, out int parsedEventId))
+            {
+                eventId = parsedEventId;
             }
         }
     }
