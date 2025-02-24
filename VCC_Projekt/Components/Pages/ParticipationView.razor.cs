@@ -130,17 +130,17 @@ namespace VCC_Projekt.Components.Pages
         {
             if (UploadedFiles.TryGetValue(aufgabe.AufgabenID, out var uploadedFile))
             {
-                // Falls die Datei korrekt ist, erstelle eine neue Instanz mit `FileIsRight = true`
-                if (uploadedFile.FileData.SequenceEqual(aufgabe.Ergebnis_TXT))
-                {
-                    UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = true };
-                }
+                string uploadedContent = System.Text.Encoding.UTF8.GetString(uploadedFile.FileData).Trim();
+                string correctContent = System.Text.Encoding.UTF8.GetString(aufgabe.Ergebnis_TXT).Trim();
+
+                bool isCorrect = uploadedContent == correctContent;
+                UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
             // Prüfen, ob alle Aufgaben eine richtige Datei haben
             AllFilesSubmitted = CurrentLevel?.Aufgaben.All(a =>
                 UploadedFiles.ContainsKey(a.AufgabenID) &&
-                UploadedFiles[a.AufgabenID].FileIsRight) ?? false;
+                UploadedFiles[a.AufgabenID].FileIsRight == true) ?? false;
         }
         private async Task ProceedToNextLevel()
         {
@@ -157,5 +157,5 @@ namespace VCC_Projekt.Components.Pages
             Navigation.NavigateTo($"/participation/{EventId}");
         }
     }
-    public record UploadedFile(string FileName, byte[] FileData, bool FileIsRight = false);
+    public record UploadedFile(string FileName, byte[] FileData, bool? FileIsRight = null);
 }

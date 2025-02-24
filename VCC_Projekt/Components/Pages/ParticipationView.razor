@@ -69,7 +69,8 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudText Typo="Typo.body1" Class="input-title">level1_@aufgabe.Aufgabennr</MudText>
                                     <MudText Typo="Typo.body2" Class="input-status">Input</MudText>
-                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))">
+
+                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))" Accept=".txt">
                                         <ActivatorContent>
                                             <MudButton Variant="Variant.Filled"
                                                        Color="Color.Primary"
@@ -78,11 +79,30 @@ else
                                             </MudButton>
                                             @if (UploadedFiles.ContainsKey(aufgabe.AufgabenID))
                                             {
-                                                <MudText><MudIcon Icon="@Icons.Material.Filled.AttachFile" /> @UploadedFiles[aufgabe.AufgabenID].FileName</MudText>
+                                                var uploadedFile = UploadedFiles[aufgabe.AufgabenID];
+
+                                                <MudText>
+                                                    <MudIcon Icon="@Icons.Material.Filled.AttachFile" /> @uploadedFile.FileName
+
+                                                    @if (uploadedFile.FileIsRight.HasValue) // Nur anzeigen, wenn geprüft
+                                                    {
+                                                        @if (uploadedFile.FileIsRight.Value)
+                                                        {
+                                                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                                                        }
+                                                        else
+                                                        {
+                                                            <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" />
+                                                        }
+                                                    }
+                                                </MudText>
                                             }
                                         </ActivatorContent>
                                     </MudFileUpload>
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await SubmitFile(aufgabe))">Submit File</MudButton>
+
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await SubmitFile(aufgabe))">
+                                        Submit File
+                                    </MudButton>
                                 </MudItem>
                             }
                         </MudGrid>
