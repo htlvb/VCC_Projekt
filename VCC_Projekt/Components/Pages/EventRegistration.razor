@@ -53,6 +53,12 @@
                 </div>
 
                 <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
+                    <label for="teamname">Gruppenmanager</label>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
+                </div>
+
+                <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.TeamName" class="form-control" />
                     <label for="teamname">Teamname</label>
                     <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
@@ -112,6 +118,7 @@
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.Username" class="form-control" disabled />
                     <label for="teamname">Benutzername</label>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
                 </div>
             }
 

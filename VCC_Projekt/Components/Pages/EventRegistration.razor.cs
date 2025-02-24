@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -21,8 +20,7 @@ namespace VCC_Projekt.Components.Pages
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
 
-        private string userEmail;
-        private int eventId;
+        private static int eventId;
 
         protected override void OnInitialized()
         {
@@ -124,7 +122,7 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.UserInGruppes.Add(gruppe);
                         dbContext.SaveChanges();
 
-                        var groupManagerEmail = dbContext.Users.Where(u => u.UserName == groupManagerUsername).Select(u => u.Email).First();
+                        var groupManagerEmail = dbContext.Users.Where(u => u.UserName == groupManagerUsername).Select(u => u.Email).FirstOrDefault();
 
                         foreach (var memberEmail in Input.TeamMembers)
                         {
@@ -140,7 +138,7 @@ namespace VCC_Projekt.Components.Pages
                             var registerLink = string.Empty;
 
                             // wenn User noch nicht in DB ist --> zusätzlich registrierlink mitschicken
-                            if(!dbContext.Users.Any(u => u.Email == memberEmail))
+                            if (!dbContext.Users.Any(u => u.Email == memberEmail))
                             {
                                 registerLink = NavigationManager.GetUriWithQueryParameters(
                                     NavigationManager.ToAbsoluteUri($"/Account/Register").AbsoluteUri,
@@ -161,6 +159,7 @@ namespace VCC_Projekt.Components.Pages
                         Console.WriteLine($"Error in Team Registration: {ex.Message}");
                     }
                 }
+
                 else
                 {
                     try
@@ -210,7 +209,7 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
-        private class InputModel : IValidatableObject
+        private partial class InputModel : IValidatableObject
         {
             [DataType(DataType.Text)]
             public string ParticipationType { get; set; }
@@ -233,11 +232,33 @@ namespace VCC_Projekt.Components.Pages
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
+                var context = validationContext.GetService<ApplicationDbContext>();
+
+                if (context == null)
+                {
+                    throw new InvalidOperationException("ApplicationDbContext ist nicht verfügbar.");
+                }
 
                 if (ParticipationType != ParticipationTypeSingle && ParticipationType != ParticipationTypeTeam)
                 {
                     errors.Add(new ValidationResult("Bitte eine Teilnahmeart eingeben.", new[] { nameof(ParticipationType) }));
                 }
+
+                // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt
+                //var groupId = context.UserInGruppes
+                //    .Where(ug => ug.User_UserId.ToUpper() == Username.ToUpper())
+                //    .Select(ug => ug.Gruppe_GruppenId)
+                //    .FirstOrDefault();
+
+                //if (groupId != null)
+                //{
+                //    var eventIdExists = context.Gruppen.Any(g => g.GruppenID == groupId && g.Event_EventID == eventId);
+
+                //    if (eventIdExists)
+                //    {
+                //        errors.Add(new ValidationResult("Du nimmt bereits an diesem Event teil.", new[] { nameof(Username) }));
+                //    }
+                //}
 
                 if (ParticipationType == ParticipationTypeTeam)
                 {
@@ -245,6 +266,11 @@ namespace VCC_Projekt.Components.Pages
                     {
                         errors.Add(new ValidationResult("Bitte einen Gruppenname vergeben.", new[] { nameof(TeamName) }));
                     }
+
+                    //else if (context.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
+                    //{
+                    //    errors.Add(new ValidationResult("Dieser Gruppenname ist bereits vergeben.", new[] { nameof(TeamName) }));
+                    //}
 
                     if (TeamMembers.Count == 0)
                     {
