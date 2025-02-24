@@ -1,84 +1,43 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MudBlazor;
+using Org.BouncyCastle.Asn1.X509;
 using System.Net.Http;
 using System.Net.Http.Json;
-
+using static MudBlazor.CategoryTypes;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
+using System.Net.NetworkInformation;
 namespace VCC_Projekt.Components.Pages
 {
     public partial class EventLog
     {
 
-        private IEnumerable<EventLogViewModel> EventLogs = new List<EventLogViewModel>();
-        private string _searchString;
-       
-
-        // Quick filter - search across multiple columns
-        private Func<EventLogViewModel, bool> _quickFilter => x =>
+        private class EventLogViewModel
         {
-            if (string.IsNullOrWhiteSpace(_searchString))
-                return true;
-
-            if (x.Tabellename?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
-                return true;
-
-            if (x.Beschreibung?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
-                return true;
-
-            if (x.CategoryDescription?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
-                return true;
-
-            if ($"{x.EventLogID}".Contains(_searchString))
-                return true;
-
-            if (x.Zeit.ToString("yyyy-MM-dd HH:mm:ss").Contains(_searchString))
-                return true;
-
-            return false;
-        };
-
-        protected override async Task OnInitializedAsync()
-        {
-            try
-            {
-                // Get both event logs and categories
-                var eventLogs = dbContext.EventLogs.Include(u => u.LogKat).ToList();
-
-                if (eventLogs != null && categories != null)
-                {
-                    // Join the data to create view models
-                    EventLogs = eventLogs.Select(log => new EventLogViewModel
-                    {
-                        EventLogID = log.EventLogID,
-                        Tabellename = log.Tabellename,
-                        Beschreibung = log.Beschreibung,
-                        Zeit = log.Zeit,
-                        LogKategorie_KatID = log.LogKategorie_KatID,
-                        CategoryDescription = categories
-                                .FirstOrDefault(c => c.KatID == log.LogKategorie_KatID)
-                                ?.Beschreibung ?? "Unknown"
-                    }).ToList();
-                }
-            }
-            catch (Exception ex)
-            {
-                // Add proper error handling here
-                Console.WriteLine($"Error loading event logs: {ex.Message}");
-            }
+            public int EventLogID { get; set; }
+            public string Tabellenname { get; set; }
+            public string Beschreibung { get; set; }
+            public DateTime Zeit { get; set; }
+            public string KategorieBeschreibung { get; set; }
         }
-    }
 
-    public class LogKategorie
-    {
-        public int KatID { get; set; }
-        public string Beschreibung { get; set; }
-    }
+        private List<EventLogViewModel> eventLogViewModels = new();
 
-    public class EventLog
-    {
-        public int EventLogID { get; set; }
-        public string Tabellename { get; set; }
-        public string Beschreibung { get; set; }
-        public DateTime Zeit { get; set; }
-        public int LogKategorie_KatID { get; set; }
+        protected override void OnInitialized()
+        {
+            // Use a projection to get both the log and category information
+            eventLogViewModels = dbContext.Set<Data.EventLog>()
+                .Include(e => e.LogKat)
+                .Select(e => new EventLogViewModel
+                {
+                    EventLogID = e.EventLogID,
+                    Tabellenname = e.Tabellenname,
+                    Beschreibung = e.Beschreibung,
+                    Zeit = e.Zeit,
+                    KategorieBeschreibung = e.LogKat != null ? e.LogKat.Beschreibung : "N/A"
+                })
+                .ToList();
+        }
     }
 }

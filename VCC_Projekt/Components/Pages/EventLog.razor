@@ -1,5 +1,17 @@
-﻿@page "/event-log"
+﻿@page "/eventlogs"
+@using VCC_Projekt.Data
 
+<MudText Typo="Typo.h5" Class="mb-4"> Event Logs</MudText>
 
-<h3>EventLog</h3>
-
+<MudDataGrid T = "EventLogViewModel" Items= "@eventLogViewModels" Dense= "true" Hover= "true" Bordered= "true" Striped= "true" >
+    <Columns >
+        <PropertyColumn Property= "x => x.EventLogID" Title= "ID" />
+        <PropertyColumn Property= "x => x.Tabellenname" Title= "Table Name" />
+        <PropertyColumn Property= "x => x.Beschreibung" Title= "Description" />
+        <PropertyColumn Property= "x => x.Zeit" Title= "Time" Format= "dd.MM.yyyy HH:mm:ss" />
+        <PropertyColumn Property= "x => x.KategorieBeschreibung" Title= "Category" />
+    </Columns >
+    <PagerContent >
+        <MudDataGridPager T= "EventLogViewModel" />
+    </PagerContent >
+</MudDataGrid >
