@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
+using System.IO.Compression;
 using System.Security.Claims;
 
 namespace VCC_Projekt.Components.Pages
@@ -12,7 +13,7 @@ namespace VCC_Projekt.Components.Pages
 
         private Event? Event { get; set; } = null;
         private Level? CurrentLevel;
-        private Dictionary<int, byte[]> UploadedFiles { get; set; } = new();
+        private Dictionary<int, UploadedFile> UploadedFiles { get; set; } = new();
         private ClaimsPrincipal User { get; set; }
         private Gruppe? Group { get; set; }
         private bool AllFilesSubmitted { get; set; } = false;
@@ -92,34 +93,55 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private async Task<string> GenerateZip()
+        {
+            using var memoryStream = new MemoryStream();
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                foreach (var aufgabe in CurrentLevel?.Aufgaben ?? new List<Aufgabe>())
+                {
+                    if (aufgabe.Input_TXT != null && aufgabe.Input_TXT.Length > 0)
+                    {
+                        var entry = archive.CreateEntry($"Aufgabe_{aufgabe.Aufgabennr}.txt", CompressionLevel.Fastest);
+                        using var entryStream = entry.Open();
+                        await entryStream.WriteAsync(aufgabe.Input_TXT, 0, aufgabe.Input_TXT.Length);
+                    }
+                }
+            }
+
+            // ZIP in Base64 konvertieren
+            var zipBytes = memoryStream.ToArray();
+            return $"data:application/zip;base64,{Convert.ToBase64String(zipBytes)}";
+        }
+
         private async Task UploadFile(IBrowserFile file, int aufgabenId)
         {
             using var stream = file.OpenReadStream();
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
-            UploadedFiles[aufgabenId] = memoryStream.ToArray();
+
+            var uploadedFile = new UploadedFile(file.Name, memoryStream.ToArray());
+
+            // Falls bereits eine Datei existiert, wird sie überschrieben
+            UploadedFiles[aufgabenId] = uploadedFile;
         }
 
         private async Task SubmitFile(Aufgabe aufgabe)
         {
             if (UploadedFiles.TryGetValue(aufgabe.AufgabenID, out var uploadedFile))
             {
-                if (uploadedFile.SequenceEqual(aufgabe.Ergebnis_TXT))
+                // Falls die Datei korrekt ist, erstelle eine neue Instanz mit `FileIsRight = true`
+                if (uploadedFile.FileData.SequenceEqual(aufgabe.Ergebnis_TXT))
                 {
-                    //TODO
-                }
-                else
-                {
-                    return;
+                    UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = true };
                 }
             }
 
-            // Überprüfen, ob alle Dateien korrekt eingereicht wurden
+            // Prüfen, ob alle Aufgaben eine richtige Datei haben
             AllFilesSubmitted = CurrentLevel?.Aufgaben.All(a =>
                 UploadedFiles.ContainsKey(a.AufgabenID) &&
-                UploadedFiles[a.AufgabenID].SequenceEqual(a.Ergebnis_TXT)) ?? false;
+                UploadedFiles[a.AufgabenID].FileIsRight) ?? false;
         }
-
         private async Task ProceedToNextLevel()
         {
             var absolviert = new GruppeAbsolviertLevel
@@ -135,4 +157,5 @@ namespace VCC_Projekt.Components.Pages
             Navigation.NavigateTo($"/participation/{EventId}");
         }
     }
+    public record UploadedFile(string FileName, byte[] FileData, bool FileIsRight = false);
 }

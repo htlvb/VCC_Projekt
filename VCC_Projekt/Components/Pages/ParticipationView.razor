@@ -56,6 +56,11 @@ else
                             <MudIcon Icon="mdi-file-pdf-box" /> Level description PDF
                         </MudLink>
                         <MudText Typo="Typo.body2" Class="description">The description for this level</MudText>
+                        <br />
+                        <MudLink Href="@GenerateZip().Result" download="@($"Inputs_Level{CurrentLevel.Levelnr}.zip")" Target="_blank">
+                            <MudIcon Icon="mdi-folder-zip" /> Inputs (ZIP)
+                        </MudLink>
+                        <MudText Typo="Typo.body2" Class="description">The description for this level</MudText>
                         <MudDivider Class="my-2" />
                         <MudText Typo="Typo.h6" Class="subtitle">Solution Submit</MudText>
                         <MudGrid>
@@ -64,7 +69,19 @@ else
                                 <MudItem xs="12" sm="6">
                                     <MudText Typo="Typo.body1" Class="input-title">level1_@aufgabe.Aufgabennr</MudText>
                                     <MudText Typo="Typo.body2" Class="input-status">Input</MudText>
-                                    <MudFileUpload T="IBrowserFile" Label="Datei auswählen" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))" />
+                                    <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))">
+                                        <ActivatorContent>
+                                            <MudButton Variant="Variant.Filled"
+                                                       Color="Color.Primary"
+                                                       StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                Input.txt hinaufladen
+                                            </MudButton>
+                                            @if (UploadedFiles.ContainsKey(aufgabe.AufgabenID))
+                                            {
+                                                <MudText><MudIcon Icon="@Icons.Material.Filled.AttachFile" /> @UploadedFiles[aufgabe.AufgabenID].FileName</MudText>
+                                            }
+                                        </ActivatorContent>
+                                    </MudFileUpload>
                                     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await SubmitFile(aufgabe))">Submit File</MudButton>
                                 </MudItem>
                             }
