@@ -1,18 +1,160 @@
-﻿@page "/participation"
+﻿@page "/participation/{eventId:int}"
+@using Microsoft.AspNetCore.Authorization
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JS
+@attribute [Authorize(Roles = "Benutzer")]
 
-<PageTitle>Teilnahme</PageTitle>
-<h3>ParticipationView</h3>
-
-@if (teamName == null)
+@if (accessDenied)
 {
-    <p>Lade Team...</p>
+    <header>
+        <h1 class="text-danger">Zugriff verweigert</h1>
+        <p class="text-danger">@accessDeniedMessage</p>
+    </header>
 }
 else
 {
-    <p>Willkommen, @teamName!</p>
+    <MudContainer MaxWidth="MaxWidth.False">
+        @if (isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else
+        {
+            <MudPaper Class="pa-4">
+                <MudStack Row="true" Spacing="3">
+                    <MudText Typo="Typo.h4" Class="title">@Event.Bezeichnung - Level @CurrentLevel?.Levelnr</MudText>
+                    <MudText Typo="Typo.h4" Class="title">@Group.Teilnehmertyp: @(Group.Gruppenname ?? User.Identity.Name)</MudText>
+                    @if (Group.Teilnehmertyp == "Team")
+                    {
+                        <MudText Typo="Typo.h4" Class="title">Gruppenmitglieder: @string.Join(",", Group.UserInGruppe.Select(gr => gr.User_UserId))</MudText>
+                    }
+                </MudStack>
+                <MudDivider Class="my-2" />
+                <MudText Typo="Typo.h6" Class="timer" id="timer">@((DateTime.Now - Event.Beginn).ToString("hh\\:mm\\:ss"))</MudText>
+                <MudGrid>
+                    <MudItem xs="12" sm="4">
+                        <MudText Typo="Typo.h6" Class="subtitle">Progress</MudText>
+                        @foreach (var level in Event.Levels)
+                        {
+                            <MudText Typo="Typo.body1" Class="level-title">Level @level.Levelnr</MudText>
+                            @if (Group.Absolviert.Any(a => a.Level_LevelID == level.LevelID))
+                            {
+                                <MudText Typo="Typo.body2">Gebrauchte Zeit: @Group.Absolviert.Where(le => le.Level_LevelID == level.LevelID).First().BenoetigteZeit</MudText>
+                                <MudText Typo="Typo.body2">Fehlversuche: @Group.Absolviert.Where(le => le.Level_LevelID == level.LevelID).First().Fehlversuche</MudText>
+                                <MudText Typo="Typo.body2">Strafminuten: @(Group.Absolviert.Where(le => le.Level_LevelID == level.LevelID).First().Fehlversuche * Event.StrafminutenProFehlversuch) min</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2">Noch nicht geschafft</MudText>
+                            }
+                        }
+                    </MudItem>
+                    <MudItem xs="12" sm="8">
+                        <MudText Typo="Typo.h6" Class="subtitle">Downloads</MudText>
+                        <MudLink Href="@($"data:application/pdf;base64,{Convert.ToBase64String(CurrentLevel?.Angabe_PDF)}")" download="@($"{Event.Bezeichnung}_Level{CurrentLevel.Levelnr}.pdf")" Target="_blank" Class="download-link">
+                            <MudIcon Icon="mdi-file-pdf-box" /> Level description PDF
+                        </MudLink>
+                        <MudText Typo="Typo.body2" Class="description">The description for this level</MudText>
+                        <MudDivider Class="my-2" />
+                        <MudText Typo="Typo.h6" Class="subtitle">Solution Submit</MudText>
+                        <MudGrid>
+                            @foreach (var aufgabe in CurrentLevel?.Aufgaben)
+                            {
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body1" Class="input-title">level1_@aufgabe.Aufgabennr</MudText>
+                                    <MudText Typo="Typo.body2" Class="input-status">Input</MudText>
+                                    <MudFileUpload T="IBrowserFile" Label="Datei auswählen" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))" />
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await SubmitFile(aufgabe))">Submit File</MudButton>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                        <MudDivider Class="my-2" />
+                        @if (AllFilesSubmitted)
+                        {
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ProceedToNextLevel" Class="submit-button">Proceed to Next Level</MudButton>
+                        }
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+        }
+    </MudContainer>
 }
 
-@code {
-    
-}
+<style>
+    .title {
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 16px;
+    }
 
+    .subtitle {
+        font-weight: bold;
+        color: #34495e;
+        margin-bottom: 8px;
+    }
+
+    .level-title, .input-title {
+        font-weight: bold;
+        color: #2980b9;
+        margin-bottom: 4px;
+    }
+
+    .level-status, .input-status {
+        color: #7f8c8d;
+        margin-bottom: 4px;
+    }
+
+    .download-link {
+        color: #e74c3c;
+        text-decoration: none;
+        margin-bottom: 8px;
+    }
+
+        .download-link:hover {
+            text-decoration: underline;
+        }
+
+    .description {
+        color: #95a5a6;
+        margin-bottom: 16px;
+    }
+
+    .timer {
+        font-weight: bold;
+        color: #27ae60;
+        margin-top: 16px;
+        font-size: 1.5em;
+    }
+
+    .submit-button {
+        margin-top: 20px;
+    }
+</style>
+
+<script>
+    window.startTimer = () => {
+        const timerElement = document.getElementById("timer");
+        let [hours, minutes, seconds] = timerElement.innerText.split(":").map(Number);
+
+        const updateTimer = () => {
+            seconds++;
+            if (seconds === 60) {
+                seconds = 0;
+                minutes++;
+            }
+            if (minutes === 60) {
+                minutes = 0;
+                hours++;
+            }
+
+            timerElement.innerText = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        };
+
+        setInterval(updateTimer, 1000);
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        startTimer();
+    });
+</script>

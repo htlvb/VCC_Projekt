@@ -39,8 +39,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.AddSession();
-builder.Services.AddHttpContextAccessor();
+
 
 builder.Services.Configure<MailOptions>(
     builder.Configuration.GetSection(MailOptions.MailOptionsKey));
