@@ -97,7 +97,7 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 var teamName = Input.TeamName;
-                var groupManager = Input.Username;
+                var groupManagerUsername = Input.Username;
 
                 if (Input.ParticipationType == ParticipationTypeTeam)
                 {
@@ -107,7 +107,7 @@ namespace VCC_Projekt.Components.Pages
                         {
                             Gruppenname = teamName,
                             Event_EventID = eventId,
-                            GruppenleiterId = groupManager,
+                            GruppenleiterId = groupManagerUsername,
                             Teilnehmertyp = Input.ParticipationType
                         };
 
@@ -124,28 +124,26 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.UserInGruppes.Add(gruppe);
                         dbContext.SaveChanges();
 
+                        var groupManagerEmail = dbContext.Users.Where(u => u.UserName == groupManagerUsername).Select(u => u.Email).First();
+
                         foreach (var memberEmail in Input.TeamMembers)
                         {
                             var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
-                            var callbackUrl = string.Empty;
+                            var invaitationLink = NavigationManager.GetUriWithQueryParameters(
+                                    NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={teamId}").AbsoluteUri,
+                                    new Dictionary<string, object?>
+                                    {
+                                        ["inviteToken"] = inviteToken,
+                                        ["email"] = memberEmail
+                                    }); ;
 
-                            // wenn User bereits in DB ist --> direkt zur Login-Seite
-                            if(dbContext.Users.Any(u => u.Email == memberEmail))
-                            {
-                                 callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                                            NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={teamId}").AbsoluteUri,
-                                            new Dictionary<string, object?>
-                                            {
-                                                ["inviteToken"] = inviteToken,
-                                                ["email"] = memberEmail
-                                            });
-                            }
+                            var registerLink = string.Empty;
 
-                            // wenn noch nicht registriert --> zur Registrierseite
-                            else
+                            // wenn User noch nicht in DB ist --> zusätzlich registrierlink mitschicken
+                            if(!dbContext.Users.Any(u => u.Email == memberEmail))
                             {
-                                 callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                                    NavigationManager.ToAbsoluteUri($"/Account/Register?groupId={teamId}").AbsoluteUri,
+                                registerLink = NavigationManager.GetUriWithQueryParameters(
+                                    NavigationManager.ToAbsoluteUri($"/Account/Register").AbsoluteUri,
                                     new Dictionary<string, object?>
                                     {
                                         ["inviteToken"] = inviteToken,
@@ -153,8 +151,7 @@ namespace VCC_Projekt.Components.Pages
                                     });
                             }
 
-
-                            await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
+                            await EmailSender.SendInvitationLinkAsync(groupManagerUsername, groupManagerEmail, memberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
                         }
 
                         NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");
@@ -172,14 +169,14 @@ namespace VCC_Projekt.Components.Pages
                         {
                             Event_EventID = eventId,
                             Teilnehmertyp = Input.ParticipationType,
-                            GruppenleiterId = groupManager
+                            GruppenleiterId = groupManagerUsername
                         };
 
                         dbContext.Gruppen.Add(single);
                         dbContext.SaveChanges();
 
                         var teamId = dbContext.Gruppen
-                                        .Where(u => u.GruppenleiterId == groupManager && u.Event_EventID == eventId)
+                                        .Where(u => u.GruppenleiterId == groupManagerUsername && u.Event_EventID == eventId)
                                         .Select(u => u.GruppenID)
                                         .FirstOrDefault();
 
