@@ -19,7 +19,7 @@ namespace VCC_Projekt.Components.Account.Pages
         private string? ReturnUrl { get; set; }
 
         private string teamname;
-        private int eventId;
+        private string eventId;
 
         protected override async Task OnInitializedAsync()
         {
@@ -38,14 +38,14 @@ namespace VCC_Projekt.Components.Account.Pages
             var uri = new Uri(NavigationManager.Uri);
             var queryParams = QueryHelpers.ParseQuery(uri.Query);
 
-            if (queryParams.TryGetValue("teamname", out var teamnameValue))
+            if (queryParams.TryGetValue("teamname", out var eventIdValue))
             {
-                teamname = teamnameValue;
+                eventId = eventIdValue;
             }
 
             if (queryParams.TryGetValue("eventId", out var eventIdValue) && int.TryParse(eventIdValue, out int parsedEventId))
             {
-                eventId = parsedEventId;
+                groupId = parsedEventId;
             }
         }
     }
