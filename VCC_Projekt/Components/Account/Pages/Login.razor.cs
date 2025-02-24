@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
@@ -19,6 +20,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
+        private int groupId;
 
         protected override async Task OnInitializedAsync()
         {
@@ -26,6 +28,14 @@ namespace VCC_Projekt.Components.Account.Pages
             {
                 // Clear the existing external cookie to ensure a clean login process
                 await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            }
+
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("groupId", out var groupIdValue) && int.TryParse(groupIdValue, out int parsedGroupId))
+            {
+                groupId = parsedGroupId;
             }
         }
 
@@ -36,7 +46,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (user == null)
             {
-                errorMessage = "Error: Benutzer existiert nicht";
+                errorMessage = "Du bist noch nicht registriert!";
                 return;
             }
             string userName = user.UserName ?? "";
@@ -45,7 +55,21 @@ namespace VCC_Projekt.Components.Account.Pages
             {
                 case { Succeeded: true }:
                     Logger.LogInformation("User logged in.");
-                    RedirectManager.RedirectTo(ReturnUrl);
+
+                    if(groupId != 0)
+                    {
+                        UserInGruppe gruppe = new UserInGruppe(userName, groupId);
+
+                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.SaveChanges();
+
+                        var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
+                        var eventId = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Event_EventID).FirstOrDefault();
+                        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
+                    }
+
+                    else RedirectManager.RedirectTo(ReturnUrl);
+
                     break;
 
                 case { RequiresTwoFactor: true }:
@@ -60,9 +84,11 @@ namespace VCC_Projekt.Components.Account.Pages
                     break;
 
                 default:
-                    errorMessage = "Error: Email wurde noch nicht bestätigt.";
+                    errorMessage = "Error: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
                     break;
             }
+
+
         }
 
         private sealed class InputModel

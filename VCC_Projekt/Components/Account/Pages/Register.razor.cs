@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -24,6 +25,8 @@ namespace VCC_Projekt.Components.Account.Pages
         [BindProperty]
         public string? InviteToken { get; set; }
 
+        private int groupId;
+
         public async Task RegisterUser(EditContext editContext)
         {
             IdentityResult result = new();
@@ -33,7 +36,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 user = CreateUser();
                 user.Firstname = char.ToUpper(Input.Firstname[0]) + Input.Firstname.Substring(1).ToLower();
                 user.Lastname = char.ToUpper(Input.Lastname[0]) + Input.Lastname.Substring(1).ToLower();
-                user.Id = null;
+                user.Id = Input.Username;
                 await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, Input.Email.ToLower(), CancellationToken.None);
@@ -63,13 +66,13 @@ namespace VCC_Projekt.Components.Account.Pages
                 Logger.LogInformation($"Benutzer {user.Id} wurde erfolgreich der Rolle 'Benutzer' zugewiesen.");
             }
 
-
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+                    NavigationManager.ToAbsoluteUri($"Account/ConfirmEmail").AbsoluteUri,
+                    new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
 
             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
             Logger.LogInformation("Confirmation Mail sent");
@@ -77,7 +80,7 @@ namespace VCC_Projekt.Components.Account.Pages
             if (UserManager.Options.SignIn.RequireConfirmedAccount)
             {
                 RedirectManager.RedirectTo(
-                    "Account/RegisterConfirmation",
+                    $"Account/RegisterConfirmation",
                     new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
             }
 

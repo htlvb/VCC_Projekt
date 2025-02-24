@@ -47,11 +47,10 @@ namespace VCC_Projekt.Components.Pages
 
             if (!string.IsNullOrWhiteSpace(newMember))
             {
-                if(newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
+                if (newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
                 {
-                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] {nameof(Input.NewMemberEmail)}));
+                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Input.NewMemberEmail) }));
                 }
-
                 else if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
                 {
                     addMemberErrors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Input.NewMemberEmail) }));
@@ -98,7 +97,7 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 var teamName = Input.TeamName;
-                var groupManager = Input.Username;
+                var groupManagerUsername = Input.Username;
 
                 if (Input.ParticipationType == ParticipationTypeTeam)
                 {
@@ -108,7 +107,7 @@ namespace VCC_Projekt.Components.Pages
                         {
                             Gruppenname = teamName,
                             Event_EventID = eventId,
-                            GruppenleiterId = groupManager,
+                            GruppenleiterId = groupManagerUsername,
                             Teilnehmertyp = Input.ParticipationType
                         };
 
@@ -120,22 +119,42 @@ namespace VCC_Projekt.Components.Pages
                             .Select(u => u.GruppenID)
                             .FirstOrDefault();
 
+                        UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
+
+                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.SaveChanges();
+
+                        var groupManagerEmail = dbContext.Users.Where(u => u.UserName == groupManagerUsername).Select(u => u.Email).First();
+
                         foreach (var memberEmail in Input.TeamMembers)
                         {
                             var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
+                            var invaitationLink = NavigationManager.GetUriWithQueryParameters(
+                                    NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={teamId}").AbsoluteUri,
+                                    new Dictionary<string, object?>
+                                    {
+                                        ["inviteToken"] = inviteToken,
+                                        ["email"] = memberEmail
+                                    }); ;
 
-                            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                                NavigationManager.ToAbsoluteUri("/Account/Register").AbsoluteUri,
-                                new Dictionary<string, object?>
-                                {
-                                    ["inviteToken"] = inviteToken,
-                                    ["email"] = memberEmail
-                                });
+                            var registerLink = string.Empty;
 
-                            await EmailSender.SendInvitationLinkAsync(groupManager, memberEmail, teamName, HtmlEncoder.Default.Encode(callbackUrl));
+                            // wenn User noch nicht in DB ist --> zusätzlich registrierlink mitschicken
+                            if(!dbContext.Users.Any(u => u.Email == memberEmail))
+                            {
+                                registerLink = NavigationManager.GetUriWithQueryParameters(
+                                    NavigationManager.ToAbsoluteUri($"/Account/Register").AbsoluteUri,
+                                    new Dictionary<string, object?>
+                                    {
+                                        ["inviteToken"] = inviteToken,
+                                        ["email"] = memberEmail
+                                    });
+                            }
+
+                            await EmailSender.SendInvitationLinkAsync(groupManagerUsername, groupManagerEmail, memberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
                         }
 
-                        NavigationManager.NavigateTo("/signup-event-confirmation");
+                        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");
                     }
                     catch (Exception ex)
                     {
@@ -150,13 +169,23 @@ namespace VCC_Projekt.Components.Pages
                         {
                             Event_EventID = eventId,
                             Teilnehmertyp = Input.ParticipationType,
-                            GruppenleiterId = groupManager
+                            GruppenleiterId = groupManagerUsername
                         };
 
                         dbContext.Gruppen.Add(single);
                         dbContext.SaveChanges();
 
-                        NavigationManager.NavigateTo("/signup-event-confirmation");
+                        var teamId = dbContext.Gruppen
+                                        .Where(u => u.GruppenleiterId == groupManagerUsername && u.Event_EventID == eventId)
+                                        .Select(u => u.GruppenID)
+                                        .FirstOrDefault();
+
+                        UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
+
+                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.SaveChanges();
+
+                        NavigationManager.NavigateTo($"/signup-event-confirmation?eventId={eventId}");
                     }
                     catch (Exception ex)
                     {
