@@ -17,10 +17,3 @@
 <StatusMessage Message="@statusMessage" />
 
 <p>Bitte überprüfe deine E-Mails, um deine E-Mail-Adresse zu bestätigen.</p>
-
-@if(teamname != string.Empty && eventId != 0)
-{
-    <div class="text-center mt-auto">
-        <a href=$"/signup-event-confirmation?teamname={@teamname}&eventId={@eventId}" class="w-50 btn btn-lg btn-success">Bitte hier klicken, um der Gruppe beizutreten!</a>
-    </div>
-}
