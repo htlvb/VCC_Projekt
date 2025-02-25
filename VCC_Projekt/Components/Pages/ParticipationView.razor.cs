@@ -94,13 +94,13 @@ namespace VCC_Projekt.Components.Pages
             }
 
 
-            //DateTime now = DateTime.Now;
-            //if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer)))
-            //{
-            //    accessDenied = true;
-            //    accessDeniedMessage = "Event wird aktuell nicht ausgeführt";
-            //    return;
-            //}
+            DateTime now = DateTime.Now;
+            if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer)))
+            {
+                accessDenied = true;
+                accessDeniedMessage = "Event wird aktuell nicht ausgeführt";
+                return;
+            }
             if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
 
 
