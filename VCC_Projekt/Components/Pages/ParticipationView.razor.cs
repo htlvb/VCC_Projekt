@@ -63,9 +63,18 @@ namespace VCC_Projekt.Components.Pages
             }
 
             Event = dbContext.Events
-                            .Where(e => e.EventID == EventId)
-                            .Include(e => e.Levels)
-                            .FirstOrDefault();
+                             .Where(e => e.EventID == EventId)
+                             .Select(e => new Event
+                             {
+                                 EventID = e.EventID,
+                                 Bezeichnung = e.Bezeichnung,
+                                 Levels = e.Levels.Select(l => new Level
+                                 {
+                                     LevelID = l.LevelID,
+                                     Levelnr = l.Levelnr
+                                 }).ToList()
+                             })
+                             .FirstOrDefault();
             CurrentLevel = dbContext.Levels
                                     .Where(level => level.Event_EventID == EventId)
                                     .Where(level => !dbContext.GruppeAbsolviertLevels
@@ -79,6 +88,7 @@ namespace VCC_Projekt.Components.Pages
                 accessDeniedMessage = "Event nicht gefunden";
                 return;
             }
+            
 
             isLoading = false;
 
@@ -138,6 +148,11 @@ namespace VCC_Projekt.Components.Pages
             }
 
             // Prüfen, ob alle Aufgaben eine richtige Datei haben
+            if(CurrentLevel?.Aufgaben.Count == 0)
+            {
+                AllFilesSubmitted = true;
+                return;
+            }
             AllFilesSubmitted = CurrentLevel?.Aufgaben.All(a =>
                 UploadedFiles.ContainsKey(a.AufgabenID) &&
                 UploadedFiles[a.AufgabenID].FileIsRight == true) ?? false;
