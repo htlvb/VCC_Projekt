@@ -128,7 +128,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     if (aufgabe.Input_TXT != null && aufgabe.Input_TXT.Length > 0)
                     {
-                        var entry = archive.CreateEntry($"Aufgabe_{aufgabe.Aufgabennr}.txt", CompressionLevel.Fastest);
+                        var entry = archive.CreateEntry($"Level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt", CompressionLevel.Fastest);
                         using var entryStream = entry.Open();
                         await entryStream.WriteAsync(aufgabe.Input_TXT, 0, aufgabe.Input_TXT.Length);
                     }
