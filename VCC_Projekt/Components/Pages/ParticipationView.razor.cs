@@ -68,6 +68,8 @@ namespace VCC_Projekt.Components.Pages
                              {
                                  EventID = e.EventID,
                                  Bezeichnung = e.Bezeichnung,
+                                 Beginn = e.Beginn,
+                                 Dauer = e.Dauer,
                                  Levels = e.Levels.Select(l => new Level
                                  {
                                      LevelID = l.LevelID,
@@ -88,7 +90,15 @@ namespace VCC_Projekt.Components.Pages
                 accessDeniedMessage = "Event nicht gefunden";
                 return;
             }
-            
+
+            //DateTime now = DateTime.Now;
+            //if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer)))
+            //{
+            //    accessDenied = true;
+            //    accessDeniedMessage = "Event wird aktuell nicht ausgeführt";
+            //    return;
+            //}
+
 
             isLoading = false;
 
