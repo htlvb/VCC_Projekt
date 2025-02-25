@@ -20,19 +20,20 @@ else
     }
     else
     {
+        <PageTitle>@Event.Bezeichnung - Level @CurrentLevel.Levelnr</PageTitle>
 
         <MudGrid Justify="Justify.Center" Spacing="3">
             <!-- TIMER OBEN MITTIG -->
             <MudItem xs="12" Style="text-align: center;">
                 <MudPaper Elevation="3" Class="pa-2">
                     <MudText Typo="Typo.h5" Class="font-bold">
-                        ⏳ Zeit: <span id="timer">@((DateTime.Now - Event.Beginn).ToString("hh\\:mm\\:ss"))</span>
+                        ⏳ Zeit: <span id="timer">@((DateTime.Now - Event.Beginn).ToString("hh\\:mm\\:ss"))</span>&#9; Fehlversuche: @Fehlversuche
                     </MudText>
                 </MudPaper>
             </MudItem>
 
             <!-- Progress Box (Links) -->
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="3">
                 <MudCard Elevation="3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">📊 Progress</MudText>
@@ -61,16 +62,16 @@ else
             </MudItem>
 
             <!-- Downloads & Abgabe Box (Mitte) -->
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="7">
                 <MudCard Elevation="3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">📥 Downloads</MudText>
                         <MudLink Href="@($"data:application/pdf;base64,{Convert.ToBase64String(CurrentLevel?.Angabe_PDF)}")" download="@($"{Event.Bezeichnung}_Level{CurrentLevel.Levelnr}.pdf")" Target="_blank">
-                            <MudIcon Icon="mdi-file-pdf-box" /> Level Description PDF
+                            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" />Level Description PDF
                         </MudLink>
                         <br />
                         <MudLink Href="@GenerateZip().Result" download="@($"Inputs_Level{CurrentLevel.Levelnr}.zip")" Target="_blank">
-                            <MudIcon Icon="mdi-folder-zip" /> Inputs (ZIP)
+                            <MudIcon Icon="@Icons.Material.Filled.FolderZip" />Inputs (ZIP)
                         </MudLink>
 
                         <MudDivider Class="my-3" />
@@ -86,29 +87,36 @@ else
 
                                             <MudFileUpload T="IBrowserFile" FilesChanged="@(e => UploadFile(e, aufgabe.AufgabenID))" Accept=".txt">
                                                 <ActivatorContent>
-                                                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
-                                                        📄 Datei hochladen
-                                                    </MudButton>
+                                                    <MudGrid Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                                                        <MudItem>
+                                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                                📄 Datei hochladen
+                                                            </MudButton>
+                                                        </MudItem>
 
-                                                    @if (UploadedFiles.ContainsKey(aufgabe.AufgabenID))
-                                                    {
-                                                        var uploadedFile = UploadedFiles[aufgabe.AufgabenID];
+                                                        @if (UploadedFiles.ContainsKey(aufgabe.AufgabenID))
+                                                        {
+                                                            var uploadedFile = UploadedFiles[aufgabe.AufgabenID];
 
-                                                        <MudText>
-                                                            <MudIcon Icon="@Icons.Material.Filled.AttachFile" /> @uploadedFile.FileName
-                                                            @if (uploadedFile.FileIsRight.HasValue)
-                                                            {
-                                                                @if (uploadedFile.FileIsRight.Value)
-                                                                {
-                                                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
-                                                                }
-                                                                else
-                                                                {
-                                                                    <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" />
-                                                                }
-                                                            }
-                                                        </MudText>
-                                                    }
+                                                            <MudItem>
+                                                                <MudText>
+                                                                    <MudIcon Icon="@Icons.Material.Filled.AttachFile" /> @uploadedFile.FileName
+                                                                    @if (uploadedFile.FileIsRight.HasValue)
+                                                                    {
+                                                                        @if (uploadedFile.FileIsRight.Value)
+                                                                        {
+                                                                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <MudIcon Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" />
+                                                                            <span>@($"+ {Event.StrafminutenProFehlversuch} min Strafminuten")</span>
+                                                                        }
+                                                                    }
+                                                                </MudText>
+                                                            </MudItem>
+                                                        }
+                                                    </MudGrid>
                                                 </ActivatorContent>
                                             </MudFileUpload>
 
@@ -132,7 +140,7 @@ else
             </MudItem>
 
             <!-- Team Info Box (Rechts) -->
-            <MudItem xs="12" md="4">
+            <MudItem xs="12" md="2">
                 <MudCard Elevation="3">
                     <MudCardContent>
                         @if (Group.Teilnehmertyp == "Team")
@@ -144,26 +152,27 @@ else
                         {
                             <MudText Typo="Typo.h6">🎮 Einzelspieler: @Group.GruppenleiterId</MudText>
                         }
-                        
+
 
                         @if (Group.Teilnehmertyp == "Team")
                         {
                             <MudDivider />
-                                <MudList Dense="true" T="string">
-                                    @foreach (var member in Group.UserInGruppe)
-                                    {
+                            <MudList Dense="true" T="string">
+                                @foreach (var member in Group.UserInGruppe)
+                                {
                                     <MudListItem Class="d-flex align-center">
                                         <MudText Typo="Typo.body2" Class="ml-2">
                                             @(member.User_UserId == Group.GruppenleiterId ? "👑 Gruppenleiter: " : "") @member.User_UserId
                                         </MudText>
                                     </MudListItem>
-                                    }
-                                </MudList>
+                                }
+                            </MudList>
                         }
                     </MudCardContent>
                 </MudCard>
             </MudItem>
         </MudGrid>
+
 
 
     }

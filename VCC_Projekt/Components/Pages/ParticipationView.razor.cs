@@ -20,6 +20,7 @@ namespace VCC_Projekt.Components.Pages
         private bool isLoading = false;
         private bool accessDenied = false;
         private string accessDeniedMessage = "";
+        private int Fehlversuche;
 
         protected override void OnInitialized()
         {
@@ -70,6 +71,7 @@ namespace VCC_Projekt.Components.Pages
                                  Bezeichnung = e.Bezeichnung,
                                  Beginn = e.Beginn,
                                  Dauer = e.Dauer,
+                                 StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
                                  Levels = e.Levels.Select(l => new Level
                                  {
                                      LevelID = l.LevelID,
@@ -91,6 +93,7 @@ namespace VCC_Projekt.Components.Pages
                 return;
             }
 
+
             //DateTime now = DateTime.Now;
             //if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer)))
             //{
@@ -98,6 +101,7 @@ namespace VCC_Projekt.Components.Pages
             //    accessDeniedMessage = "Event wird aktuell nicht ausgeführt";
             //    return;
             //}
+            if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
 
 
             isLoading = false;
@@ -110,8 +114,10 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (accessDenied) return;
                 await JS.InvokeVoidAsync("startTimer");
+
             }
         }
+
 
         private async Task<string> GenerateZip()
         {
@@ -154,11 +160,15 @@ namespace VCC_Projekt.Components.Pages
                 string correctContent = System.Text.Encoding.UTF8.GetString(aufgabe.Ergebnis_TXT).Trim();
 
                 bool isCorrect = uploadedContent == correctContent;
+                if (!isCorrect && uploadedFile.FileIsRight == null)
+                {
+                    Fehlversuche++;
+                }
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
             // Prüfen, ob alle Aufgaben eine richtige Datei haben
-            if(CurrentLevel?.Aufgaben.Count == 0)
+            if (CurrentLevel?.Aufgaben.Count == 0)
             {
                 AllFilesSubmitted = true;
                 return;
@@ -173,11 +183,12 @@ namespace VCC_Projekt.Components.Pages
             {
                 Gruppe_GruppeID = Group.GruppenID,
                 Level_LevelID = CurrentLevel.LevelID,
-                Fehlversuche = 0
+                Fehlversuche = Fehlversuche
             };
 
             dbContext.GruppeAbsolviertLevels.Add(absolviert);
             await dbContext.SaveChangesAsync();
+            Fehlversuche = 0;
 
             Navigation.NavigateTo($"/participation/{EventId}");
         }
