@@ -9,6 +9,7 @@
 
 @if (accessDenied)
 {
+    <PageTitle>Zugriff verweigert</PageTitle>
     <header>
         <h1 class="text-danger">Zugriff verweigert</h1>
         <p class="text-danger">@accessDeniedMessage</p>
@@ -68,11 +69,11 @@ else
                 <MudCard Elevation="3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">📥 Downloads</MudText>
-                        <MudLink Href="@($"data:application/pdf;base64,{Convert.ToBase64String(CurrentLevel?.Angabe_PDF)}")" download="@($"{Event.Bezeichnung}_Level{CurrentLevel.Levelnr}.pdf")">
+                        <MudLink Href="@($"data:application/pdf;base64,{Convert.ToBase64String(CurrentLevel?.Angabe_PDF)}")" download="@($"Level {CurrentLevel.Levelnr}.pdf")">
                             <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" /> Level Description PDF
                         </MudLink>
                         <br />
-                        <MudLink Href="@GenerateZip().Result" download="@($"Inputs_Level{CurrentLevel.Levelnr}.zip")" Target="_blank">
+                        <MudLink Href="@GenerateZip().Result" download="@($"level{CurrentLevel.Levelnr}.zip")" Target="_blank">
                             <MudIcon Icon="@Icons.Material.Filled.FolderZip" /> Inputs (ZIP)
                         </MudLink>
 
@@ -88,7 +89,7 @@ else
                                             <MudGrid Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Wrap="NoWrap" Spacing="3">
                                                 <!-- Download Link -->
                                                 <MudItem>
-                                                    <MudLink Href="@($"data:text/plain;base64,{Convert.ToBase64String(aufgabe.Input_TXT)}")" download="@($"Level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt")">
+                                                    <MudLink Href="@($"data:text/plain;base64,{Convert.ToBase64String(aufgabe.Input_TXT)}")" download="@($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.in")">
                                                         <MudIcon Icon="@Icons.Material.Filled.Download" /> level@(CurrentLevel.Levelnr)_@aufgabe.Aufgabennr
                                                     </MudLink>
                                                 </MudItem>

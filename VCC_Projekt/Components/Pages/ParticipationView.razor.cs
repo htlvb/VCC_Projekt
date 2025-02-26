@@ -27,8 +27,28 @@ namespace VCC_Projekt.Components.Pages
             isLoading = true;
             try
             {
-                if (EventId <= 0 || !dbContext.Events.Any(ev => ev.EventID == EventId)) throw new ArgumentException("Event existiert nicht");
-                
+                Event = dbContext.Events
+                                 .Where(e => e.EventID == EventId)
+                                 .Select(e => new Event
+                                 {
+                                     EventID = e.EventID,
+                                     Bezeichnung = e.Bezeichnung,
+                                     Beginn = e.Beginn,
+                                     Dauer = e.Dauer,
+                                     StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
+                                     Levels = e.Levels.Select(l => new Level
+                                     {
+                                         LevelID = l.LevelID,
+                                         Levelnr = l.Levelnr
+                                     }).OrderBy(le => le.Levelnr).ToList()
+                                 })
+                                 .FirstOrDefault();
+
+                if (EventId <= 0 || Event == null) throw new ArgumentException("Event nicht gefunden");
+
+                DateTime now = DateTime.Now;
+                // if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
                 User = authState.User;
@@ -45,34 +65,15 @@ namespace VCC_Projekt.Components.Pages
 
                 if (Group.Gesperrt) throw new ArgumentException("Gruppe gesperrt");
 
-                Event = dbContext.Events
-                                 .Where(e => e.EventID == EventId)
-                                 .Select(e => new Event
-                                 {
-                                     EventID = e.EventID,
-                                     Bezeichnung = e.Bezeichnung,
-                                     Beginn = e.Beginn,
-                                     Dauer = e.Dauer,
-                                     StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
-                                     Levels = e.Levels.Select(l => new Level
-                                     {
-                                         LevelID = l.LevelID,
-                                         Levelnr = l.Levelnr
-                                     }).ToList()
-                                 })
-                                 .FirstOrDefault();
-
                 CurrentLevel = dbContext.Levels
                                         .Where(level => level.Event_EventID == EventId)
                                         .Where(level => !dbContext.GruppeAbsolviertLevels
                                             .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
+                                        .OrderBy(l => l.Levelnr)
                                         .Include(l => l.Aufgaben)
                                         .FirstOrDefault();
 
-                if (Event == null) throw new ArgumentException("Event nicht gefunden");
-
-                DateTime now = DateTime.Now;
-                if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+                if (CurrentLevel == null) throw new ArgumentException("Kein Level gefunden");
 
                 if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
             }
@@ -117,7 +118,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     if (aufgabe.Input_TXT != null && aufgabe.Input_TXT.Length > 0)
                     {
-                        var entry = archive.CreateEntry($"Level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt", CompressionLevel.Fastest);
+                        var entry = archive.CreateEntry($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.in", CompressionLevel.Fastest);
                         using var entryStream = entry.Open();
                         await entryStream.WriteAsync(aufgabe.Input_TXT, 0, aufgabe.Input_TXT.Length);
                     }
