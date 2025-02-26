@@ -47,7 +47,7 @@ namespace VCC_Projekt.Components.Pages
                 if (EventId <= 0 || Event == null) throw new ArgumentException("Event nicht gefunden");
 
                 DateTime now = DateTime.Now;
-                // if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+                if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
 
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
