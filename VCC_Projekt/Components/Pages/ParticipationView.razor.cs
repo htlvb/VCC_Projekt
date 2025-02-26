@@ -22,99 +22,88 @@ namespace VCC_Projekt.Components.Pages
         private string accessDeniedMessage = "";
         private int Fehlversuche;
 
-        protected override void OnInitialized()
+        protected override async void OnInitialized()
         {
             isLoading = true;
-            if (EventId <= 0 || !dbContext.Events.Any(ev => ev.EventID == EventId))
+            try
             {
-                accessDenied = true;
-                accessDeniedMessage = "Event existiert nicht";
-                return;
-            }
+                if (EventId <= 0 || !dbContext.Events.Any(ev => ev.EventID == EventId)) throw new ArgumentException("Event existiert nicht");
+                
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-            var authState = AuthenticationStateProvider.GetAuthenticationStateAsync().Result;
+                User = authState.User;
 
+                if (User.Identity == null || !User.Identity.IsAuthenticated) throw new ArgumentException("Benutzer nicht gefunden");
 
-            User = authState.User;
+                Group = dbContext.Gruppen
+                    .Where(gr => gr.Event_EventID == EventId && gr.UserInGruppe.Any(us => us.User_UserId == User.Identity.Name))
+                    .Include(g => g.Absolviert)
+                    .Include(n => n.UserInGruppe)
+                    .FirstOrDefault();
 
-            if (User.Identity == null || !User.Identity.IsAuthenticated)
-            {
-                accessDenied = true;
-                accessDeniedMessage = "Benutzer nicht gefunden";
-                return;
-            }
+                if (Group == null) throw new ArgumentException("Gruppe nicht gefunden");
 
-            Group = dbContext.Gruppen
-                .Where(gr => gr.Event_EventID == EventId && gr.UserInGruppe.Any(us => us.User_UserId == User.Identity.Name))
-                .Include(g => g.Absolviert)
-                .Include(n => n.UserInGruppe)
-                .FirstOrDefault();
+                if (Group.Gesperrt) throw new ArgumentException("Gruppe gesperrt");
 
-            if (Group == null)
-            {
-                accessDenied = true;
-                accessDeniedMessage = "Gruppe nicht gefunden";
-                return;
-            }
-            if (Group.Gesperrt)
-            {
-                accessDenied = true;
-                accessDeniedMessage = "Gruppe gesperrt";
-                return;
-            }
-
-            Event = dbContext.Events
-                             .Where(e => e.EventID == EventId)
-                             .Select(e => new Event
-                             {
-                                 EventID = e.EventID,
-                                 Bezeichnung = e.Bezeichnung,
-                                 Beginn = e.Beginn,
-                                 Dauer = e.Dauer,
-                                 StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
-                                 Levels = e.Levels.Select(l => new Level
+                Event = dbContext.Events
+                                 .Where(e => e.EventID == EventId)
+                                 .Select(e => new Event
                                  {
-                                     LevelID = l.LevelID,
-                                     Levelnr = l.Levelnr
-                                 }).ToList()
-                             })
-                             .FirstOrDefault();
-            CurrentLevel = dbContext.Levels
-                                    .Where(level => level.Event_EventID == EventId)
-                                    .Where(level => !dbContext.GruppeAbsolviertLevels
-                                        .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
-                                    .Include(l => l.Aufgaben)
-                                    .FirstOrDefault();
+                                     EventID = e.EventID,
+                                     Bezeichnung = e.Bezeichnung,
+                                     Beginn = e.Beginn,
+                                     Dauer = e.Dauer,
+                                     StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
+                                     Levels = e.Levels.Select(l => new Level
+                                     {
+                                         LevelID = l.LevelID,
+                                         Levelnr = l.Levelnr
+                                     }).ToList()
+                                 })
+                                 .FirstOrDefault();
 
-            if (Event == null)
+                CurrentLevel = dbContext.Levels
+                                        .Where(level => level.Event_EventID == EventId)
+                                        .Where(level => !dbContext.GruppeAbsolviertLevels
+                                            .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
+                                        .Include(l => l.Aufgaben)
+                                        .FirstOrDefault();
+
+                if (Event == null) throw new ArgumentException("Event nicht gefunden");
+
+                DateTime now = DateTime.Now;
+                if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+
+                if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
+            }
+            catch (Exception ex)
             {
                 accessDenied = true;
-                accessDeniedMessage = "Event nicht gefunden";
-                return;
+                accessDeniedMessage = ex.Message;
             }
-
-
-            DateTime now = DateTime.Now;
-            if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer)))
-            {
-                accessDenied = true;
-                accessDeniedMessage = "Event wird aktuell nicht ausgeführt";
-                return;
-            }
-            if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
-
-
+            
             isLoading = false;
-
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
             if (firstRender)
             {
-                if (accessDenied) return;
+                if (accessDenied)
+                {
+                    if (Event != null)
+                    {
+                        await ProtectedLocalStorage.DeleteAsync($"Fehlversuche_{Event.EventID}"); // Löscht die Fehlversuche aus dem Local Storage für das Event
+                    }
+                    return;
+                }
+
                 await JS.InvokeVoidAsync("startTimer");
 
+                var result = await ProtectedLocalStorage.GetAsync<int>($"Fehlversuche_{Event.EventID}"); //Holt die Fehlversuche des Events aus dem Local Storage des Browsers
+                Fehlversuche = result.Success ? result.Value : 0;
+
+                StateHasChanged(); // UI-Update auslösen
             }
         }
 
@@ -164,6 +153,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     Fehlversuche++;
                 }
+                await ProtectedLocalStorage.SetAsync($"Fehlversuche_{Event.EventID}",Fehlversuche);
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
@@ -189,6 +179,8 @@ namespace VCC_Projekt.Components.Pages
             dbContext.GruppeAbsolviertLevels.Add(absolviert);
             await dbContext.SaveChangesAsync();
             Fehlversuche = 0;
+
+            await ProtectedLocalStorage.DeleteAsync($"Fehlversuche_{Event.EventID}"); //Löscht den Localen Storage des Browsers für das Event
 
             Navigation.NavigateTo($"/participation/{EventId}");
         }

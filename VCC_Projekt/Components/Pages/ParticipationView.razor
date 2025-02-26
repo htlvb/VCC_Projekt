@@ -1,7 +1,9 @@
 ﻿@page "/participation/{eventId:int}"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ProtectedLocalStorage ProtectedLocalStorage
 @inject IJSRuntime JS
 @attribute [Authorize(Roles = "Benutzer")]
 
