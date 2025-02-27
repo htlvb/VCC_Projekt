@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Components\Pages\MyEvents.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="wwwroot\images\htlvb_logo.jpg" />
   </ItemGroup>
 
@@ -33,18 +29,6 @@
 
   <ItemGroup>
     <Resource Include="wwwroot\images\htlvb_logo.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <UpToDateCheckInput Remove="Components\Pages\MyEvents.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <_ContentIncludedByDefault Remove="Components\Pages\MyEvents.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Components\Pages\MyEvents.razor" />
   </ItemGroup>
 
 </Project>
