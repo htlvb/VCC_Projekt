@@ -245,20 +245,22 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt
-                //var groupId = context.UserInGruppes
-                //    .Where(ug => ug.User_UserId.ToUpper() == Username.ToUpper())
-                //    .Select(ug => ug.Gruppe_GruppenId)
-                //    .FirstOrDefault();
+                var groupIds = context.UserInGruppes
+                    .Where(ug => ug.User_UserId.ToUpper() == Username.ToUpper())
+                    .Select(ug => ug.Gruppe_GruppenId)
+                    .ToList();
 
-                //if (groupId != null)
-                //{
-                //    var eventIdExists = context.Gruppen.Any(g => g.GruppenID == groupId && g.Event_EventID == eventId);
+                if (groupIds.Any()) // Überprüfen, ob der Benutzer in mindestens einer Gruppe ist
+                {
+                    // Überprüfen, ob der Benutzer an dem Event teilnimmt
+                    var eventIdExists = context.Gruppen
+                        .Any(g => groupIds.Contains(g.GruppenID) && g.Event_EventID == eventId);
 
-                //    if (eventIdExists)
-                //    {
-                //        errors.Add(new ValidationResult("Du nimmt bereits an diesem Event teil.", new[] { nameof(Username) }));
-                //    }
-                //}
+                    if (eventIdExists)
+                    {
+                        errors.Add(new ValidationResult("Du nimmst bereits an diesem Event teil.", new[] { nameof(Username) }));
+                    }
+                }
 
                 if (ParticipationType == ParticipationTypeTeam)
                 {
@@ -267,10 +269,10 @@ namespace VCC_Projekt.Components.Pages
                         errors.Add(new ValidationResult("Bitte einen Gruppenname vergeben.", new[] { nameof(TeamName) }));
                     }
 
-                    //else if (context.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
-                    //{
-                    //    errors.Add(new ValidationResult("Dieser Gruppenname ist bereits vergeben.", new[] { nameof(TeamName) }));
-                    //}
+                    else if (context.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
+                    {
+                        errors.Add(new ValidationResult("Dieser Gruppenname ist bereits vergeben.", new[] { nameof(TeamName) }));
+                    }
 
                     if (TeamMembers.Count == 0)
                     {
