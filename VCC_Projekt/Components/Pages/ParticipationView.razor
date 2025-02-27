@@ -62,6 +62,37 @@ else
 
                     </MudCardContent>
                 </MudCard>
+                <!-- Rangliste Box -->
+                <MudCard Elevation="3" Class="mt-3">
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">🏆 Aktuelle Rangliste</MudText>
+                        <MudDivider/>
+                        <MudGrid>
+                            <MudItem xs="12">
+                                <MudGrid spacing="2">
+                                    <MudItem xs="2"><MudText Typo="Typo.subtitle2">Platz</MudText></MudItem>
+                                    <MudItem xs="4"><MudText Typo="Typo.subtitle2">Team Name</MudText></MudItem>
+                                    <MudItem xs="4"><MudText Typo="Typo.subtitle2">Letztes Abgeschlossene Level</MudText></MudItem>
+                                    <MudItem xs="3"><MudText Typo="Typo.subtitle2">Gebrauchte Zeit (min) [ohne Strafzeit]</MudText></MudItem>
+                                    <MudItem xs="3"><MudText Typo="Typo.subtitle2">Strafzeit (min)</MudText></MudItem>
+                                </MudGrid>
+                            </MudItem>
+
+                            @foreach (var rang in Rangliste)
+                            {
+                                <MudItem xs="12">
+                                    <MudGrid spacing="2">
+                                        <MudItem xs="2"><MudText Typo="Typo.body2">@(Rangliste.IndexOf(rang) + 1)</MudText></MudItem>  <!-- Index beibehalten -->
+                                        <MudItem xs="4"><MudText Typo="Typo.body2">@(rang.gruppe.Gruppenname ?? rang.gruppe.GruppenleiterId)</MudText></MudItem>
+                                        <MudItem xs="4"><MudText Typo="Typo.body2">@rang.LetztesAbgeschlossenesLevel</MudText></MudItem>
+                                        <MudItem xs="3"><MudText Typo="Typo.body2">@rang.GebrauchteZeit</MudText></MudItem>
+                                        <MudItem xs="3"><MudText Typo="Typo.body2">@rang.Strafminuten</MudText></MudItem>
+                                    </MudGrid>
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
 
             <!-- Downloads & Abgabe Box (Mitte) -->
@@ -201,6 +232,7 @@ else
         margin: 0;
         padding: 0;
     }
+
     .title {
         font-weight: bold;
         color: #2c3e50;
