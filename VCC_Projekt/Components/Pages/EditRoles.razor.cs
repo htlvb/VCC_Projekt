@@ -152,7 +152,7 @@ namespace VCC_Projekt.Components.Pages
         {
             if (string.IsNullOrWhiteSpace(_searchString)) return false;
             _searchString = _searchString.ToLower();
-            if(x.Typ.ToLower().StartsWith(_searchString)) return true;
+            if (x.Typ.ToLower().StartsWith(_searchString)) return true;
 
             if (x.Email.ToLower().StartsWith(_searchString)) return true;
             if (x.Firstname.ToLower().StartsWith(_searchString)) return true;
@@ -198,7 +198,7 @@ namespace VCC_Projekt.Components.Pages
         public List<string> Roles { get; set; }
         public string Typ { get; set; }
         public Event? Event { get; set; }
-        public string DiplayName => Typ != "Nutzer" ? $"{Username} (Event: {Event.Bezeichnung} - {Event.Beginn.Date.ToString("d. MMMM yyyy")})": Username;
+        public string DiplayName => Typ != "Nutzer" ? $"{Username} (Event: {Event.Bezeichnung} - {Event.Beginn.Date.ToString("d. MMMM yyyy")})" : Username;
 
         public List<EditRoleUser>? Teammitglieder { get; set; }
 
