@@ -1,6 +1,7 @@
 ﻿@page "/my-events"
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@using System.ComponentModel.DataAnnotations
+@inject UserManager<ApplicationUser > UserManager
+@inject ApplicationDbContext dbContext
 
 <PageTitle>Meine Events</PageTitle>
 
@@ -23,7 +24,7 @@ else
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">@eventItem.Title</h5>
-                        <p class="card-text">@eventItem.Description</p>
+                        <p class="card-text">@eventItem.Date.ToString("dd.MM.yyyy")</p>
                         <button class="btn btn-success" @onclick="() => Unregister(eventItem.Id)">Abmelden</button>
                     </div>
                 </div>
@@ -42,10 +43,10 @@ else
         border-color: #134883;
     }
 
-        .btn-success:hover {
-            background-color: #2f5e91;
-            border-color: #2f5e91;
-        }
+    .btn-success:hover {
+        background-color: #2f5e91;
+        border-color: #2f5e91;
+    }
 
     h1, h2, h3 {
         color: #134883;
@@ -55,21 +56,60 @@ else
         border: 2px solid #134883;
     }
 
-        .form-control:focus {
-            border-color: #2f5e91;
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
-        }
+    .form-control:focus {
+        border-color: #2f5e91;
+        box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+    }
 
     .card {
         transition: transform 0.2s;
         border: 2px solid #134883;
     }
 
-        .card:hover {
-            transform: scale(1.05);
-        }
+    .card:hover {
+        transform: scale(1.05);
+    }
 
-        .card:selected {
-            transform: scale(1.05);
-        }
+    .card:selected {
+        transform: scale(1.05);
+    }
 </style>
+
+@code {
+    private List<Event> events;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User ;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userId = user.Identity.Name; // Hier wird der Benutzername verwendet
+            events = await dbContext.Gruppe
+                .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                .SelectMany(g => g.Events)
+                .ToListAsync();
+        }
+    }
+
+    private async Task Unregister(int eventId)
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User ;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userId = user.Identity.Name; // Hier wird der Benutzername verwendet
+            var eventToRemove = await dbContext.EventParticipants
+                .FirstOrDefaultAsync(ep => ep.EventId == eventId && ep.UserId == userId);
+
+            if (eventToRemove != null)
+            {
+                dbContext.EventParticipants.Remove(eventToRemove);
+                await dbContext.SaveChangesAsync();
+                // Aktualisiere die Liste der Events nach der Abmeldung
+                events = await dbContext.Gruppe
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                    .SelectMany(g => g.Events)
+                    .ToListAsync();
+            }
+        }
+    }
+}
