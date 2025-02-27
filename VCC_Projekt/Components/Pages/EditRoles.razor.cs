@@ -11,47 +11,142 @@ namespace VCC_Projekt.Components.Pages
 
         // For the Grid
         private List<EditRoleUser> users;
+        private List<EditRoleUser> allUsers; // Gemeinsame Liste für alle Benutzer
 
         protected override void OnInitialized()
         {
             var userList = dbContext.Users
-                            .GroupJoin(
-                                dbContext.UserRoles,
-                                u => u.UserName,
-                                ur => ur.UserId,
-                                (u, userRoles) => new { u, userRoles }
-                            )
-                            .Select(x => new EditRoleUser
-                            (
-                                x.u.UserName,
-                                x.u.Firstname,
-                                x.u.Lastname,
-                                x.u.Email,
-                                x.userRoles.Any() ? x.userRoles.Select(ur => ur.RoleId).ToList() : new List<string> { "Gesperrt" },
-                                "Nutzer",
-                                null
-                            ))
-                            .AsNoTracking()
-                            .ToList();
+                .GroupJoin(
+                    dbContext.UserRoles,
+                    u => u.UserName,
+                    ur => ur.UserId,
+                    (u, userRoles) => new { u, userRoles }
+                )
+                .Select(x => new EditRoleUser
+                (
+                    x.u.UserName,
+                    x.u.Firstname,
+                    x.u.Lastname,
+                    x.u.Email,
+                    x.userRoles.Any() ? x.userRoles.Select(ur => ur.RoleId).ToList() : new List<string> { "Gesperrt" },
+                    "Nutzer",
+                    null,
+                    null
+                ))
+                .AsNoTracking()
+                .ToList();
 
             var groupList = dbContext.Gruppen
-                                     .Select(g => new EditRoleUser
-                                     (
-                                         g.Gruppenname ?? g.GruppenleiterId,
-                                         string.Empty, // Kein Vorname für Gruppen
-                                         string.Empty, // Kein Nachname für Gruppen
-                                         string.Empty, // Keine E-Mail für Gruppen
-                                         new List<string> { g.Gesperrt ? "Gesperrt" : "Nicht gesperrt" },
-                                         g.Teilnehmertyp,
-                                         g.Event
-                                     ))
-                                     .AsNoTracking()
-                                     .ToList();
+                .Select(g => new EditRoleUser
+                (
+                    g.Gruppenname ?? g.GruppenleiterId,
+                    string.Empty, // Kein Vorname für Gruppen
+                    string.Empty, // Kein Nachname für Gruppen
+                    string.Empty, // Keine E-Mail für Gruppen
+                    new List<string> { g.Gesperrt ? "Gesperrt" : "Nicht gesperrt" },
+                    g.Teilnehmertyp,
+                    g.Event,
+                    g.UserInGruppe.Select(uig => new EditRoleUser
+                    (
+                        uig.User.UserName,
+                        uig.User.Firstname,
+                        uig.User.Lastname,
+                        uig.User.Email,
+                        dbContext.UserRoles.Where(ur => ur.UserId == uig.User.UserName).Select(ur => ur.RoleId).ToList(),
+                        "Nutzer",
+                        null,
+                        null
+                    )).ToList()
+                ))
+                .AsNoTracking()
+                .ToList();
 
+            allUsers = userList.Concat(groupList.SelectMany(g => g.Teammitglieder)).ToList();
             users = userList.Concat(groupList).ToList();
             roles = dbContext.Roles.Select(r => r.Name).ToList();
             roles.Add("Gesperrt");
         }
+
+        private void CommittedItemChanges(EditRoleUser item)
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    if (item.Typ != "Nutzer")
+                    {
+                        Gruppe group = null;
+                        if (item.Typ == "Einzelspieler")
+                            group = await dbContext.Gruppen.FirstOrDefaultAsync(g => g.GruppenleiterId == item.Username && g.Event_EventID == item.Event.EventID && g.Teilnehmertyp == item.Typ);
+                        else
+                            group = await dbContext.Gruppen.FirstOrDefaultAsync(g => g.Gruppenname == item.Username && g.Event_EventID == item.Event.EventID);
+
+                        if (group == null)
+                        {
+                            Snackbar.Add("Gruppe nicht gefunden, um die Rolle zu ändern!", Severity.Error);
+                            await InvokeAsync(StateHasChanged);
+                            return;
+                        }
+
+                        group.Gesperrt = item.Roles.Contains("Gesperrt");
+                        dbContext.Gruppen.Update(group);
+                        await dbContext.SaveChangesAsync();
+
+                        Snackbar.Add($"Rollen des {item.Typ} erfolgreich geändert! ({item.Username}; {string.Join(",", item.Roles)})", Severity.Success);
+                        await InvokeAsync(StateHasChanged);
+                        return;
+                    }
+
+                    ApplicationUser? user = await Usermanager.FindByEmailAsync(item.Email);
+                    if (user == null)
+                    {
+                        Snackbar.Add("Benutzer nicht gefunden, um die Rolle zu ändern!", Severity.Error);
+                        await InvokeAsync(StateHasChanged);
+                        return;
+                    }
+
+                    var currentRoles = await Usermanager.GetRolesAsync(user);
+                    var rolesToRemove = currentRoles.Except(item.Roles).ToList();
+                    var rolesToAdd = item.Roles.Except(currentRoles).ToList();
+
+                    if (rolesToRemove.Any())
+                    {
+                        await Usermanager.RemoveFromRolesAsync(user, rolesToRemove.ToArray());
+                    }
+
+                    if (rolesToAdd.Any() && !rolesToAdd.Contains("Gesperrt"))
+                    {
+                        await Usermanager.AddToRolesAsync(user, rolesToAdd.ToArray());
+                    }
+
+                    // Aktualisiere die Benutzer in der gemeinsamen Liste
+                    var userInList = allUsers.FirstOrDefault(u => u.Email == item.Email);
+                    if (userInList != null)
+                    {
+                        userInList.Roles = item.Roles;
+                    }
+
+                    // Aktualisiere die Benutzer in den Teams
+                    foreach (var team in users.Where(u => u.Typ == "Team"))
+                    {
+                        var teamMember = team.Teammitglieder.FirstOrDefault(u => u.Email == item.Email);
+                        if (teamMember != null)
+                        {
+                            teamMember.Roles = item.Roles;
+                        }
+                    }
+
+                    Snackbar.Add($"Rollen erfolgreich geändert! ({item.Email}; {string.Join(",", item.Roles)})", Severity.Success);
+                    await InvokeAsync(StateHasChanged);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Fehler bei der Änderung der Rollen: {ex.Message}", Severity.Error);
+                    await InvokeAsync(StateHasChanged);
+                }
+            }).ConfigureAwait(false);
+        }
+
 
         private Func<EditRoleUser, bool> _quickFilter => x =>
         {
@@ -68,72 +163,6 @@ namespace VCC_Projekt.Components.Pages
 
             return false;
         };
-
-        private void CommittedItemChanges(EditRoleUser item)
-        {
-            Task.Run(async () =>
-            {
-                try
-                {
-                    if(item.Typ != "Nutzer")
-                    {
-                        Gruppe group = null;
-                        if (item.Typ == "Einzelspieler") group = dbContext.Gruppen.FirstOrDefault(g => g.GruppenleiterId == item.Username && g.Event_EventID == item.Event.EventID && g.Teilnehmertyp == item.Typ);
-                        else group = dbContext.Gruppen.FirstOrDefault(g => g.Gruppenname == item.Username && g.Event_EventID == item.Event.EventID);
-                        
-                        if (group == null)
-                        {
-                            Snackbar.Add("Gruppe nicht gefunden, um die Rolle zu ändern!", Severity.Error);
-                            await InvokeAsync(StateHasChanged);
-                            return;
-                        }
-                        if (item.Roles.Contains("Gesperrt"))
-                        {
-                            group.Gesperrt = true;
-                        }
-                        else
-                        {
-                            group.Gesperrt = false;
-                        }
-                        dbContext.Gruppen.Update(group);
-                        await dbContext.SaveChangesAsync();
-                        Snackbar.Add($"Rollen des {item.Typ} erfolgreich geändert! ({item.Username}; {string.Join(",", item.Roles)})", Severity.Success);
-                        await InvokeAsync(StateHasChanged);
-                        return;
-                    }
-
-                    ApplicationUser? user = await Usermanager.FindByEmailAsync(item.Email);
-                    if (user == null)
-                    {
-                        Snackbar.Add("Benutzer nicht gefunden, um die Rolle zu ändern!", Severity.Error);
-                        await InvokeAsync(StateHasChanged);
-                        return;
-                    }
-                    var currentRoles = await Usermanager.GetRolesAsync(user);
-                    var rolesToRemove = currentRoles.Except(item.Roles).ToList();
-                    var rolesToAdd = item.Roles.Except(currentRoles).ToList();
-
-                    if (rolesToRemove.Any())
-                    {
-                        await Usermanager.RemoveFromRolesAsync(user, rolesToRemove.ToArray());
-                    }
-
-                    if (rolesToAdd.Any() && !rolesToAdd.Contains("Gesperrt"))
-                    {
-                        await Usermanager.AddToRolesAsync(user, rolesToAdd.ToArray());
-                    }
-
-                    Snackbar.Add($"Rollen erfolgreich geändert! ({item.Email}; {string.Join(",", item.Roles)})", Severity.Success);
-
-                    await InvokeAsync(StateHasChanged);
-                }
-                catch (Exception ex)
-                {
-                    Snackbar.Add($"Fehler bei der Änderung der Rollen: {ex.Message}", Severity.Error);
-                    await InvokeAsync(StateHasChanged);
-                }
-            }).ConfigureAwait(false);
-        }
 
         private void OnRolesChanged(EditRoleUser user, IEnumerable<string> newRoles)
         {
@@ -171,7 +200,9 @@ namespace VCC_Projekt.Components.Pages
         public Event? Event { get; set; }
         public string DiplayName => Typ != "Nutzer" ? $"{Username} (Event: {Event.Bezeichnung} - {Event.Beginn.Date.ToString("d. MMMM yyyy")})": Username;
 
-        public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles, string typ, Event? @event)
+        public List<EditRoleUser>? Teammitglieder { get; set; }
+
+        public EditRoleUser(string username, string firstname, string lastname, string email, List<string> roles, string typ, Event? @event, List<EditRoleUser>? teammitglieder)
         {
             Username = username;
             Firstname = firstname;
@@ -180,6 +211,7 @@ namespace VCC_Projekt.Components.Pages
             Roles = roles;
             Typ = typ;
             Event = @event;
+            Teammitglieder = teammitglieder;
         }
 
         public string Fullname => $"{Firstname} {Lastname}";
