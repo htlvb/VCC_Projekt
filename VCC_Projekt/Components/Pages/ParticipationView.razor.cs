@@ -26,6 +26,7 @@ namespace VCC_Projekt.Components.Pages
         private bool accessDenied = false;
         private string accessDeniedMessage = "";
         private int Fehlversuche;
+        private int Platzeriung;
 
         protected override async void OnInitialized()
         {
@@ -79,7 +80,7 @@ namespace VCC_Projekt.Components.Pages
                                         .FirstOrDefault();
                 if (CurrentLevel == null) throw new ArgumentException("Kein Level gefunden");
 
-                Rangliste = dbContext.Gruppen
+                var rangliste = dbContext.Gruppen
                             .Where(gr => gr.Event_EventID == Event.EventID && gr.Gesperrt == false)
                             .Select(g => new Rangliste
                             {
@@ -100,9 +101,9 @@ namespace VCC_Projekt.Components.Pages
                                 GesamteZeit = r.GebrauchteZeit + TimeSpan.FromMinutes((double)r.Strafminuten)  // Berechne GesamteZeit nach der Abfrage
                             })
                             .OrderByDescending(r => r.LetztesAbgeschlossenesLevel)
-                            .ThenBy(r => r.GesamteZeit)
-                            .Take(20)
-                            .ToList();
+                            .ThenBy(r => r.GesamteZeit);
+                Rangliste = rangliste.Take(20).ToList();
+                Platzeriung = rangliste.ToList().FindIndex(r => r.gruppe.GruppenID == Group.GruppenID) + 1;
 
                 if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
             }
