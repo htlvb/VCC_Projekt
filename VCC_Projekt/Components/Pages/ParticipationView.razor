@@ -66,31 +66,23 @@ else
                 <MudCard Elevation="3" Class="mt-3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">🏆 Aktuelle Rangliste</MudText>
-                        <MudDivider/>
-                        <MudGrid>
-                            <MudItem xs="12">
-                                <MudGrid spacing="2">
-                                    <MudItem xs="2"><MudText Typo="Typo.subtitle2">Platz</MudText></MudItem>
-                                    <MudItem xs="4"><MudText Typo="Typo.subtitle2">Team Name</MudText></MudItem>
-                                    <MudItem xs="4"><MudText Typo="Typo.subtitle2">Letztes Abgeschlossene Level</MudText></MudItem>
-                                    <MudItem xs="3"><MudText Typo="Typo.subtitle2">Gebrauchte Zeit (min) [ohne Strafzeit]</MudText></MudItem>
-                                    <MudItem xs="3"><MudText Typo="Typo.subtitle2">Strafzeit (min)</MudText></MudItem>
-                                </MudGrid>
-                            </MudItem>
-
-                            @foreach (var rang in Rangliste)
-                            {
-                                <MudItem xs="12">
-                                    <MudGrid spacing="2">
-                                        <MudItem xs="2"><MudText Typo="Typo.body2">@(Rangliste.IndexOf(rang) + 1)</MudText></MudItem>  <!-- Index beibehalten -->
-                                        <MudItem xs="4"><MudText Typo="Typo.body2">@(rang.gruppe.Gruppenname ?? rang.gruppe.GruppenleiterId)</MudText></MudItem>
-                                        <MudItem xs="4"><MudText Typo="Typo.body2">@rang.LetztesAbgeschlossenesLevel</MudText></MudItem>
-                                        <MudItem xs="3"><MudText Typo="Typo.body2">@rang.GebrauchteZeit</MudText></MudItem>
-                                        <MudItem xs="3"><MudText Typo="Typo.body2">@rang.Strafminuten</MudText></MudItem>
-                                    </MudGrid>
-                                </MudItem>
-                            }
-                        </MudGrid>
+                        <MudDivider />
+                        <MudTable Striped="true" Items="Rangliste">
+                            <HeaderContent>
+                                <MudTh>Platz</MudTh>
+                                <MudTh>Team Name</MudTh>
+                                <MudTh>Letztes Abgeschlossene Level</MudTh>
+                                <MudTh>Gebrauchte Zeit (min) [ohne Strafzeit]</MudTh>
+                                <MudTh>Strafzeit (min)</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@(Rangliste.IndexOf(context) + 1)</MudTd>  <!-- Index beibehalten -->
+                                <MudTd>@(context.gruppe.Gruppenname ?? context.gruppe.GruppenleiterId)</MudTd>
+                                <MudTd>@context.LetztesAbgeschlossenesLevel</MudTd>
+                                <MudTd>@context.GebrauchteZeit</MudTd>
+                                <MudTd>@context.Strafminuten</MudTd>
+                            </RowTemplate>
+                        </MudTable>
                     </MudCardContent>
                 </MudCard>
             </MudItem>
