@@ -52,7 +52,7 @@ namespace VCC_Projekt.Components.Pages
                 if (EventId <= 0 || Event == null) throw new ArgumentException("Event nicht gefunden");
 
                 DateTime now = DateTime.Now;
-                // if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+                if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
 
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
@@ -111,7 +111,7 @@ namespace VCC_Projekt.Components.Pages
                 accessDenied = true;
                 accessDeniedMessage = ex.Message;
             }
-            
+
             isLoading = false;
         }
 
@@ -183,7 +183,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     Fehlversuche++;
                 }
-                await ProtectedLocalStorage.SetAsync($"Fehlversuche_{Event.EventID}",Fehlversuche);
+                await ProtectedLocalStorage.SetAsync($"Fehlversuche_{Event.EventID}", Fehlversuche);
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
@@ -223,6 +223,6 @@ namespace VCC_Projekt.Components.Pages
         public int? GesamteFehlversuche { get; set; }
         public int? Strafminuten { get; set; }
         public int? LetztesAbgeschlossenesLevel { get; set; }
-        public TimeSpan? GesamteZeit { get; set;}
+        public TimeSpan? GesamteZeit { get; set; }
     }
 }
