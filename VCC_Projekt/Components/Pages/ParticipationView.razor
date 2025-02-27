@@ -72,6 +72,7 @@ else
                                 <MudTh>Platz</MudTh>
                                 <MudTh>Team Name</MudTh>
                                 <MudTh>Letztes Abgeschlossene Level</MudTh>
+                                <MudTh>Gesamtzeit (min) [mit Strafminuten]</MudTh>
                                 <MudTh>Gebrauchte Zeit (min) [ohne Strafzeit]</MudTh>
                                 <MudTh>Strafzeit (min)</MudTh>
                             </HeaderContent>
@@ -79,6 +80,7 @@ else
                                 <MudTd>@(Rangliste.IndexOf(context) + 1)</MudTd>  <!-- Index beibehalten -->
                                 <MudTd>@(context.gruppe.Gruppenname ?? context.gruppe.GruppenleiterId)</MudTd>
                                 <MudTd>@context.LetztesAbgeschlossenesLevel</MudTd>
+                                <MudTd>@context.GesamteZeit</MudTd>
                                 <MudTd>@context.GebrauchteZeit</MudTd>
                                 <MudTd>@context.Strafminuten</MudTd>
                             </RowTemplate>
