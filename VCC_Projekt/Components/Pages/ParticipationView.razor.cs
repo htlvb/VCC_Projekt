@@ -101,7 +101,7 @@ namespace VCC_Projekt.Components.Pages
                             })
                             .OrderByDescending(r => r.LetztesAbgeschlossenesLevel)
                             .ThenBy(r => r.GesamteZeit)
-                            .Take(5)
+                            .Take(20)
                             .ToList();
 
                 if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
