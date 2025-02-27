@@ -35,31 +35,31 @@ namespace VCC_Projekt.Components.Pages
                 ))
                 .AsNoTracking()
                 .ToList();
-
             var groupList = dbContext.Gruppen
-                .Select(g => new EditRoleUser
-                (
-                    g.Gruppenname ?? g.GruppenleiterId,
-                    string.Empty, // Kein Vorname für Gruppen
-                    string.Empty, // Kein Nachname für Gruppen
-                    string.Empty, // Keine E-Mail für Gruppen
-                    new List<string> { g.Gesperrt ? "Gesperrt" : "Nicht gesperrt" },
-                    g.Teilnehmertyp,
-                    g.Event,
-                    g.UserInGruppe.Select(uig => new EditRoleUser
-                    (
-                        uig.User.UserName,
-                        uig.User.Firstname,
-                        uig.User.Lastname,
-                        uig.User.Email,
-                        dbContext.UserRoles.Where(ur => ur.UserId == uig.User.UserName).Select(ur => ur.RoleId).ToList(),
-                        "Nutzer",
-                        null,
-                        null
-                    )).ToList()
-                ))
+               .Select(g => new EditRoleUser
+               (
+                   g.Gruppenname ?? g.GruppenleiterId,
+                   string.Empty, // Kein Vorname für Gruppen
+                   string.Empty, // Kein Nachname für Gruppen
+                   string.Empty, // Keine E-Mail für Gruppen
+                   new List<string> { g.Gesperrt ? "Gesperrt" : "Nicht gesperrt" },
+                   g.Teilnehmertyp,
+                   g.Event,
+                   g.UserInGruppe.Select(uig => new EditRoleUser
+                   (
+                       uig.User.UserName,
+                       uig.User.Firstname,
+                       uig.User.Lastname,
+                       uig.User.Email,
+                       dbContext.UserRoles.Where(ur => ur.UserId == uig.User.UserName).Select(ur => ur.RoleId).ToList(),
+                       "Nutzer",
+                       null,
+                       null
+                   )).ToList()
+               ))
                 .AsNoTracking()
-                .ToList();
+               .ToList();
+
 
             allUsers = userList.Concat(groupList.SelectMany(g => g.Teammitglieder)).ToList();
             users = userList.Concat(groupList).ToList();

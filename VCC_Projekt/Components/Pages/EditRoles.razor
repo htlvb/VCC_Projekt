@@ -60,7 +60,7 @@
                 }
             </Columns>
 
-            <ChildRowContent Context="context">
+            <ChildRowContent>
                 <MudDataGrid T="EditRoleUser" Items="@context.Item.Teammitglieder" ColumnResizeMode="ResizeMode.Column"
                              SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false" EditMode="DataGridEditMode.Form"
                              CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
