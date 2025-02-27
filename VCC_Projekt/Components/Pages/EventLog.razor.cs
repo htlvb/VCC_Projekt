@@ -1,18 +1,15 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+﻿// EventLog.razor.cs
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor;
-using Org.BouncyCastle.Asn1.X509;
-using System.Net.Http;
-using System.Net.Http.Json;
-using static MudBlazor.CategoryTypes;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
-using System.Net.NetworkInformation;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace VCC_Projekt.Components.Pages
 {
     public partial class EventLog
     {
-
         private class EventLogViewModel
         {
             public int EventLogID { get; set; }
@@ -23,6 +20,32 @@ namespace VCC_Projekt.Components.Pages
         }
 
         private List<EventLogViewModel> eventLogViewModels = new();
+        private string _searchString = "";
+
+
+        // Quick filter function that works across multiple columns
+        private Func<EventLogViewModel, bool> _quickFilter => x =>
+        {
+            if (string.IsNullOrWhiteSpace(_searchString))
+                return true;
+
+            if (x.Tabellenname?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+                return true;
+
+            if (x.Beschreibung?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+                return true;
+
+            if (x.KategorieBeschreibung?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+                return true;
+
+            if (x.EventLogID.ToString().Contains(_searchString))
+                return true;
+
+            if (x.Zeit.ToString("dd.MM.yyyy HH:mm:ss").Contains(_searchString))
+                return true;
+
+            return false;
+        };
 
         protected override void OnInitialized()
         {
