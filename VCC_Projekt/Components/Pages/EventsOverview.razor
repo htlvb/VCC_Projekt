@@ -34,41 +34,86 @@ else
         @foreach (var eventItem in events)
         {
             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
+            if (userGroup == null) continue; // Falls userGroup null ist, fahre mit dem nächsten Event fort.
+
+            bool isGroupLeader = userGroup?.GruppenleiterId == userId;
+            bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
+            bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
+
+@*             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
             bool isGroupLeader = userGroup?.GruppenleiterId == userId; // Prüft, ob der aktuelle Benutzer Gruppenleiter ist
 
-            <div class="col-md-@(isGroupLeader ? "6" : "4")">
-                @* Größere Card für Gruppenleiter *@
+            bool canDeleteGroup = false;
+            bool canAddMember = false;
+
+            @if(userGroup != null)
+            {
+                canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
+                canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;   
+            } *@
+
+            <div class="col-md-6">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">@eventItem.Bezeichnung</h5>
                         <p class="card-text"><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</p>
+                        @if(userGroup.Teilnehmertyp == "Team")
+                        {
+                            <p class="card-text"><strong>Teamname: </strong>@userGroup.Gruppenname</p>
+                        }
+                        @if(userGroup.Teilnehmertyp == "Einzelspieler")
+                        {
+                            <p class="card-text"><strong>Benutzername: </strong>@userGroup.GruppenleiterId</p>
+                        }
                         <p class="card-text"><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</p>
 
-                        @if (isGroupLeader)
+
+                        @if(userGroup.Teilnehmertyp == "Team")
                         {
-                            <ul class="list-group mb-2">
-                                @foreach (var member in userGroup.UserInGruppe)
-                                {
-                                    @* Überprüft, ob der Benutzer Gruppenleiter ist und blockiert das Entfernen *@
-                                    @if (member.User_UserId != userGroup.GruppenleiterId)
+
+                            @if (isGroupLeader)
+                            {
+                                <ul class="list-group mb-2">
+                                    @foreach (var member in userGroup.UserInGruppe)
                                     {
-                                        <h6>Gruppenmitglieder:</h6>
+                                        @* Überprüft, ob der Benutzer Gruppenleiter ist und blockiert das Entfernen *@
+                                        @if (member.User_UserId != userGroup.GruppenleiterId)
+                                        {
+                                            <h6><strong>Gruppenmitglieder: </strong></h6>
 
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            @member.User_UserId
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                @member.User_UserId
 
-                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">
-                                                Entfernen
-                                            </button>
-                                        </li>
+                                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</button>
+                                            </li>
+                                        }
                                     }
+                                </ul>
+
+                                @if (canAddMember)
+                                {
+                                    <button class="btn btn-primary mb-2" @onclick="() => AddMember(userGroup.GruppenID)">Mitglied hinzufügen</button>
                                 }
-                            </ul>
+
+                                @if (canDeleteGroup)
+                                {
+                                    <button class="btn btn-danger" @onclick="() => DeleteGroup(userGroup.GruppenID)">Gruppe löschen</button>
+                                }
+                            }
+
+                            else
+                            {
+                                <button class="btn btn-success" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
+                                
+                            }
+
                         }
 
-                        <button class="btn @(isGroupLeader ? "btn-warning" : "btn-success")" @onclick="() => Unregister(eventItem.EventID)">
-                            @(isGroupLeader ? "Gruppe verwalten" : "Abmelden")
-                        </button>
+                        else if(userGroup.Teilnehmertyp == "Einzelspieler")
+                        {
+                            <button class="btn btn-success" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
+                        }
+
                     </div>
                 </div>
             </div>
@@ -206,5 +251,19 @@ else
         }
     }
 
+    private async Task DeleteGroup(int groupId)
+    {
+        var group = await dbContext.Gruppen.FirstOrDefaultAsync(g => g.GruppenID == groupId);
+        if (group != null)
+        {
+            dbContext.Gruppen.Remove(group);
+            await dbContext.SaveChangesAsync();
+            userGroups.Remove(group);
+        }
+    }
 
+    private async Task AddMember(int groupId)
+    {
+        // ähnlich wie bei der event registrierung
+    }
 }

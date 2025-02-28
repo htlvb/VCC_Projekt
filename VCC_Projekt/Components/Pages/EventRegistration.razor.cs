@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -45,6 +46,28 @@ namespace VCC_Projekt.Components.Pages
 
             if (!string.IsNullOrWhiteSpace(newMember))
             {
+                var username = dbContext.Users.Where(u => u.NormalizedEmail == newMember.Normalize()).Select(u => u.NormalizedUserName).FirstOrDefault();
+
+                if(username != null)
+                {
+                    var groupIds = dbContext.UserInGruppe
+                        .Where(ug => ug.User_UserId.ToUpper() == username)
+                        .Select(ug => ug.Gruppe_GruppenId)
+                        .ToList();
+
+                    if (groupIds.Any())
+                    {
+                        var eventIdExists = dbContext.Gruppen
+                            .Any(g => groupIds.Contains(g.GruppenID) && g.Event_EventID == eventId);
+
+                        if (eventIdExists)
+                        {
+                            addMemberErrors.Add(new ValidationResult("Diese Person nimmt bereits am Event teil. Um sie/ihn trotzdem ins Team zu holen, muss sie/er sich zuerst wieder abmelden.", new[] { nameof(Input.NewMemberEmail) }));
+                        }
+                    }
+                }
+
+
                 if (newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
                 {
                     addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Input.NewMemberEmail) }));
