@@ -42,12 +42,14 @@ public class UserInGruppeConfiguration : IEntityTypeConfiguration<UserInGruppe>
         builder.HasOne(t => t.User)
                .WithMany(t => t.UserInGruppe)
                .HasForeignKey(t => t.User_UserId)
+               .HasPrincipalKey(t => t.UserName)
                .OnDelete(DeleteBehavior.Cascade);
 
         // Beziehung zu Gruppe
         builder.HasOne(t => t.Gruppe)
                .WithMany(t => t.UserInGruppe)
                .HasForeignKey(t => t.Gruppe_GruppenId)
+                .HasPrincipalKey(t => t.GruppenID)
                .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -14,29 +14,29 @@
 
     <!-- DataGrid -->
     <div class="datagrid">
-        <MudDataGrid T="EditRoleUser " Items="@users"
-            SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
-            QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
-            CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
+        <MudDataGrid T="EditRoleUser" Items="@users" ColumnResizeMode="ResizeMode.Column"
+                     SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
+                     QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
+                     CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Personen und Gruppen</MudText>
                 <MudSpacer />
                 <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
 
             <Columns>
                 @if (!string.IsNullOrEmpty(_searchString))
                 {
-                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false"/>
-                    <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false">
-                    </PropertyColumn>
-                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false"/>
+                    <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
+                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
+                    <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false" />
+                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
                     <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />
-                    <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" >
-                        <EditTemplate>
+                    <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen">
+                        <EditTemplate Context="context">
                             <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="@(context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
-                                @if(context.Item.Typ != "Nutzer")
+                                @if (context.Item.Typ != "Nutzer")
                                 {
                                     <MudSelectItem T="string" Value="@("Gesperrt")">Gesperrt</MudSelectItem>
                                     <MudSelectItem T="string" Value="@("Nicht gesperrt")">Nicht gesperrt</MudSelectItem>
@@ -51,18 +51,46 @@
                             </MudSelect>
                         </EditTemplate>
                     </PropertyColumn>
-                        
                     <TemplateColumn CellClass="d-flex justify-end">
-                        <CellTemplate>
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync"/>
+                        <CellTemplate Context="context">
+                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                         </CellTemplate>
                     </TemplateColumn>
                 }
             </Columns>
+
+            <ChildRowContent>
+                <MudDataGrid T="EditRoleUser" Items="@context.Item.Teammitglieder" ColumnResizeMode="ResizeMode.Column"
+                             SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                             CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
+                    <Columns>
+                        <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
+                        <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false">
+                        </PropertyColumn>
+                        <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
+                        <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" Context="child_context">
+                            <EditTemplate Context="child_context">
+                                <MudSelect T="string" SelectedValues="child_context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(child_context.Item, newRoles))" MultiSelection="@(child_context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
+                                    @foreach (var role in roles)
+                                    {
+                                        <MudSelectItem T="string" Value="@role" Disabled="@(child_context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </EditTemplate>
+                        </PropertyColumn>
+                        <TemplateColumn CellClass="d-flex justify-end" Context="child_context">
+                            <CellTemplate Context="child_context">
+                                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@child_context.Actions.StartEditingItemAsync" />
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </ChildRowContent>
+
             <PagerContent>
                 @if (!string.IsNullOrEmpty(_searchString))
                 {
-                    <MudDataGridPager T="EditRoleUser " />
+                    <MudDataGridPager T="EditRoleUser" />
                 }
             </PagerContent>
         </MudDataGrid>
@@ -71,34 +99,34 @@
 
 <style>
     body {
-        background-color: #f8f9fa; 
+        background-color: #f8f9fa;
     }
 
     h1, h2, h3 {
-        color: #134883; 
+        color: #134883;
     }
 
     .btn-success {
-        background-color: #134883; 
-        border-color: #134883; 
+        background-color: #134883;
+        border-color: #134883;
     }
 
         .btn-success:hover {
-            background-color: #2f5e91; 
-            border-color: #2f5e91; 
+            background-color: #2f5e91;
+            border-color: #2f5e91;
         }
 
     .form-control {
-        border: 2px solid #134883; 
+        border: 2px solid #134883;
     }
 
         .form-control:focus {
-            border-color: #2f5e91; 
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5); 
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
         }
 
     .alerts {
-        margin-bottom: 20px; 
+        margin-bottom: 20px;
         margin-top: 20px;
     }
 
