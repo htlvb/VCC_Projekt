@@ -79,7 +79,7 @@
     {
         UserInGruppe gruppe = new UserInGruppe(user.UserName, dbContext.Gruppen.Where(g => g.Gruppenname == teamname && g.Event_EventID == eventId).Select(g => g.GruppenID).First());
 
-        dbContext.UserInGruppes.Add(gruppe);
+        dbContext.UserInGruppe.Add(gruppe);
         dbContext.SaveChanges();
 
         NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");

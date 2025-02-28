@@ -119,7 +119,7 @@ namespace VCC_Projekt.Components.Pages
 
                         UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
 
-                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.UserInGruppe.Add(gruppe);
                         dbContext.SaveChanges();
 
                         var groupManagerEmail = dbContext.Users.Where(u => u.UserName == groupManagerUsername).Select(u => u.Email).FirstOrDefault();
@@ -181,7 +181,7 @@ namespace VCC_Projekt.Components.Pages
 
                         UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
 
-                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.UserInGruppe.Add(gruppe);
                         dbContext.SaveChanges();
 
                         NavigationManager.NavigateTo($"/signup-event-confirmation?eventId={eventId}");
@@ -245,7 +245,7 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt
-                var groupIds = context.UserInGruppes
+                var groupIds = context.UserInGruppe
                     .Where(ug => ug.User_UserId.ToUpper() == Username.ToUpper())
                     .Select(ug => ug.Gruppe_GruppenId)
                     .ToList();

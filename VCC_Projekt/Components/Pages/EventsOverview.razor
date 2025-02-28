@@ -1,0 +1,210 @@
+﻿@page "/my-events"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject EmailSender EmailSender
+@inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VCC_Projekt.Data
+@using Microsoft.AspNetCore.Components.Forms;
+@using System;
+
+<PageTitle>Meine Events</PageTitle>
+
+<h1>Meine Events</h1>
+
+@if (events == null)
+{
+    <p>Lade Events...</p>
+}
+else if (events.Count == 0)
+{
+    <p>Sie haben sich für keine Events angemeldet.</p>
+}
+else
+{
+    <div class="row">
+
+        @foreach (var eventItem in events)
+        {
+            var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
+            bool isGroupLeader = userGroup?.GruppenleiterId == userId; // Prüft, ob der aktuelle Benutzer Gruppenleiter ist
+
+            <div class="col-md-@(isGroupLeader ? "6" : "4")">
+                @* Größere Card für Gruppenleiter *@
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">@eventItem.Bezeichnung</h5>
+                        <p class="card-text"><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</p>
+                        <p class="card-text"><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</p>
+
+                        @if (isGroupLeader)
+                        {
+                            <ul class="list-group mb-2">
+                                @foreach (var member in userGroup.UserInGruppe)
+                                {
+                                    @* Überprüft, ob der Benutzer Gruppenleiter ist und blockiert das Entfernen *@
+                                    @if (member.User_UserId != userGroup.GruppenleiterId)
+                                    {
+                                        <h6>Gruppenmitglieder:</h6>
+
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @member.User_UserId
+
+                                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">
+                                                Entfernen
+                                            </button>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        }
+
+                        <button class="btn @(isGroupLeader ? "btn-warning" : "btn-success")" @onclick="() => Unregister(eventItem.EventID)">
+                            @(isGroupLeader ? "Gruppe verwalten" : "Abmelden")
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+        }
+
+    .card {
+        transition: transform 0.2s;
+        border: 2px solid #134883;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card:selected {
+            transform: scale(1.05);
+        }
+</style>
+
+@code {
+    private List<Event> events;
+    private string userId;
+    private List<Gruppe> userGroups = new List<Gruppe>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.Identity.IsAuthenticated)
+        {
+            userId = user.Identity.Name;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                // Hole alle Gruppen, in denen der Benutzer Mitglied ist
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                    .Include(g => g.UserInGruppe) // Um auch die Mitglieder mitzuladen
+                    .ToListAsync();
+
+                events = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                    .Select(g => g.Event)
+                    .ToListAsync();
+            }
+        }
+    }
+
+    private async Task Unregister(int eventId)
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userId = user.Identity.Name;
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("Fehler: Benutzer-ID konnte nicht ermittelt werden.");
+                return;
+            }
+
+            // Finde die Gruppen des Benutzers, die mit dem Event verknüpft sind
+            var userGroupEntries = await dbContext.UserInGruppe
+                .Where(uig => uig.User_UserId == userId &&
+                              dbContext.Gruppen.Any(g => g.GruppenID == uig.Gruppe_GruppenId && g.Event_EventID == eventId))
+                .ToListAsync();
+
+            if (!userGroupEntries.Any())
+            {
+                Console.WriteLine($"Benutzer {userId} ist für Event {eventId} in keiner Gruppe.");
+                return;
+            }
+
+            // Entferne den Benutzer aus diesen Gruppen
+            dbContext.UserInGruppe.RemoveRange(userGroupEntries);
+            await dbContext.SaveChangesAsync();
+
+            // Aktualisiere die Liste der Events nach der Abmeldung
+            events = await dbContext.Gruppen
+                .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                .Select(g => g.Event)
+                .ToListAsync();
+        }
+        else
+        {
+            Console.WriteLine("Benutzer ist nicht authentifiziert.");
+        }
+    }
+
+    private async Task RemoveMember(int groupId, string memberId)
+    {
+        var memberEntry = await dbContext.UserInGruppe
+            .FirstOrDefaultAsync(uig => uig.Gruppe_GruppenId == groupId && uig.User_UserId == memberId);
+
+        if (memberEntry != null)
+        {
+            dbContext.UserInGruppe.Remove(memberEntry);
+            await dbContext.SaveChangesAsync();
+
+            // Aktualisiere die Event-Liste nach dem Entfernen eines Mitglieds
+            events = await dbContext.Gruppen
+                .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                .Select(g => g.Event)
+                .ToListAsync();
+        }
+    }
+
+
+}

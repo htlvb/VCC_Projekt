@@ -60,7 +60,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     {
                         UserInGruppe gruppe = new UserInGruppe(userName, groupId);
 
-                        dbContext.UserInGruppes.Add(gruppe);
+                        dbContext.UserInGruppe.Add(gruppe);
                         dbContext.SaveChanges();
 
                         var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
