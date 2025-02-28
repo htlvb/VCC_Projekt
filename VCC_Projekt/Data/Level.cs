@@ -50,12 +50,14 @@ public class LevelConfiguration : IEntityTypeConfiguration<Level>
 
         entity.HasMany(g => g.Absolviert)
                .WithOne(gal => gal.Level)
-               .HasForeignKey(gal => gal.Gruppe_GruppeID)
+               .HasForeignKey(gal => gal.Level_LevelID)
+               .HasPrincipalKey(g => g.LevelID)
                .OnDelete(DeleteBehavior.Cascade);
 
         entity.HasMany(a => a.Aufgaben)
                 .WithOne(a => a.Level)
                 .HasForeignKey(a => a.Level_LevelID)
+                .HasPrincipalKey(l => l.LevelID)
                 .OnDelete(DeleteBehavior.Cascade);
 
     }
