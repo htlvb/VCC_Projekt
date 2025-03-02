@@ -140,9 +140,9 @@ namespace VCC_Projekt.Components.Pages
             {
                 if (file != null)
                 {
-                    if (file.Size > 5 * 1024 * 1024)
+                    if (file.Size > 4 * 1024 * 1024)
                     {
-                        Snackbar.Add("Die TXT-Datei darf nicht größer als 5MB sein!", Severity.Error, config =>
+                        Snackbar.Add("Die TXT-Datei darf nicht größer als 4MB sein!", Severity.Error, config =>
                         {
                             config.Icon = Icons.Material.Filled.Error;
                         });
