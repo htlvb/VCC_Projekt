@@ -34,7 +34,7 @@ namespace VCC_Projekt.Controllers
         [HttpGet("{levelId}")]
         public async Task<IActionResult> DownloadFile(int levelId)
         {
-            if(!IsRequestFromAllowedWebsite())
+            if (!IsRequestFromAllowedWebsite())
             {
                 return Forbid();
             }
@@ -57,7 +57,7 @@ namespace VCC_Projekt.Controllers
             }
             // Get the file from the database
             var file = await _dbContext.Aufgabe
-                .Where(l => l.Level_LevelID == levelId && l.AufgabenID==aufgabeId)
+                .Where(l => l.Level_LevelID == levelId && l.AufgabenID == aufgabeId)
                 .Select(l => new { l.Input_TXT, l.Aufgabennr, l.Level.Levelnr })
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
@@ -102,11 +102,9 @@ namespace VCC_Projekt.Controllers
                 {
                     foreach (var file in files)
                     {
-                        var zipArchiveEntry = archive.CreateEntry($"level{file.Levelnr}_{file.Aufgabennr}.txt");  // Hier den Dateinamen anpassen
+                        var zipArchiveEntry = archive.CreateEntry($"level{file.Levelnr}_{file.Aufgabennr}.txt");
                         using (var zipStream = zipArchiveEntry.Open())
                         {
-                            // Hier die Datei-Inhalte in den Zip-Stream schreiben
-                            var fileContent = file.Input_TXT; // Hier kannst du die tatsächlichen Daten einfügen
                             await zipStream.WriteAsync(file.Input_TXT, 0, file.Input_TXT.Length);
                         }
                     }
