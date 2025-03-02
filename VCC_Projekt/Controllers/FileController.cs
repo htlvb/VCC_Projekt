@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,7 @@ namespace VCC_Projekt.Controllers
 {
     [Route("api/v1/files")]
     [ApiController]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class FileController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
@@ -18,9 +19,25 @@ namespace VCC_Projekt.Controllers
             _dbContext = dbContext;
         }
 
+        private bool IsRequestFromAllowedWebsite()
+        {
+            var referer = Request.Headers["Referer"].ToString();
+
+            // Liste unerlaubter Begriffe
+            string[] blockedKeywords = { "account", "returnurl" };
+
+            return !string.IsNullOrWhiteSpace(referer) &&
+                   referer.StartsWith("https://localhost:7051", StringComparison.OrdinalIgnoreCase) &&
+                   !blockedKeywords.Any(keyword => referer.Contains(keyword, StringComparison.OrdinalIgnoreCase));
+        }
+
         [HttpGet("{levelId}")]
         public async Task<IActionResult> DownloadFile(int levelId)
         {
+            if(!IsRequestFromAllowedWebsite())
+            {
+                return Forbid();
+            }
             // Get the file from the database
             var file = await _dbContext.Levels
                 .Where(l => l.LevelID == levelId)
@@ -28,12 +45,16 @@ namespace VCC_Projekt.Controllers
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Angabe_PDF, "application/pdf",fileDownloadName: $"Level {file.Levelnr}.pdf");
+            return File(file.Angabe_PDF, "application/pdf");
         }
 
         [HttpGet("{levelId}/{aufgabeId}/input")]
         public async Task<IActionResult> DownloadInputFile(int levelId, int aufgabeId)
         {
+            if (!IsRequestFromAllowedWebsite())
+            {
+                return Forbid();
+            }
             // Get the file from the database
             var file = await _dbContext.Aufgabe
                 .Where(l => l.Level_LevelID == levelId && l.AufgabenID==aufgabeId)
@@ -41,24 +62,32 @@ namespace VCC_Projekt.Controllers
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Input_TXT, "plain/text", fileDownloadName: $"level{file.Aufgabennr}_{file.Levelnr}.txt");
+            return File(file.Input_TXT, "plain/text");
         }
 
         [HttpGet("{levelId}/{aufgabeId}/ergebnis")]
         public async Task<IActionResult> DownloadErgebnisFile(int levelId, int aufgabeId)
         {
+            if (!IsRequestFromAllowedWebsite())
+            {
+                return Forbid();
+            }
             var file = await _dbContext.Aufgabe
                 .Where(l => l.Level_LevelID == levelId && l.AufgabenID == aufgabeId)
                 .Select(l => new { l.Ergebnis_TXT, l.Aufgabennr, l.Level.Levelnr })
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Ergebnis_TXT, "plain/text", fileDownloadName: $"level{file.Aufgabennr}_{file.Levelnr}.txt");
+            return File(file.Ergebnis_TXT, "plain/text");
         }
 
         [HttpGet("{levelId}/input/zip")]
         public async Task<IActionResult> DownloadFiles(int levelId)
         {
+            if (!IsRequestFromAllowedWebsite())
+            {
+                return Forbid();
+            }
             var files = await _dbContext.Aufgabe
                                         .Where(l => l.Level_LevelID == levelId)
                                         .Select(l => new { l.Input_TXT, l.Level.Levelnr, l.Aufgabennr })
@@ -82,7 +111,7 @@ namespace VCC_Projekt.Controllers
                         }
                     }
                 }
-                return File(memoryStream.ToArray(), "application/zip", fileDownloadName: $"level{files.First().Levelnr}.zip");
+                return File(memoryStream.ToArray(), "application/zip");
             }
         }
     }

@@ -43,6 +43,7 @@ builder.Services.Configure<MailOptions>(
     builder.Configuration.GetSection(MailOptions.MailOptionsKey));
 
 builder.Services.AddControllers();
+
 builder.Services.AddMudServices();
 
 var app = builder.Build();
