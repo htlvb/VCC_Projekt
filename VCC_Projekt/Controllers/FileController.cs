@@ -13,6 +13,7 @@ namespace VCC_Projekt.Controllers
     public class FileController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
+        string frontendUrl = "https://localhost:7051";
 
         public FileController(ApplicationDbContext dbContext)
         {
@@ -27,7 +28,7 @@ namespace VCC_Projekt.Controllers
             string[] blockedKeywords = { "account", "returnurl" };
 
             return !string.IsNullOrWhiteSpace(referer) &&
-                   referer.StartsWith("https://localhost:7051", StringComparison.OrdinalIgnoreCase) &&
+                   referer.StartsWith(frontendUrl, StringComparison.OrdinalIgnoreCase) &&
                    !blockedKeywords.Any(keyword => referer.Contains(keyword, StringComparison.OrdinalIgnoreCase));
         }
 
