@@ -31,5 +31,20 @@ namespace VCC_Projekt.Controllers
             }
             return File(file, "application/pdf");
         }
+
+        [HttpGet("{levelId}/{aufgabeId}/input")]
+        public async Task<IActionResult> DownloadFile(int levelId, int aufgabeId)
+        {
+            // Get the file from the database
+            var file = await _dbContext.Aufgabe
+                .Where(l => l.Level_LevelID == levelId && l.AufgabenID==aufgabeId)
+                .Select(l => l.Input_TXT)
+                .FirstOrDefaultAsync();
+            if (file == null)
+            {
+                return NotFound();
+            }
+            return File(file, "plain/text");
+        }
     }
 }
