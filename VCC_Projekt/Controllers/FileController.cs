@@ -7,6 +7,7 @@ using System.Text;
 
 namespace VCC_Projekt.Controllers
 {
+    [EnableCors("AllowSpecificOrigin")]
     [Route("api/v1/files")]
     [ApiController]
     [Authorize]
@@ -28,7 +29,6 @@ namespace VCC_Projekt.Controllers
             string[] blockedKeywords = { "account", "returnurl" };
 
             return !string.IsNullOrWhiteSpace(referer) &&
-                   referer.StartsWith(frontendUrl, StringComparison.OrdinalIgnoreCase) &&
                    !blockedKeywords.Any(keyword => referer.Contains(keyword, StringComparison.OrdinalIgnoreCase));
         }
 
