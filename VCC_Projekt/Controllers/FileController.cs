@@ -8,13 +8,12 @@ using System.Text;
 namespace VCC_Projekt.Controllers
 {
     [EnableCors("AllowSpecificOrigin")]
-    [Route("api/v1/files")]
+    [Route("api/files")]
     [ApiController]
     [Authorize]
     public class FileController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
-        string frontendUrl = "https://localhost:7051";
 
         public FileController(ApplicationDbContext dbContext)
         {
