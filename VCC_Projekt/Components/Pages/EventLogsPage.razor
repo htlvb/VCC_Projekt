@@ -1,0 +1,35 @@
+﻿@page "/eventlogs"
+@using VCC_Projekt.Data
+
+<MudDataGrid T="EventLog"
+             Items="@eventLogs"
+             Dense="true"
+             Hover="true"
+             Bordered="true"
+             Striped="true"
+             SortMode="SortMode.Multiple"
+             Filterable="true"
+             QuickFilter="@_quickFilter"
+             Hideable="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Event-Logs</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString"
+                      Placeholder="Suchen"
+                      Adornment="Adornment.Start"
+                      Immediate="true"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      IconSize="Size.Medium"
+                      Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.EventLogID" Title="ID" />
+        <PropertyColumn Property="x => x.Tabellenname" Title="Tabellenname" />
+        <PropertyColumn Property="x => x.Beschreibung" Title="Beschreibung" />
+        <PropertyColumn Property="x => x.Zeit" Title="Zeit" Format="dd.MM.yyyy HH:mm:ss" />
+        <PropertyColumn Property="x => x.LogKat.Beschreibung" Title="Kategorie" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="EventLog" />
+    </PagerContent>
+</MudDataGrid>
