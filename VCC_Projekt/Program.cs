@@ -42,8 +42,19 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.Configure<MailOptions>(
     builder.Configuration.GetSection(MailOptions.MailOptionsKey));
 
-// builder.Services.AddSingleto
+builder.Services.AddControllers();
+var frontendUrl = builder.Configuration["Frontend:Url"];
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins(frontendUrl)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
+
+
 builder.Services.AddMudServices();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
@@ -60,6 +71,8 @@ else
 }
 
 app.UseHttpsRedirection();
+app.MapControllers();
+app.UseCors("AllowSpecificOrigin");
 
 app.UseStaticFiles();
 app.UseAntiforgery();
