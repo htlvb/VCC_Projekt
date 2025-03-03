@@ -104,6 +104,7 @@ namespace VCC_Projekt.Components.Pages
         {
             try
             {
+                Input.dbContext = dbContext;
                 var validationResults = new List<ValidationResult>();
                 var validationContext = new ValidationContext(Input);
                 bool isValid = Validator.TryValidateObject(Input, validationContext, validationResults, true);
@@ -252,14 +253,17 @@ namespace VCC_Projekt.Components.Pages
             [Display(Name = "Benutzername")]
             public string Username { get; set; } = "";
 
+            public ApplicationDbContext dbContext { get; set; }
+
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
                 var context = validationContext.GetService<ApplicationDbContext>();
 
-                if (context == null)
+                if (dbContext == null)
                 {
-                    throw new InvalidOperationException("ApplicationDbContext ist nicht verfügbar.");
+                    dbContext = context;
+                    // throw new InvalidOperationException("ApplicationDbContext ist nicht verfügbar.");
                 }
 
                 if (ParticipationType != ParticipationTypeSingle && ParticipationType != ParticipationTypeTeam)
@@ -268,7 +272,7 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt
-                var groupIds = context.UserInGruppe
+                var groupIds = dbContext.UserInGruppe
                     .Where(ug => ug.User_UserId.ToUpper() == Username.ToUpper())
                     .Select(ug => ug.Gruppe_GruppenId)
                     .ToList();
@@ -276,7 +280,7 @@ namespace VCC_Projekt.Components.Pages
                 if (groupIds.Any()) // Überprüfen, ob der Benutzer in mindestens einer Gruppe ist
                 {
                     // Überprüfen, ob der Benutzer an dem Event teilnimmt
-                    var eventIdExists = context.Gruppen
+                    var eventIdExists = dbContext.Gruppen
                         .Any(g => groupIds.Contains(g.GruppenID) && g.Event_EventID == eventId);
 
                     if (eventIdExists)
@@ -292,7 +296,7 @@ namespace VCC_Projekt.Components.Pages
                         errors.Add(new ValidationResult("Bitte einen Gruppenname vergeben.", new[] { nameof(TeamName) }));
                     }
 
-                    else if (context.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
+                    else if (dbContext.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
                     {
                         errors.Add(new ValidationResult("Dieser Gruppenname ist bereits vergeben.", new[] { nameof(TeamName) }));
                     }
