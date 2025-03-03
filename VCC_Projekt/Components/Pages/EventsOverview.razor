@@ -61,12 +61,16 @@ else
 
                             @if (isGroupLeader)
                             {
+                                @if(userGroup.UserInGruppe.Count != 0)
+                                {
+                                    <p><strong>Gruppenmitglieder: </strong></p>
+                                }
+
                                 <ul class="list-group mb-2">
                                     @foreach (var member in userGroup.UserInGruppe)
                                     {
                                         @if (member.User_UserId != userGroup.GruppenleiterId)
                                         {
-                                            <h6><strong>Gruppenmitglieder: </strong></h6>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 @member.User_UserId
 
@@ -76,30 +80,27 @@ else
                                     }
                                 </ul>
 
-
-
                                 @if (canAddMember)
                                 {
-                                    <button class="btn btn-primary mb-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                    <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
                                 }
 
                                 @if (canDeleteGroup)
                                 {
-                                    <button class="btn btn-danger" @onclick="() => Unregister(eventItem.EventID)">Gruppe löschen</button>
+                                    <button class="btn btn-danger me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe löschen</button>
                                 }
                             }
 
                             else
                             {
-                                <button class="btn btn-success" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
-                                
+                                <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
                             }
 
                         }
 
                         else if(userGroup.Teilnehmertyp == "Einzelspieler")
                         {
-                            <button class="btn btn-success" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
+                            <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
                         }
 
                     </div>
