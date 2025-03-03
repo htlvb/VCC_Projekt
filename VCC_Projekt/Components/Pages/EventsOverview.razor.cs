@@ -103,6 +103,11 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private async Task JoinEvent(int eventId)
+        {
+            NavigationManager.NavigateTo($"/participation/{eventId}");
+        }
+
         private async Task AddMember(int groupId, int eventId)
         {
             // ähnlich wie bei Event Registration

@@ -31,7 +31,7 @@ else
 {
     <div class="row">
 
-        @foreach (var eventItem in events)
+        @foreach (var eventItem in events.OrderBy(e => e.Beginn))
         {
             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
             if (userGroup == null) continue;
@@ -39,6 +39,10 @@ else
             bool isGroupLeader = userGroup?.GruppenleiterId == userId;
             bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
             bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
+
+            var eventEndTime = eventItem.Beginn.AddMinutes(eventItem.Dauer);
+            bool eventStarted = eventItem.Beginn <= DateTime.Now;
+            bool isCurrentEvent = eventItem.Beginn <= DateTime.Now && eventEndTime >= DateTime.Now;
 
             <div class="col-md-6">
                 <div class="card mb-4">
@@ -55,54 +59,60 @@ else
                         }
                         <p class="card-text"><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</p>
 
-
-                        @if(userGroup.Teilnehmertyp == "Team")
+                        @if (isCurrentEvent)
                         {
+                            <button class="btn btn-success me-2" @onclick="() => JoinEvent(eventItem.EventID)">Teilnehmen</button>
+                        }
 
-                            @if (isGroupLeader)
+                        @if(!eventStarted)
+                        {
+                            @if(userGroup.Teilnehmertyp == "Team")
                             {
-                                @if(userGroup.UserInGruppe.Count != 0)
-                                {
-                                    <p><strong>Gruppenmitglieder: </strong></p>
-                                }
 
-                                <ul class="list-group mb-2">
-                                    @foreach (var member in userGroup.UserInGruppe)
+                                @if (isGroupLeader)
+                                {
+                                    @if(userGroup.UserInGruppe.Count != 0)
                                     {
-                                        @if (member.User_UserId != userGroup.GruppenleiterId)
-                                        {
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                @member.User_UserId
-
-                                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</button>
-                                            </li>
-                                        }
+                                        <p><strong>Gruppenmitglieder: </strong></p>
                                     }
-                                </ul>
 
-                                @if (canAddMember)
-                                {
-                                    <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                    <ul class="list-group mb-2">
+                                        @foreach (var member in userGroup.UserInGruppe)
+                                        {
+                                            @if (member.User_UserId != userGroup.GruppenleiterId)
+                                            {
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    @member.User_UserId
+
+                                                    <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</button>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+
+                                    @if (canAddMember)
+                                    {
+                                        <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                    }
+
+                                    @if (canDeleteGroup)
+                                    {
+                                        <button class="btn btn-danger me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe löschen</button>
+                                    }
                                 }
 
-                                @if (canDeleteGroup)
+                                else
                                 {
-                                    <button class="btn btn-danger me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe löschen</button>
+                                    <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
                                 }
+
                             }
 
-                            else
+                            else if(userGroup.Teilnehmertyp == "Einzelspieler")
                             {
-                                <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
+                                <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
                             }
-
                         }
-
-                        else if(userGroup.Teilnehmertyp == "Einzelspieler")
-                        {
-                            <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
-                        }
-
                     </div>
                 </div>
             </div>
