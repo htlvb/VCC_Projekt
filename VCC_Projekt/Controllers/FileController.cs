@@ -95,7 +95,7 @@ namespace VCC_Projekt.Controllers
 
             using (var memoryStream = new MemoryStream())
             {
-                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true))
+                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true,System.Text.Encoding.UTF8))
                 {
                     foreach (var file in files)
                     {
