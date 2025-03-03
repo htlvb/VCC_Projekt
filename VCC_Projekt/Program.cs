@@ -54,6 +54,7 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddMudServices();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
