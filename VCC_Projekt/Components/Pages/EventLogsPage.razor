@@ -1,8 +1,6 @@
 ﻿@page "/eventlogs"
 @using VCC_Projekt.Data
 
-<MudText Typo="Typo.h5" Class="mb-4">Event Logs</MudText>
-
 <MudDataGrid T="EventLog"
              Items="@eventLogs"
              Dense="true"
@@ -14,10 +12,10 @@
              QuickFilter="@_quickFilter"
              Hideable="true">
     <ToolBarContent>
-        <MudText Typo="Typo.h6">Event Logs</MudText>
+        <MudText Typo="Typo.h6">Event-Logs</MudText>
         <MudSpacer />
         <MudTextField @bind-Value="_searchString"
-                      Placeholder="Search"
+                      Placeholder="Suchen"
                       Adornment="Adornment.Start"
                       Immediate="true"
                       AdornmentIcon="@Icons.Material.Filled.Search"
@@ -26,12 +24,12 @@
     </ToolBarContent>
     <Columns>
         <PropertyColumn Property="x => x.EventLogID" Title="ID" />
-        <PropertyColumn Property="x => x.Tabellenname" Title="Table Name" />
-        <PropertyColumn Property="x => x.Beschreibung" Title="Description" />
-        <PropertyColumn Property="x => x.Zeit" Title="Time" Format="dd.MM.yyyy HH:mm:ss" />
-        <PropertyColumn Property="x => x.LogKat.Beschreibung" Title="Category" />
+        <PropertyColumn Property="x => x.Tabellenname" Title="Tabellenname" />
+        <PropertyColumn Property="x => x.Beschreibung" Title="Beschreibung" />
+        <PropertyColumn Property="x => x.Zeit" Title="Zeit" Format="dd.MM.yyyy HH:mm:ss" />
+        <PropertyColumn Property="x => x.LogKat.Beschreibung" Title="Kategorie" />
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="EventLog"/>
+        <MudDataGridPager T="EventLog" />
     </PagerContent>
 </MudDataGrid>
