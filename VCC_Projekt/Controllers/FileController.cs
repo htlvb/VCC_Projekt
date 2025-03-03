@@ -62,7 +62,7 @@ namespace VCC_Projekt.Controllers
             return File(file.Input_TXT, "plain/text");
         }
 
-        [HttpGet("{levelId}/{aufgabeId}/ergebnis")]
+        [HttpGet("{levelId}/{aufgabeId}/result")]
         public async Task<IActionResult> DownloadErgebnisFile(int levelId, int aufgabeId)
         {
             if (!IsRequestFromAllowedWebsite())
