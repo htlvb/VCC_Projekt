@@ -38,11 +38,11 @@ namespace VCC_Projekt.Controllers
             // Get the file from the database
             var file = await _dbContext.Levels
                 .Where(l => l.LevelID == levelId)
-                .Select(l => new { l.Angabe_PDF, l.Levelnr })
+                .Select(l => l.Angabe_PDF)
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Angabe_PDF, "application/pdf");
+            return File(file, "application/pdf");
         }
 
         [HttpGet("{levelId}/{aufgabeId}/input")]
@@ -55,11 +55,11 @@ namespace VCC_Projekt.Controllers
             // Get the file from the database
             var file = await _dbContext.Aufgabe
                 .Where(l => l.Level_LevelID == levelId && l.AufgabenID == aufgabeId)
-                .Select(l => new { l.Input_TXT, l.Aufgabennr, l.Level.Levelnr })
+                .Select(l => l.Input_TXT)
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Input_TXT, "plain/text");
+            return File(file, "plain/text");
         }
 
         [HttpGet("{levelId}/{aufgabeId}/result")]
@@ -71,11 +71,11 @@ namespace VCC_Projekt.Controllers
             }
             var file = await _dbContext.Aufgabe
                 .Where(l => l.Level_LevelID == levelId && l.AufgabenID == aufgabeId)
-                .Select(l => new { l.Ergebnis_TXT, l.Aufgabennr, l.Level.Levelnr })
+                .Select(l => l.Ergebnis_TXT)
                 .FirstOrDefaultAsync();
             if (file == null) return NotFound();
 
-            return File(file.Ergebnis_TXT, "plain/text");
+            return File(file, "plain/text");
         }
 
         [HttpGet("{levelId}/input/zip")]
