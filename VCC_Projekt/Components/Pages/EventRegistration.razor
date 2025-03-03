@@ -6,6 +6,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ApplicationDbContext dbContext
 
 <PageTitle>Event-Anmeldung</PageTitle>
 
@@ -50,6 +51,12 @@
                         Um als Team am Event teilzunehmen, erstellst du eine Gruppe mit einem Teamnamen und wirst dadurch Gruppenmanager. Anschließend fügst du die E-Mail-Adressen der Teammitglieder hinzu. <br />
                         Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams.
                     </p>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
+                    <label for="teamname">Gruppenmanager</label>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
                 </div>
 
                 <div class="form-floating mb-3">
@@ -112,6 +119,7 @@
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="Input.Username" class="form-control" disabled />
                     <label for="teamname">Benutzername</label>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
                 </div>
             }
 

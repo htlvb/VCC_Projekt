@@ -47,13 +47,13 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
         builder.HasMany(u => u.UserInGruppe)
            .WithOne(g => g.User)           
            .HasForeignKey(g => g.User_UserId)   
-           .HasPrincipalKey(u => u.Id)    
+           .HasPrincipalKey(u => u.UserName)    
            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(u => u.GruppenleiterNavigation)
           .WithOne(g => g.GruppenleiterNavigation)
           .HasForeignKey(g => g.GruppenleiterId)
-          .HasPrincipalKey(u => u.Id)
+          .HasPrincipalKey(u => u.UserName)
           .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(u => u.NormalizedUserName)

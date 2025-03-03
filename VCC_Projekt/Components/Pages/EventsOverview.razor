@@ -1,0 +1,153 @@
+﻿@page "/my-events"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavigationManager
+@inject EmailSender EmailSender
+@inject IdentityRedirectManager RedirectManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Text
+@using System.Text.Encodings.Web
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
+@using VCC_Projekt.Data
+@using Microsoft.AspNetCore.Components.Forms;
+@using System;
+
+<PageTitle>Meine Events</PageTitle>
+
+<h1>Meine Events</h1>
+
+@if (events == null)
+{
+    <p>Lade Events...</p>
+}
+else if (events.Count == 0)
+{
+    <p>Sie haben sich für keine Events angemeldet.</p>
+}
+else
+{
+    <div class="row">
+
+        @foreach (var eventItem in events)
+        {
+            var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
+            if (userGroup == null) continue;
+
+            bool isGroupLeader = userGroup?.GruppenleiterId == userId;
+            bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
+            bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
+
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">@eventItem.Bezeichnung</h5>
+                        <p class="card-text"><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</p>
+                        @if(userGroup.Teilnehmertyp == "Team")
+                        {
+                            <p class="card-text"><strong>Teamname: </strong>@userGroup.Gruppenname</p>
+                        }
+                        @if(userGroup.Teilnehmertyp == "Einzelspieler")
+                        {
+                            <p class="card-text"><strong>Benutzername: </strong>@userGroup.GruppenleiterId</p>
+                        }
+                        <p class="card-text"><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</p>
+
+
+                        @if(userGroup.Teilnehmertyp == "Team")
+                        {
+
+                            @if (isGroupLeader)
+                            {
+                                @if(userGroup.UserInGruppe.Count != 0)
+                                {
+                                    <p><strong>Gruppenmitglieder: </strong></p>
+                                }
+
+                                <ul class="list-group mb-2">
+                                    @foreach (var member in userGroup.UserInGruppe)
+                                    {
+                                        @if (member.User_UserId != userGroup.GruppenleiterId)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                @member.User_UserId
+
+                                                <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</button>
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+
+                                @if (canAddMember)
+                                {
+                                    <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                }
+
+                                @if (canDeleteGroup)
+                                {
+                                    <button class="btn btn-danger me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe löschen</button>
+                                }
+                            }
+
+                            else
+                            {
+                                <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Gruppe verlassen</button>
+                            }
+
+                        }
+
+                        else if(userGroup.Teilnehmertyp == "Einzelspieler")
+                        {
+                            <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
+                        }
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .btn-success {
+        background-color: #134883;
+        border-color: #134883;
+    }
+
+        .btn-success:hover {
+            background-color: #2f5e91;
+            border-color: #2f5e91;
+        }
+
+    h1, h2, h3 {
+        color: #134883;
+    }
+
+    .form-control {
+        border: 2px solid #134883;
+    }
+
+        .form-control:focus {
+            border-color: #2f5e91;
+            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
+        }
+
+    .card {
+        transition: transform 0.2s;
+        border: 2px solid #134883;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .card:selected {
+            transform: scale(1.05);
+        }
+</style>
