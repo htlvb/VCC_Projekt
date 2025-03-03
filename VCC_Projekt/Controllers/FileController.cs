@@ -7,7 +7,7 @@ namespace VCC_Projekt.Controllers
     [EnableCors("AllowSpecificOrigin")]
     [Route("api/files")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles ="Admin,Editor,Benutzer")]
     public class FileController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
