@@ -3,8 +3,8 @@
 
 <MudText Typo="Typo.h5" Class="mb-4">Event Logs</MudText>
 
-<MudDataGrid T="EventLogViewModel"
-             Items="@eventLogViewModels"
+<MudDataGrid T="EventLog"
+             Items="@eventLogs"
              Dense="true"
              Hover="true"
              Bordered="true"
@@ -29,9 +29,9 @@
         <PropertyColumn Property="x => x.Tabellenname" Title="Table Name" />
         <PropertyColumn Property="x => x.Beschreibung" Title="Description" />
         <PropertyColumn Property="x => x.Zeit" Title="Time" Format="dd.MM.yyyy HH:mm:ss" />
-        <PropertyColumn Property="x => x.KategorieBeschreibung" Title="Category" />
+        <PropertyColumn Property="x => x.LogKat.Beschreibung" Title="Category" />
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="EventLogViewModel" />
+        <MudDataGridPager T="EventLog"/>
     </PagerContent>
 </MudDataGrid>
