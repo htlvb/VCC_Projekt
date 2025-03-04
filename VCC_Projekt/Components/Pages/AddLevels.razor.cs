@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using Azure;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using MudBlazor;
 
 namespace VCC_Projekt.Components.Pages
@@ -39,7 +41,6 @@ namespace VCC_Projekt.Components.Pages
                     }).ToList(),
                     IsExpanded = false
                 })
-                .AsNoTracking()
                 .ToListAsync();
 
         private void AddLevel()
@@ -190,6 +191,8 @@ namespace VCC_Projekt.Components.Pages
         {
             try
             {
+                ShowSnackbar("Levels werden gespeichert...", Severity.Info);
+                _levels.ForEach(l => { l.IsExpanded = false; l.Aufgaben.ForEach(a => a.IsExpanded = false); });
                 ValidateBeforeSave();
                 await ProcessDatabaseOperations();
                 await dbContext.SaveChangesAsync();
@@ -199,7 +202,9 @@ namespace VCC_Projekt.Components.Pages
             }
             catch (Exception ex)
             {
-                ShowSnackbar($"Fehler: {ex.Message}", Severity.Error);
+                if (Snackbar.ShownSnackbars.Any(sn => sn.Message == "Levels erfolgreich gespeichert!")) ShowSnackbar($"Bitte den Speicher Button nicht strapazieren!", Severity.Error);
+                else if (ex.Source == "Microsoft.EntityFrameworkCore.Relational" || ex.Message.StartsWith("A second operation")) ShowSnackbar($"Fehler beim Speichern des Levels! (Bitte versuchen Sie es erneut)", Severity.Error);
+                else ShowSnackbar($"Fehler: {ex.Message}", Severity.Error);
             }
         }
 
