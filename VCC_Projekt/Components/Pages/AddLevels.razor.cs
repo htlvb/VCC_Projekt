@@ -1,7 +1,4 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
+﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
 namespace VCC_Projekt.Components.Pages
@@ -191,19 +188,19 @@ namespace VCC_Projekt.Components.Pages
         {
             try
             {
-                ShowSnackbar("Levels werden gespeichert...", Severity.Info);
                 _levels.ForEach(l => { l.IsExpanded = false; l.Aufgaben.ForEach(a => a.IsExpanded = false); });
                 ValidateBeforeSave();
+                ShowSnackbar("Levels werden gespeichert...", Severity.Info);
                 await ProcessDatabaseOperations();
                 await dbContext.SaveChangesAsync();
 
                 _levels = await LoadLevelsAsync();
+                Snackbar.Remove(Snackbar.ShownSnackbars.Where(sn => sn.Message == "Levels werden gespeichert...").FirstOrDefault());
                 ShowSnackbar("Levels erfolgreich gespeichert!", Severity.Success);
             }
             catch (Exception ex)
             {
-                if (Snackbar.ShownSnackbars.Any(sn => sn.Message == "Levels erfolgreich gespeichert!")) ShowSnackbar($"Bitte den Speicher Button nicht strapazieren!", Severity.Error);
-                else if (ex.Source == "Microsoft.EntityFrameworkCore.Relational" || ex.Message.StartsWith("A second operation")) ShowSnackbar($"Fehler beim Speichern des Levels! (Bitte versuchen Sie es erneut)", Severity.Error);
+                if (ex.Source == "Microsoft.EntityFrameworkCore.Relational" || ex.Message.StartsWith("A second operation")) ShowSnackbar($"Fehler beim Speichern des Levels! (Bitte versuchen Sie es erneut)", Severity.Error);
                 else ShowSnackbar($"Fehler: {ex.Message}", Severity.Error);
             }
         }
@@ -212,7 +209,7 @@ namespace VCC_Projekt.Components.Pages
         {
             foreach (var level in _levels)
             {
-                if (level.AngabeUpdated && level.NewAngabe_PDF == null)
+                if ((level.AngabeUpdated || level.IsNew) && level.NewAngabe_PDF == null)
                     throw new Exception($"Level {level.Levelnr}: PDF fehlt!");
 
                 foreach (var task in level.Aufgaben)

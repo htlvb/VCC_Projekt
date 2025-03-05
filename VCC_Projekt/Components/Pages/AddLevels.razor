@@ -51,7 +51,7 @@
                                         <iframe src="data:application/pdf;base64,@Convert.ToBase64String(level.NewAngabe_PDF)" class="pdf-preview"></iframe>
                                     </div>
                                 }
-                                else
+                                else if(!level.IsNew)
                                 {
                                     <div class="file-preview">
                                         <a href="/api/files/@level.LevelId" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr + 1}.pdf")" class="download-link">PDF herunterladen</a>
