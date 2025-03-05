@@ -17,7 +17,9 @@
 
 <PageTitle>Meine Events</PageTitle>
 
-<h1>Meine Events</h1>
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883;">Meine Events</h1>
+</div>
 
 @if (events == null)
 {
@@ -29,9 +31,14 @@ else if (events.Count == 0)
 }
 else
 {
-    <div class="row">
+    <div class="text-center">
+        <button class="btn @((isPastEventsActive ? "btn-primary" : "btn-success")) me-2" style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowPastEvents()">Vergangene Events</button>
+        <button class="btn @((isUpcomingEventsActive ? "btn-primary" : "btn-success")) " style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowUpcomingEvents()">Zukünftige Events</button>
+    </div>
 
-        @foreach (var eventItem in events.OrderBy(e => e.Beginn))
+    <div class="row justify-content-center">
+
+        @foreach (var eventItem in filteredEvents.OrderBy(e => e.Beginn))
         {
             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
             if (userGroup == null) continue;
@@ -44,7 +51,7 @@ else
             bool eventStarted = eventItem.Beginn <= DateTime.Now;
             bool isCurrentEvent = eventItem.Beginn <= DateTime.Now && eventEndTime >= DateTime.Now;
 
-            <div class="col-md-6">
+            <div class="col-md-10">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">@eventItem.Bezeichnung</h5>
@@ -88,11 +95,30 @@ else
                                                 </li>
                                             }
                                         }
+
+                                        @if (isAddingMember)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+@*                                                 <input type="text" @bind="newMemberEmail" placeholder="E-Mail-Adresse hinzufügen" />
+                                                <ValidationMessage For="@(() => newMemberEmail)" class="text-danger" />
+                                                <button class="btn btn-success btn-sm" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMemberEmail)">Hinzufügen</button>
+ *@
+                                                <EditForm Model="@newMember" OnValidSubmit="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMember.Email)">
+                                                    <DataAnnotationsValidator />
+
+                                                    <input type="text" @bind="newMember.Email" placeholder="E-Mail-Adresse hinzufügen" /> <br />
+
+@*                                                     <InputText @bind-Value="newMember.Email" placeholder="E-Mail-Adresse hinzufügen" class="form-control" />
+ *@                                                    <ValidationMessage For="@(() => newMember.Email)" class="text-danger" />
+                                                    <button type="submit" class="btn btn-success btn-sm">Hinzufügen</button>
+                                                </EditForm>
+                                            </li>
+                                        }
                                     </ul>
 
                                     @if (canAddMember)
                                     {
-                                        <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                        <button class="btn btn-success me-2" @onclick="() => ShowAddMemberInput()">Mitglied hinzufügen</button>
                                     }
 
                                     @if (canDeleteGroup)
@@ -134,6 +160,11 @@ else
             background-color: #2f5e91;
             border-color: #2f5e91;
         }
+
+    .btn-primary{
+        background-color: #2f5e91;
+        border-color: #2f5e91;
+    }
 
     h1, h2, h3 {
         color: #134883;
