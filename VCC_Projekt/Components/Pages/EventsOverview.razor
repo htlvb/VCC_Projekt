@@ -40,11 +40,11 @@ else
 
         @foreach (var eventItem in filteredEvents.OrderBy(e => e.Beginn))
         {
-            eventId = eventItem.EventID;
+            selectedEventId = eventItem.EventID;
             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
             if (userGroup == null) continue;
 
-            bool isGroupLeader = userGroup?.GruppenleiterId == userId;
+            bool isGroupLeader = userGroup?.GruppenleiterId == usernameLoggedInUser;
             bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
             bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
 

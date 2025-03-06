@@ -17,7 +17,7 @@ namespace VCC_Projekt.Components.Pages
         private List<Event> filteredEvents = new List<Event>();
         private List<Gruppe> userGroups = new List<Gruppe>();
         private static List<string> invitedUsers = new List<string>();
-        private static string userId;
+        private static string usernameLoggedInUser;
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
 
@@ -26,7 +26,7 @@ namespace VCC_Projekt.Components.Pages
 
         private bool isAddingMember;
 
-        public static int eventId;
+        public static int selectedEventId;
 
         private MemberModel newMember = new MemberModel();
 
@@ -35,17 +35,17 @@ namespace VCC_Projekt.Components.Pages
             var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
             if (user.Identity.IsAuthenticated)
             {
-                userId = user.Identity.Name;
+                usernameLoggedInUser = user.Identity.Name;
 
-                if (!string.IsNullOrEmpty(userId))
+                if (!string.IsNullOrEmpty(usernameLoggedInUser))
                 {
                     userGroups = await dbContext.Gruppen
-                        .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                        .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                         .Include(g => g.UserInGruppe)
                         .ToListAsync();
 
                     events = await dbContext.Gruppen
-                        .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                        .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                         .Select(g => g.Event)
                         .ToListAsync();
 
@@ -75,20 +75,20 @@ namespace VCC_Projekt.Components.Pages
 
             if (user.Identity?.IsAuthenticated == true)
             {
-                userId = user.Identity.Name;
-                if (string.IsNullOrEmpty(userId))
+                usernameLoggedInUser = user.Identity.Name;
+                if (string.IsNullOrEmpty(usernameLoggedInUser))
                 {
                     Console.WriteLine("Fehler: Benutzer-ID konnte nicht ermittelt werden.");
                     return;
                 }
 
                 var userGroupEntry = await dbContext.UserInGruppe
-                    .FirstOrDefaultAsync(uig => uig.User_UserId == userId &&
+                    .FirstOrDefaultAsync(uig => uig.User_UserId == usernameLoggedInUser &&
                                                 dbContext.Gruppen.Any(g => g.GruppenID == uig.Gruppe_GruppenId && g.Event_EventID == eventId));
 
                 if (userGroupEntry == null)
                 {
-                    Console.WriteLine($"Benutzer {userId} ist für Event {eventId} in keiner Gruppe.");
+                    Console.WriteLine($"Benutzer {usernameLoggedInUser} ist für Event {eventId} in keiner Gruppe.");
                     return;
                 }
 
@@ -110,10 +110,11 @@ namespace VCC_Projekt.Components.Pages
                 }
 
                 events = await dbContext.Gruppen
-                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                     .Select(g => g.Event)
                     .ToListAsync();
             }
+
             else
             {
                 Console.WriteLine("Benutzer ist nicht authentifiziert.");
@@ -131,7 +132,7 @@ namespace VCC_Projekt.Components.Pages
                 await dbContext.SaveChangesAsync();
 
                 events = await dbContext.Gruppen
-                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == userId))
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                     .Select(g => g.Event)
                     .ToListAsync();
             }
@@ -146,7 +147,7 @@ namespace VCC_Projekt.Components.Pages
         {
             try
             {
-                var groupManagerEmail = dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).FirstOrDefault();
+                var groupManagerEmail = dbContext.Users.Where(u => u.UserName == usernameLoggedInUser).Select(u => u.Email).FirstOrDefault();
 
                 var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(groupId.ToString()));
                 var invaitationLink = NavigationManager.GetUriWithQueryParameters(
@@ -173,7 +174,7 @@ namespace VCC_Projekt.Components.Pages
 
                 var teamName = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
 
-                await EmailSender.SendInvitationLinkAsync(userId, groupManagerEmail, newMemberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
+                await EmailSender.SendInvitationLinkAsync(usernameLoggedInUser, groupManagerEmail, newMemberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
 
                 invitedUsers.Add(newMemberEmail);
 
@@ -212,9 +213,9 @@ namespace VCC_Projekt.Components.Pages
 
                 if (!string.IsNullOrWhiteSpace(Email))
                 {
-                    var username = dbContext.Users.Where(u => u.NormalizedEmail == Email.Normalize()).Select(u => u.NormalizedUserName).FirstOrDefault();
+                    var usernameNewMember = dbContext.Users.Where(u => u.NormalizedEmail == Email.Normalize()).Select(u => u.NormalizedUserName).FirstOrDefault();
 
-                    if (Email == dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).First())
+                    if (Email == dbContext.Users.Where(u => u.UserName == usernameLoggedInUser).Select(u => u.Email).First())
                     {
                         errors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Email) }));
                     }
@@ -225,9 +226,9 @@ namespace VCC_Projekt.Components.Pages
                     }
 
                     // Eingeladene Mitglieder
-                    foreach(string member in invitedUsers)
+                    foreach(string invitedMembers in invitedUsers)
                     {
-                        if(member.ToLower() == Email.ToLower())
+                        if(invitedMembers.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
                             return errors;
@@ -235,29 +236,29 @@ namespace VCC_Projekt.Components.Pages
                     }
 
                     // Mitglieder in der Datenbank
-                    var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == eventId && g.GruppenleiterId == userId).Select(g => g.GruppenID).FirstOrDefault();
-                    var users = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
+                    var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == selectedEventId && g.GruppenleiterId == usernameLoggedInUser).Select(g => g.GruppenID).FirstOrDefault();
+                    var membersInDatabase = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
 
-                    foreach(var user in users)
+                    foreach(var memberInDatabase in membersInDatabase)
                     {
-                        if(user.ToLower() == Email.ToLower())
+                        if(memberInDatabase.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
                             return errors;
                         }
                     }
 
-                    if (username != null)
+                    if (usernameNewMember != null)
                     {
                         var groupIds = dbContext.UserInGruppe
-                            .Where(ug => ug.User_UserId.ToUpper() == username)
+                            .Where(ug => ug.User_UserId.ToUpper() == usernameNewMember)
                             .Select(ug => ug.Gruppe_GruppenId)
                             .ToList();
 
                         if (groupIds.Any())
                         {
                             var eventIdExists = dbContext.Gruppen
-                                .Any(g => groupIds.Contains(g.GruppenID) && g.Event_EventID == eventId);
+                                .Any(g => groupIds.Contains(g.GruppenID) && g.Event_EventID == selectedEventId);
 
                             if (eventIdExists)
                             {
