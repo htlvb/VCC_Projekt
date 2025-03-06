@@ -1,0 +1,21 @@
+﻿@page "/view-participantsData"
+@using Microsoft.AspNetCore.Components.Forms
+@using MudBlazor
+
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard>
+                <MudCardContent>
+                    <MudText Typo="Typo.h6">Event auswählen</MudText>
+                    <MudSelect T="Event" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")">
+                        @foreach (var ev in _events)
+                        {
+                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
