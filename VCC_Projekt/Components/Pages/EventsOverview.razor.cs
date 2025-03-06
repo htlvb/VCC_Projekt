@@ -229,15 +229,15 @@ namespace VCC_Projekt.Components.Pages
                         }
                     }
 
-                    if (Email == dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).First())
-                    {
-                        errors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(newMemberEmail) }));
-                    }
+                    //if (Email == dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).First())
+                    //{
+                    //    errors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(newMemberEmail) }));
+                    //}
 
-                    else if (!Regex.IsMatch(Email, @"(?i)^.+@htlvb\.at$"))
-                    {
-                        errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(newMemberEmail) }));
-                    }
+                    //else if (!Regex.IsMatch(Email, @"(?i)^.+@htlvb\.at$"))
+                    //{
+                    //    errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(newMemberEmail) }));
+                    //}
 
                     //else if (Input.TeamMembers.Contains(Email))
                     //{
