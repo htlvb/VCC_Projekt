@@ -23,7 +23,7 @@ public class GruppeAbsolviertLevel
     public int Level_LevelID { get; set; }
     public virtual Level Level { get; set; }
 
-    public TimeSpan BenoetigteZeit { get; set; }
+    public TimeSpan? BenoetigteZeit { get; set; }
     public int Fehlversuche { get; set; }
 }
 

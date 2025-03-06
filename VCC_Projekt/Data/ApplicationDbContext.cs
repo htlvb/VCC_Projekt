@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Identity.Client;
+using MySqlConnector;
 
 namespace VCC_Projekt.Data
 {
@@ -36,9 +37,8 @@ namespace VCC_Projekt.Data
         
         public DbSet<EventLog> EventLogs { get; set; }
 
-        public DbSet<RanglisteResult> RanglisteResults { get; set; }
+        public DbSet<RanglisteResult> Rangliste { get; set; }
 
-        public IQueryable<RanglisteResult> GetRangliste(int eventId) => RanglisteResults.FromSqlRaw("CALL ShowRangliste(@EventId)", new SqlParameter("@EventId", eventId));
     }
 
 
