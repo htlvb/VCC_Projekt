@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Identity.Client;
@@ -34,6 +35,10 @@ namespace VCC_Projekt.Data
         public DbSet<LogKat> LogKats { get; set; }
         
         public DbSet<EventLog> EventLogs { get; set; }
+
+        public DbSet<RanglisteResult> RanglisteResults { get; set; }
+
+        public IQueryable<RanglisteResult> GetRangliste(int eventId) => RanglisteResults.FromSqlRaw("CALL ShowRangliste(@EventId)", new SqlParameter("@EventId", eventId));
     }
 
 

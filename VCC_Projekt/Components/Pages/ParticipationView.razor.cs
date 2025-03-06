@@ -19,7 +19,6 @@ namespace VCC_Projekt.Components.Pages
         private Dictionary<int, UploadedFile> UploadedFiles { get; set; } = new();
         private ClaimsPrincipal User { get; set; }
         private Gruppe? Group { get; set; }
-        private List<Rangliste> Rangliste { get; set; }
 
         private bool AllFilesSubmitted { get; set; } = false;
         private bool isLoading = false;
@@ -27,83 +26,74 @@ namespace VCC_Projekt.Components.Pages
         private string accessDeniedMessage = "";
         private int Fehlversuche;
         private int Platzeriung;
+        private List<RanglisteResult> Rangliste { get; set; } = new();
 
-        protected override async void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             isLoading = true;
             try
             {
-                Event = dbContext.Events
-                                 .Where(e => e.EventID == EventId)
-                                 .Select(e => new Event
-                                 {
-                                     EventID = e.EventID,
-                                     Bezeichnung = e.Bezeichnung,
-                                     Beginn = e.Beginn,
-                                     Dauer = e.Dauer,
-                                     StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
-                                     Levels = e.Levels.Select(l => new Level
-                                     {
-                                         LevelID = l.LevelID,
-                                         Levelnr = l.Levelnr
-                                     }).OrderBy(le => le.Levelnr).ToList()
-                                 })
-                                 .FirstOrDefault();
+                // Lade das Event und die Gruppe
+                Event = await dbContext.Events
+                    .Where(e => e.EventID == EventId)
+                    .Select(e => new Event
+                    {
+                        EventID = e.EventID,
+                        Bezeichnung = e.Bezeichnung,
+                        Beginn = e.Beginn,
+                        Dauer = e.Dauer,
+                        StrafminutenProFehlversuch = e.StrafminutenProFehlversuch,
+                        Levels = e.Levels.Select(l => new Level
+                        {
+                            LevelID = l.LevelID,
+                            Levelnr = l.Levelnr
+                        }).OrderBy(le => le.Levelnr).ToList()
+                    })
+                    .FirstOrDefaultAsync();
 
-                if (EventId <= 0 || Event == null) throw new ArgumentException("Event nicht gefunden");
-
-                DateTime now = DateTime.Now;
-                if (!(now >= Event.Beginn && now <= Event.Beginn.AddMinutes(Event.Dauer))) throw new ArgumentException("Event wird aktuell nicht ausgeführt");
+                if (Event == null) throw new ArgumentException("Event nicht gefunden");
 
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
                 User = authState.User;
 
-                if (User.Identity == null || !User.Identity.IsAuthenticated) throw new ArgumentException("Benutzer nicht gefunden");
+                if (User.Identity == null || !User.Identity.IsAuthenticated)
+                    throw new ArgumentException("Benutzer nicht gefunden");
 
-                Group = dbContext.Gruppen
+                Group = await dbContext.Gruppen
                     .Where(gr => gr.Event_EventID == EventId && gr.UserInGruppe.Any(us => us.User_UserId == User.Identity.Name))
                     .Include(g => g.Absolviert)
                     .Include(n => n.UserInGruppe)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 if (Group == null) throw new ArgumentException("Gruppe nicht gefunden");
-
                 if (Group.Gesperrt) throw new ArgumentException("Gruppe gesperrt");
 
-                CurrentLevel = dbContext.Levels
-                                        .Where(level => level.Event_EventID == EventId)
-                                        .Where(level => !dbContext.GruppeAbsolviertLevels
-                                            .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
-                                        .OrderBy(l => l.Levelnr)
-                                        .Include(l => l.Aufgaben)
-                                        .FirstOrDefault();
-                if (CurrentLevel == null) throw new ArgumentException("Kein Level gefunden");
+                // Lade die Rangliste mit der gespeicherten Prozedur
+                Rangliste = await dbContext.GetRangliste(EventId).ToListAsync();
 
-                var rangliste = dbContext.Gruppen
-                            .Where(gr => gr.Event_EventID == Event.EventID && gr.Gesperrt == false)
-                            .Select(g => new Rangliste
-                            {
-                                gruppe = g,
-                                GebrauchteZeit = g.Absolviert.Max(al => al.BenoetigteZeit),
-                                GesamteFehlversuche = g.Absolviert.Sum(al => al.Fehlversuche),
-                                Strafminuten = g.Absolviert.Sum(al => al.Fehlversuche) * Event.StrafminutenProFehlversuch,
-                                LetztesAbgeschlossenesLevel = g.Absolviert.Max(al => al.Level.Levelnr)
-                            })
-                            .ToList()  // Lade die Daten aus der Datenbank
-                            .Select(r => new Rangliste
-                            {
-                                gruppe = r.gruppe,
-                                GebrauchteZeit = r.GebrauchteZeit,
-                                GesamteFehlversuche = r.GesamteFehlversuche,
-                                Strafminuten = r.Strafminuten,
-                                LetztesAbgeschlossenesLevel = r.LetztesAbgeschlossenesLevel,
-                                GesamteZeit = r.GebrauchteZeit + TimeSpan.FromMinutes((double)r.Strafminuten)  // Berechne GesamteZeit nach der Abfrage
-                            })
-                            .OrderByDescending(r => r.LetztesAbgeschlossenesLevel)
-                            .ThenBy(r => r.GesamteZeit);
-                Rangliste = rangliste.Take(20).ToList();
-                Platzeriung = rangliste.ToList().FindIndex(r => r.gruppe.GruppenID == Group.GruppenID) + 1;
+                // Berechne die Platzierung der aktuellen Gruppe
+                var gruppeRang = Rangliste.FirstOrDefault(r => r.GruppenID == Group.GruppenID);
+                Platzeriung = gruppeRang?.Rang ?? 0;
+
+                // Lade das aktuelle Level
+                CurrentLevel = await dbContext.Levels
+                    .Where(level => level.Event_EventID == EventId)
+                    .Where(level => !dbContext.GruppeAbsolviertLevels
+                        .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
+                    .OrderBy(l => l.Levelnr)
+                    .Select(l => new Level
+                    {
+                        LevelID = l.LevelID,
+                        Levelnr = l.Levelnr,
+                        Aufgaben = l.Aufgaben.Select(au => new Aufgabe
+                        {
+                            AufgabenID = au.AufgabenID,
+                            Aufgabennr = au.Aufgabennr
+                        }).ToList()
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (CurrentLevel == null) throw new ArgumentException("Kein Level gefunden");
 
                 if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
             }
@@ -112,8 +102,10 @@ namespace VCC_Projekt.Components.Pages
                 accessDenied = true;
                 accessDeniedMessage = ex.Message;
             }
-
-            isLoading = false;
+            finally
+            {
+                isLoading = false;
+            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -217,13 +209,4 @@ namespace VCC_Projekt.Components.Pages
         }
     }
     public record UploadedFile(string FileName, byte[] FileData, bool? FileIsRight = null);
-    public class Rangliste
-    {
-        public Gruppe gruppe { get; set; }
-        public TimeSpan? GebrauchteZeit { get; set; }
-        public int? GesamteFehlversuche { get; set; }
-        public int? Strafminuten { get; set; }
-        public int? LetztesAbgeschlossenesLevel { get; set; }
-        public TimeSpan? GesamteZeit { get; set; }
-    }
 }

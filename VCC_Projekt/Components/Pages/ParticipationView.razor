@@ -72,18 +72,16 @@ else
                             <HeaderContent>
                                 <MudTh>Platz</MudTh>
                                 <MudTh>Team Name</MudTh>
-                                <MudTh>Letztes Abgeschlossene Level</MudTh>
-                                <MudTh>Gesamtzeit (min) [mit Strafminuten]</MudTh>
-                                <MudTh>Gebrauchte Zeit (min) [ohne Strafzeit]</MudTh>
-                                <MudTh>Strafzeit (min)</MudTh>
+                                <MudTh>Abgeschlossene Level</MudTh>
+                                <MudTh>Anzahl Level</MudTh>
+                                <MudTh>Schnellste Zeit</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd>@(Rangliste.IndexOf(context) + 1)</MudTd>  <!-- Index beibehalten -->
-                                <MudTd>@(context.gruppe.Gruppenname ?? context.gruppe.GruppenleiterId)</MudTd>
-                                <MudTd>@context.LetztesAbgeschlossenesLevel</MudTd>
-                                <MudTd>@context.GesamteZeit</MudTd>
-                                <MudTd>@context.GebrauchteZeit</MudTd>
-                                <MudTd>@context.Strafminuten</MudTd>
+                                <MudTd>@context.Rang</MudTd>
+                                <MudTd>@context.Gruppenname</MudTd>
+                                <MudTd>@context.AbgeschlosseneLevel</MudTd>
+                                <MudTd>@context.AnzahlLevel</MudTd>
+                                <MudTd>@context.SchnellsteZeit.ToString("hh\\:mm\\:ss")</MudTd>
                             </RowTemplate>
                         </MudTable>
                     </MudCardContent>
@@ -95,11 +93,11 @@ else
                 <MudCard Elevation="3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">📥 Downloads</MudText>
-                        <MudLink Href="@($"data:application/pdf;base64,{Convert.ToBase64String(CurrentLevel?.Angabe_PDF)}")" download="@($"Level {CurrentLevel.Levelnr}.pdf")">
+                        <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}")" download="@($"Level {CurrentLevel.Levelnr}.pdf")">
                             <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" /> Level Description PDF
                         </MudLink>
                         <br />
-                        <MudLink Href="@GenerateZip().Result" download="@($"level{CurrentLevel.Levelnr}.zip")" Target="_blank">
+                        <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}/input/zip")" download="@($"level{CurrentLevel.Levelnr}.zip")" Target="_blank">
                             <MudIcon Icon="@Icons.Material.Filled.FolderZip" /> Inputs (ZIP)
                         </MudLink>
 
@@ -110,12 +108,11 @@ else
                             @foreach (var aufgabe in CurrentLevel?.Aufgaben)
                             {
                                 <MudItem xs="12">
-                                    <MudCard Elevation="2">
-                                        <MudCardContent>
+                                    
                                             <MudGrid Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Wrap="NoWrap" Spacing="3">
                                                 <!-- Download Link -->
                                                 <MudItem>
-                                                    <MudLink Href="@($"data:text/plain;base64,{Convert.ToBase64String(aufgabe.Input_TXT)}")" download="@($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.in")">
+                                                    <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}/{aufgabe.AufgabenID}/input")" download="@($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt")">
                                                         <MudIcon Icon="@Icons.Material.Filled.Download" /> level@(CurrentLevel.Levelnr)_@aufgabe.Aufgabennr
                                                     </MudLink>
                                                 </MudItem>
@@ -166,8 +163,7 @@ else
                                                 </MudItem>
                                             </MudGrid>
 
-                                        </MudCardContent>
-                                    </MudCard>
+                                        
                                 </MudItem>
                             }
                         </MudGrid>
