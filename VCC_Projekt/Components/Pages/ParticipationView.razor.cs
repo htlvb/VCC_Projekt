@@ -35,7 +35,6 @@ namespace VCC_Projekt.Components.Pages
 
         protected override async void OnInitialized()
         {
-            GC.Collect();
             isLoading = true;
             try
             {
@@ -67,7 +66,6 @@ namespace VCC_Projekt.Components.Pages
                 }
                 if (now > Event.Beginn.AddMinutes(Event.Dauer))
                 {
-                    Navigation.NavigateTo(Dashboardlink + EventId);
                     throw new ArgumentException("Das Event ist bereits beendet.");
                 }
 
