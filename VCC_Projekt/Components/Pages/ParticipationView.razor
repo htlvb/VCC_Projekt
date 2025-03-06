@@ -1,9 +1,7 @@
 ﻿@page "/participation/{eventId:int}"
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
-@inject ProtectedLocalStorage ProtectedLocalStorage
 @inject IJSRuntime JS
 @attribute [Authorize(Roles = "Benutzer")]
 
@@ -13,6 +11,7 @@
     <header>
         <h1 class="text-danger">Zugriff verweigert</h1>
         <p class="text-danger">@accessDeniedMessage</p>
+        @if (accessDeniedMessage == "Das Event ist bereits beendet.") {<MudLink Href="@($"{Dashboardlink}{Event.EventID}")">Hier kommen Sie zum Dashboard des Events</MudLink> }
     </header>
 }
 else
@@ -45,7 +44,7 @@ else
                             <tr>
                                 <td>Level @level.Levelnr</td>
                                 <td>
-                                    @if (Group.Absolviert.Any(a => a.Level_LevelID == level.LevelID))
+                                    @if (Group.Absolviert.Any(a => a.Level_LevelID == level.LevelID && a.BenoetigteZeit != null))
                                     {
                                         var levelData = Group.Absolviert.First(le => le.Level_LevelID == level.LevelID);
                                         <p class="level-detail">⏱ Zeit: @levelData.BenoetigteZeit</p>
@@ -72,16 +71,16 @@ else
                             <HeaderContent>
                                 <MudTh>Platz</MudTh>
                                 <MudTh>Team Name</MudTh>
-                                <MudTh>Abgeschlossene Level</MudTh>
-                                <MudTh>Anzahl Level</MudTh>
-                                <MudTh>Schnellste Zeit</MudTh>
+                                <MudTh>Letztes Abgeschlossene Level</MudTh>
+                                <MudTh>Gebrauchte Zeit seit Event-Beginn (inkl Strafzeit)</MudTh>
+                                <MudTh>Fehlversuche gesamt</MudTh>
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd>@context.Rang</MudTd>
-                                <MudTd>@context.Gruppenname</MudTd>
-                                <MudTd>@context.AbgeschlosseneLevel</MudTd>
+                                <MudTd>@(context.Gruppenname != null ? context.Gruppenname + " (Team)" : context.GruppenleiterId + " (Einzelspieler)")</MudTd>
                                 <MudTd>@context.AnzahlLevel</MudTd>
-                                <MudTd>@context.SchnellsteZeit.ToString("hh\\:mm\\:ss")</MudTd>
+                                <MudTd>@(context.GebrauchteZeit.HasValue ? context.MaxBenötigteZeit.Value.ToString(@"hh\:mm\:ss"): "")</MudTd>
+                                <MudTd>@context.GesamtFehlversuche</MudTd>
                             </RowTemplate>
                         </MudTable>
                     </MudCardContent>

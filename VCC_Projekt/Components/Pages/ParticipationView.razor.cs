@@ -6,11 +6,16 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
 using VCC_Projekt.Data;
+using MySqlConnector;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class ParticipationView
     {
+        static string Dashboardlink = "/Dashboard/";
+
+
+
         [Parameter]
         public int EventId { get; set; }
 
@@ -28,13 +33,14 @@ namespace VCC_Projekt.Components.Pages
         private int Platzeriung;
         private List<RanglisteResult> Rangliste { get; set; } = new();
 
-        protected override async Task OnInitializedAsync()
+        protected override async void OnInitialized()
         {
+            GC.Collect();
             isLoading = true;
             try
             {
                 // Lade das Event und die Gruppe
-                Event = await dbContext.Events
+                Event = dbContext.Events
                     .Where(e => e.EventID == EventId)
                     .Select(e => new Event
                     {
@@ -49,9 +55,21 @@ namespace VCC_Projekt.Components.Pages
                             Levelnr = l.Levelnr
                         }).OrderBy(le => le.Levelnr).ToList()
                     })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefault();
 
                 if (Event == null) throw new ArgumentException("Event nicht gefunden");
+
+                // Überprüfe, ob das Event aktuell läuft
+                DateTime now = DateTime.Now;
+                if (now < Event.Beginn)
+                {
+                    throw new ArgumentException("Das Event hat noch nicht begonnen.");
+                }
+                if (now > Event.Beginn.AddMinutes(Event.Dauer))
+                {
+                    Navigation.NavigateTo(Dashboardlink + EventId);
+                    throw new ArgumentException("Das Event ist bereits beendet.");
+                }
 
                 var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
                 User = authState.User;
@@ -59,27 +77,29 @@ namespace VCC_Projekt.Components.Pages
                 if (User.Identity == null || !User.Identity.IsAuthenticated)
                     throw new ArgumentException("Benutzer nicht gefunden");
 
-                Group = await dbContext.Gruppen
+                Group = dbContext.Gruppen
                     .Where(gr => gr.Event_EventID == EventId && gr.UserInGruppe.Any(us => us.User_UserId == User.Identity.Name))
                     .Include(g => g.Absolviert)
                     .Include(n => n.UserInGruppe)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefault();
+
+               
 
                 if (Group == null) throw new ArgumentException("Gruppe nicht gefunden");
                 if (Group.Gesperrt) throw new ArgumentException("Gruppe gesperrt");
 
                 // Lade die Rangliste mit der gespeicherten Prozedur
-                Rangliste = await dbContext.GetRangliste(EventId).ToListAsync();
+                Rangliste = dbContext.Set<RanglisteResult>().FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", EventId)).ToList();
 
                 // Berechne die Platzierung der aktuellen Gruppe
                 var gruppeRang = Rangliste.FirstOrDefault(r => r.GruppenID == Group.GruppenID);
                 Platzeriung = gruppeRang?.Rang ?? 0;
 
                 // Lade das aktuelle Level
-                CurrentLevel = await dbContext.Levels
+                CurrentLevel = dbContext.Levels
                     .Where(level => level.Event_EventID == EventId)
                     .Where(level => !dbContext.GruppeAbsolviertLevels
-                        .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID))
+                        .Any(a => a.Level_LevelID == level.LevelID && a.Gruppe_GruppeID == Group.GruppenID && a.BenoetigteZeit != null))
                     .OrderBy(l => l.Levelnr)
                     .Select(l => new Level
                     {
@@ -91,11 +111,13 @@ namespace VCC_Projekt.Components.Pages
                             Aufgabennr = au.Aufgabennr
                         }).ToList()
                     })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefault();
+
 
                 if (CurrentLevel == null) throw new ArgumentException("Kein Level gefunden");
 
                 if (CurrentLevel.Aufgaben.Count == 0) AllFilesSubmitted = true;
+                Fehlversuche = Group.Absolviert.Where(ab => ab.Level_LevelID == CurrentLevel.LevelID).Select(ab => ab.Fehlversuche).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -112,44 +134,13 @@ namespace VCC_Projekt.Components.Pages
         {
             if (firstRender)
             {
-                if (accessDenied)
+                try
                 {
-                    if (Event != null)
-                    {
-                        await ProtectedLocalStorage.DeleteAsync($"Fehlversuche_{Event.EventID}"); // Löscht die Fehlversuche aus dem Local Storage für das Event
-                    }
-                    return;
+                    await JS.InvokeVoidAsync("startTimer");
+                    StateHasChanged();
                 }
-
-                await JS.InvokeVoidAsync("startTimer");
-
-                var result = await ProtectedLocalStorage.GetAsync<int>($"Fehlversuche_{Event.EventID}"); //Holt die Fehlversuche des Events aus dem Local Storage des Browsers
-                Fehlversuche = result.Success ? result.Value : 0;
-
-                StateHasChanged(); // UI-Update auslösen
+                catch (Exception ex) { }
             }
-        }
-
-
-        private async Task<string> GenerateZip()
-        {
-            using var memoryStream = new MemoryStream();
-            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
-            {
-                foreach (var aufgabe in CurrentLevel?.Aufgaben ?? new List<Aufgabe>())
-                {
-                    if (aufgabe.Input_TXT != null && aufgabe.Input_TXT.Length > 0)
-                    {
-                        var entry = archive.CreateEntry($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.in", CompressionLevel.Fastest);
-                        using var entryStream = entry.Open();
-                        await entryStream.WriteAsync(aufgabe.Input_TXT, 0, aufgabe.Input_TXT.Length);
-                    }
-                }
-            }
-
-            // ZIP in Base64 konvertieren
-            var zipBytes = memoryStream.ToArray();
-            return $"data:application/zip;base64,{Convert.ToBase64String(zipBytes)}";
         }
 
         private async Task UploadFile(IBrowserFile file, int aufgabenId)
@@ -166,19 +157,52 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task SubmitFile(Aufgabe aufgabe)
         {
+            if (Event.Beginn.AddMinutes(Event.Dauer) > DateTime.Now) Navigation.Refresh();
             if (UploadedFiles.TryGetValue(aufgabe.AufgabenID, out var uploadedFile))
             {
+                var ergebnisTxt = await dbContext.Aufgabe
+                                                .Where(au => au.AufgabenID == aufgabe.AufgabenID)
+                                                .Select(au => au.Ergebnis_TXT)
+                                                .FirstOrDefaultAsync();
+                if (ergebnisTxt == null) return;
+
                 string uploadedContent = System.Text.Encoding.UTF8.GetString(uploadedFile.FileData).Trim();
-                string correctContent = System.Text.Encoding.UTF8.GetString(aufgabe.Ergebnis_TXT).Trim();
+                string correctContent = System.Text.Encoding.UTF8.GetString(ergebnisTxt).Trim();
 
                 bool isCorrect = uploadedContent == correctContent;
                 if (!isCorrect && uploadedFile.FileIsRight == null)
                 {
-                    Fehlversuche++;
+                    TimeSpan benoetigteZeit = DateTime.Now - Event.Beginn;
+                    if (benoetigteZeit > TimeSpan.FromMinutes(Event.Dauer))
+                    {
+                        Navigation.NavigateTo(Dashboardlink + EventId);
+                        return;
+                    }
+                    var absolviertLevel = await dbContext.GruppeAbsolviertLevels
+                                                        .FirstOrDefaultAsync(a => a.Gruppe_GruppeID == Group.GruppenID && a.Level_LevelID == CurrentLevel.LevelID);
+                    if(absolviertLevel != null)
+                    {
+                        absolviertLevel.Fehlversuche++;
+                        Fehlversuche = absolviertLevel.Fehlversuche;
+                        StateHasChanged();
+                    }
+                    else
+                    {
+                        var newAbsolviertLevel = new GruppeAbsolviertLevel
+                        {
+                            Gruppe_GruppeID = Group.GruppenID,
+                            Level_LevelID = CurrentLevel.LevelID,
+                            Fehlversuche = 1,
+                            BenoetigteZeit = null
+                        };
+                        dbContext.GruppeAbsolviertLevels.Add(newAbsolviertLevel);
+                    }
+                    dbContext.SaveChanges();
                 }
-                await ProtectedLocalStorage.SetAsync($"Fehlversuche_{Event.EventID}", Fehlversuche);
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
+
+
 
             // Prüfen, ob alle Aufgaben eine richtige Datei haben
             if (CurrentLevel?.Aufgaben.Count == 0)
@@ -192,20 +216,31 @@ namespace VCC_Projekt.Components.Pages
         }
         private async Task ProceedToNextLevel()
         {
-            var absolviert = new GruppeAbsolviertLevel
+            TimeSpan benoetigteZeit = DateTime.Now - Event.Beginn;
+            if(benoetigteZeit > TimeSpan.FromMinutes(Event.Dauer))
             {
-                Gruppe_GruppeID = Group.GruppenID,
-                Level_LevelID = CurrentLevel.LevelID,
-                Fehlversuche = Fehlversuche
-            };
+                OnInitialized();
+                return;
+            }
+            var absolviert = await dbContext.GruppeAbsolviertLevels
+                                            .FirstOrDefaultAsync(g => g.Gruppe_GruppeID == Group.GruppenID
+                                                                && g.Level_LevelID == CurrentLevel.LevelID);
+            if (absolviert == null)
+            {
+                // Neuen Datensatz erstellen
+                absolviert = new GruppeAbsolviertLevel
+                {
+                    Gruppe_GruppeID = Group.GruppenID,
+                    Level_LevelID = CurrentLevel.LevelID,
+                    Fehlversuche = Fehlversuche,
+                };
 
-            dbContext.GruppeAbsolviertLevels.Add(absolviert);
+                dbContext.GruppeAbsolviertLevels.Add(absolviert);
+            }
+            absolviert.BenoetigteZeit = benoetigteZeit;
+
             await dbContext.SaveChangesAsync();
-            Fehlversuche = 0;
-
-            await ProtectedLocalStorage.DeleteAsync($"Fehlversuche_{Event.EventID}"); //Löscht den Localen Storage des Browsers für das Event
-
-            Navigation.NavigateTo($"/participation/{EventId}");
+            OnInitialized();
         }
     }
     public record UploadedFile(string FileName, byte[] FileData, bool? FileIsRight = null);
