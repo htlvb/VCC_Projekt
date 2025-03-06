@@ -1,20 +1,14 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Claims;
-using VCC_Projekt.Data;
 using MySqlConnector;
+using System.Security.Claims;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class ParticipationView
     {
         static string Dashboardlink = "/Dashboard/";
-
-
 
         [Parameter]
         public int EventId { get; set; }
@@ -81,7 +75,7 @@ namespace VCC_Projekt.Components.Pages
                     .Include(n => n.UserInGruppe)
                     .FirstOrDefault();
 
-               
+
 
                 if (Group == null) throw new ArgumentException("Gruppe nicht gefunden");
                 if (Group.Gesperrt) throw new ArgumentException("Gruppe gesperrt");
@@ -134,11 +128,16 @@ namespace VCC_Projekt.Components.Pages
             {
                 try
                 {
-                    await JS.InvokeVoidAsync("startTimer");
-                    StateHasChanged();
+                    await JS.InvokeVoidAsync("startTimer", Event.Dauer);
                 }
-                catch (Exception ex) { }
+                catch (Exception) { }
             }
+        }
+
+        public async Task OnTimerFinished()
+        {
+            OnInitialized();
+            return;
         }
 
         private async Task UploadFile(IBrowserFile file, int aufgabenId)
@@ -155,7 +154,11 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task SubmitFile(Aufgabe aufgabe)
         {
-            if (Event.Beginn.AddMinutes(Event.Dauer) > DateTime.Now) Navigation.Refresh();
+            if (Event.Beginn.AddMinutes(Event.Dauer) < DateTime.Now)
+            {
+                OnInitialized();
+                return;
+            }
             if (UploadedFiles.TryGetValue(aufgabe.AufgabenID, out var uploadedFile))
             {
                 var ergebnisTxt = await dbContext.Aufgabe
@@ -178,7 +181,7 @@ namespace VCC_Projekt.Components.Pages
                     }
                     var absolviertLevel = await dbContext.GruppeAbsolviertLevels
                                                         .FirstOrDefaultAsync(a => a.Gruppe_GruppeID == Group.GruppenID && a.Level_LevelID == CurrentLevel.LevelID);
-                    if(absolviertLevel != null)
+                    if (absolviertLevel != null)
                     {
                         absolviertLevel.Fehlversuche++;
                         Fehlversuche = absolviertLevel.Fehlversuche;
@@ -194,6 +197,7 @@ namespace VCC_Projekt.Components.Pages
                             BenoetigteZeit = null
                         };
                         dbContext.GruppeAbsolviertLevels.Add(newAbsolviertLevel);
+                        Fehlversuche = 1;
                     }
                     dbContext.SaveChanges();
                 }
@@ -215,7 +219,7 @@ namespace VCC_Projekt.Components.Pages
         private async Task ProceedToNextLevel()
         {
             TimeSpan benoetigteZeit = DateTime.Now - Event.Beginn;
-            if(benoetigteZeit > TimeSpan.FromMinutes(Event.Dauer))
+            if (benoetigteZeit > TimeSpan.FromMinutes(Event.Dauer))
             {
                 OnInitialized();
                 return;
@@ -230,7 +234,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     Gruppe_GruppeID = Group.GruppenID,
                     Level_LevelID = CurrentLevel.LevelID,
-                    Fehlversuche = Fehlversuche,
+                    Fehlversuche = Fehlversuche
                 };
 
                 dbContext.GruppeAbsolviertLevels.Add(absolviert);
@@ -239,6 +243,7 @@ namespace VCC_Projekt.Components.Pages
 
             await dbContext.SaveChangesAsync();
             OnInitialized();
+            AllFilesSubmitted = false;
         }
     }
     public record UploadedFile(string FileName, byte[] FileData, bool? FileIsRight = null);
