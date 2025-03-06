@@ -6,6 +6,8 @@ using System.Text.Encodings.Web;
 using System.Text;
 using System.Text.RegularExpressions;
 using VCC_Projekt.Data;
+using VCC_Projekt.Components.Account.Pages.Manage;
+using MudBlazor;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -14,6 +16,7 @@ namespace VCC_Projekt.Components.Pages
         private List<Event> events;
         private List<Event> filteredEvents = new List<Event>();
         private List<Gruppe> userGroups = new List<Gruppe>();
+        private static List<string> invitedUsers = new List<string>();
         private static string userId;
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
@@ -172,7 +175,10 @@ namespace VCC_Projekt.Components.Pages
 
                 await EmailSender.SendInvitationLinkAsync(userId, groupManagerEmail, newMemberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
 
-                NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");
+                invitedUsers.Add(newMemberEmail);
+
+                isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
+                newMember.Email = string.Empty; // Eingabefeld zurücksetzen
             }
 
             catch (Exception ex)
@@ -180,8 +186,6 @@ namespace VCC_Projekt.Components.Pages
                 Console.WriteLine($"Error in Registration: {ex.Message}");
             }
 
-            isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
-            newMemberEmail = string.Empty; // Eingabefeld zurücksetzen
         }
 
         private void ShowAddMemberInput()
@@ -210,6 +214,39 @@ namespace VCC_Projekt.Components.Pages
                 {
                     var username = dbContext.Users.Where(u => u.NormalizedEmail == Email.Normalize()).Select(u => u.NormalizedUserName).FirstOrDefault();
 
+                    if (Email == dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).First())
+                    {
+                        errors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Email) }));
+                    }
+
+                    else if (!Regex.IsMatch(Email, @"(?i)^.+@htlvb\.at$"))
+                    {
+                        errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Email) }));
+                    }
+
+                    // Eingeladene Mitglieder
+                    foreach(string member in invitedUsers)
+                    {
+                        if(member.ToLower() == Email.ToLower())
+                        {
+                            errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
+                            return errors;
+                        }
+                    }
+
+                    // Mitglieder in der Datenbank
+                    var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == eventId && g.GruppenleiterId == userId).Select(g => g.GruppenID).FirstOrDefault();
+                    var users = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
+
+                    foreach(var user in users)
+                    {
+                        if(user.ToLower() == Email.ToLower())
+                        {
+                            errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
+                            return errors;
+                        }
+                    }
+
                     if (username != null)
                     {
                         var groupIds = dbContext.UserInGruppe
@@ -228,26 +265,6 @@ namespace VCC_Projekt.Components.Pages
                             }
                         }
                     }
-
-                    //if (Email == dbContext.Users.Where(u => u.UserName == userId).Select(u => u.Email).First())
-                    //{
-                    //    errors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(newMemberEmail) }));
-                    //}
-
-                    //else if (!Regex.IsMatch(Email, @"(?i)^.+@htlvb\.at$"))
-                    //{
-                    //    errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(newMemberEmail) }));
-                    //}
-
-                    //else if (Input.TeamMembers.Contains(Email))
-                    //{
-                    //    errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(newMemberEmail) }));
-                    //}
-
-                    //else if (Input.TeamMembers.Count >= 4)
-                    //{
-                    //    errors.Add(new ValidationResult("Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.", new[] { nameof(newMemberEmail) }));
-                    //}
                 }
 
                 return errors;
