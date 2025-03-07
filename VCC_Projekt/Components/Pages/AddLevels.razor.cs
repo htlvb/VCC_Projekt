@@ -7,278 +7,318 @@ namespace VCC_Projekt.Components.Pages
     {
         private List<LevelViewModel> _levels = new();
         private List<Event> _events = new();
-        private int _selectedEventId;
-        private Event _selectedEvent;
-        private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEventId)?.Beginn < DateTime.Now;
+        private Event _selectedEvent = new() { EventID = 0 };
+        private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEvent.EventID)?.Beginn < DateTime.Now;
 
-        protected override async Task OnInitializedAsync()
+        protected override void OnInitialized()
         {
-            _events = await dbContext.Events.OrderByDescending(ev => ev.Beginn).ToListAsync();
+            _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
         }
 
-        private async Task OnEventSelected(Event eventId)
+        private async Task OnEventSelected(Event selectedEvent)
         {
-            _selectedEventId = eventId.EventID;
-            _selectedEvent =  eventId;
+            _selectedEvent = selectedEvent;
+            _levels = _selectedEvent.EventID != 0
+                ? await LoadLevelsAsync()
+                : new List<LevelViewModel>();
+        }
 
-            if (_selectedEventId != 0)
-            {
-                var levels = await dbContext.Levels
-                                            .Where(l => l.Event_EventID == _selectedEventId)
-                                            .Include(l => l.Aufgaben)
-                                            .ToListAsync();
-
-                _levels = levels.Select(level => new LevelViewModel
+        private async Task<List<LevelViewModel>> LoadLevelsAsync() =>
+            await dbContext.Levels
+                .Where(le => le.Event_EventID == _selectedEvent.EventID)
+                .Select(level => new LevelViewModel
                 {
+                    LevelId = level.LevelID,
                     Levelnr = level.Levelnr,
-                    Event_EventID = level.Event_EventID,
-                    Angabe_PDF = level.Angabe_PDF,
                     Aufgaben = level.Aufgaben.Select(aufgabe => new AufgabeViewModel
                     {
+                        AufgabenId = aufgabe.AufgabenID,
                         Aufgabennr = aufgabe.Aufgabennr,
-                        Input_TXT = aufgabe.Input_TXT,
-                        Ergebnis_TXT = aufgabe.Ergebnis_TXT,
                         IsExpanded = false
                     }).ToList(),
                     IsExpanded = false
-                }).ToList();
-            }
-            else
-            {
-                _levels.Clear();
-            }
-        }
+                })
+                .ToListAsync();
 
         private void AddLevel()
         {
-            if (_levels.Count < 5 && _selectedEventId != 0 && !IsEventInPast)
+            if (CanAddLevel())
             {
-                _levels.Add(new LevelViewModel { Levelnr = _levels.Count + 1, Event_EventID = _selectedEventId, Aufgaben = new List<AufgabeViewModel>(), IsExpanded = false });
+                _levels.Add(new LevelViewModel
+                {
+                    Levelnr = _levels.Count + 1,
+                    Aufgaben = new List<AufgabeViewModel>(),
+                    IsExpanded = false
+                });
             }
         }
 
-        private void RemoveLevel(int index)
+        private bool CanAddLevel() => _levels.Count < 5 && _selectedEvent.EventID != 0 && !IsEventInPast;
+
+        private void RemoveLevel(int levelnr)
         {
-            if (index >= 0 && index < _levels.Count && !IsEventInPast)
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            if (level != null && CanRemoveLevel(levelnr))
             {
-                _levels.RemoveAt(index);
+                _levels.Remove(level);
+                if (!level.IsNew)
+                {
+                    dbContext.Levels.Remove(dbContext.Levels.Find(level.LevelId));
+                }
                 ReorderLevels();
             }
         }
 
-        private void AddTask(int levelIndex)
+        private bool CanRemoveLevel(int levelnr)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
-            {
-                _levels[levelIndex].Aufgaben.Add(new AufgabeViewModel { Aufgabennr = _levels[levelIndex].Aufgaben.Count + 1, IsExpanded = false });
-            }
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            return level != null && !IsEventInPast;
         }
 
-        private void RemoveTask(int levelIndex, int taskIndex)
+        private void AddTask(int levelnr)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count &&
-                taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count && !IsEventInPast)
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            if (level != null && CanModifyTask(level.Levelnr))
             {
-                _levels[levelIndex].Aufgaben.RemoveAt(taskIndex);
-            }
-        }
-
-        private void ToggleLevel(int index)
-        {
-            if (index >= 0 && index < _levels.Count)
-            {
-                _levels[index].IsExpanded = !_levels[index].IsExpanded;
-            }
-        }
-
-        private void ToggleTask(int levelIndex, int taskIndex)
-        {
-            if (levelIndex >= 0 && levelIndex < _levels.Count && taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count)
-            {
-                _levels[levelIndex].Aufgaben[taskIndex].IsExpanded = !_levels[levelIndex].Aufgaben[taskIndex].IsExpanded;
-            }
-        }
-
-        private async Task UploadFile(IBrowserFile file, int levelIndex)
-        {
-            if (levelIndex >= 0 && levelIndex < _levels.Count && !IsEventInPast)
-            {
-                
-                if (file != null)
+                level.Aufgaben.Add(new AufgabeViewModel
                 {
-                    if(file.Size > 4 * 1024 * 1024)
+                    Aufgabennr = level.Aufgaben.Count + 1,
+                    IsExpanded = false
+                });
+            }
+        }
+
+        private void RemoveTask(int levelnr, int aufgabennr)
+        {
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            if (level != null && CanModifyTask(level.Levelnr))
+            {
+                var task = level.Aufgaben.FirstOrDefault(a => a.Aufgabennr == aufgabennr);
+                if (task != null)
+                {
+                    level.Aufgaben.Remove(task);
+                    if (!task.IsNew)
                     {
-                        Snackbar.Add("Die PDF-Datei darf nicht größer als 4MB sein!", Severity.Error, config =>
-                        {
-                            config.Icon = Icons.Material.Filled.Error;
-                        });
-                        return;
+                        dbContext.Aufgabe
+                            .Where(a => a.AufgabenID == task.AufgabenId)
+                            .ExecuteDelete();
                     }
-                    if (file.ContentType != "application/pdf")
-                    {
-                        Snackbar.Add("Die Datei muss ein PDF sein!", Severity.Error, config =>
-                        {
-                            config.Icon = Icons.Material.Filled.Error;
-                        });
-                        return;
-                    }
-                    _levels[levelIndex].Angabe_PDF = await ConvertToBytesAsync(file);
-                    Snackbar.Add("PDF erfolgreich hochgeladen!", Severity.Success, config =>
-                    {
-                        config.Icon = Icons.Material.Filled.CheckCircle;
-                    });
-                    return;
                 }
             }
         }
 
-        
-
-        private async Task UploadTaskFile(IBrowserFile file, int levelIndex, int taskIndex, string type)
+        private bool CanModifyTask(int levelnr)
         {
-            if (levelIndex >= 0 && levelIndex < _levels.Count && taskIndex >= 0 && taskIndex < _levels[levelIndex].Aufgaben.Count && !IsEventInPast)
-            {
-                if (file != null)
-                {
-                    if (file.Size > 4 * 1024 * 1024)
-                    {
-                        Snackbar.Add("Die TXT-Datei darf nicht größer als 4MB sein!", Severity.Error, config =>
-                        {
-                            config.Icon = Icons.Material.Filled.Error;
-                        });
-                        return;
-                    }
-                    if (file.ContentType != "text/plain")
-                    {
-                        Snackbar.Add("Die Datei muss eine Textdatei sein!", Severity.Error, config =>
-                        {
-                            config.Icon = Icons.Material.Filled.Error;
-                        });
-                        return;
-                    }
-
-                    if (type == "input")
-                        _levels[levelIndex].Aufgaben[taskIndex].Input_TXT = await ConvertToBytesAsync(file);
-                    else if (type == "output")
-                        _levels[levelIndex].Aufgaben[taskIndex].Ergebnis_TXT = await ConvertToBytesAsync(file);
-                }
-            }
-            Snackbar.Add("Text Datei erfolgreich hochgeladen!", Severity.Success, config =>
-            {
-                config.Icon = Icons.Material.Filled.CheckCircle;
-            });
-            StateHasChanged();
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            return level != null && !IsEventInPast;
         }
 
-        private async Task<byte[]> ConvertToBytesAsync(IBrowserFile file)
+        private void ToggleLevel(int levelnr)
         {
-            const long maxFileSize = 5 * 1024 * 1024;
-            using var memoryStream = new MemoryStream();
-            await file.OpenReadStream(maxAllowedSize: maxFileSize).CopyToAsync(memoryStream);
-            return memoryStream.ToArray();
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            if (level != null) level.IsExpanded = !level.IsExpanded;
+        }
+
+        private void ToggleTask(int levelnr, int aufgabennr)
+        {
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            var task = level?.Aufgaben.FirstOrDefault(a => a.Aufgabennr == aufgabennr);
+            if (task != null) task.IsExpanded = !task.IsExpanded;
+        }
+
+        private async Task UploadFile(IBrowserFile file, int levelnr)
+        {
+            if (CanUploadFile(file, levelnr))
+            {
+                var level = _levels.First(l => l.Levelnr == levelnr);
+                var fileBytes = await ConvertToBytesAsync(file);
+
+                level.NewAngabe_PDF = fileBytes;
+                level.AngabeUpdated = true;
+
+                ShowSnackbar("PDF erfolgreich hochgeladen!", Severity.Success);
+            }
+        }
+
+        private async Task UploadTaskFile(IBrowserFile file, int levelnr, int aufgabennr, string type)
+        {
+            if (CanUploadTaskFile(file, levelnr, aufgabennr))
+            {
+                var level = _levels.First(l => l.Levelnr == levelnr);
+                var task = level.Aufgaben.First(a => a.Aufgabennr == aufgabennr);
+                var fileBytes = await ConvertToBytesAsync(file);
+
+                if (type == "input")
+                {
+                    task.NewInput_TXT = fileBytes;
+                    task.InputUpdated = true;
+                }
+                else
+                {
+                    task.NewErgebnis_TXT = fileBytes;
+                    task.ErgebnisUpdated = true;
+                }
+
+                ShowSnackbar("Datei erfolgreich hochgeladen!", Severity.Success);
+            }
+        }
+
+        private bool CanUploadFile(IBrowserFile file, int levelnr)
+        {
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            return level != null
+                && !IsEventInPast
+                && file != null
+                && file.ContentType == "application/pdf"
+                && file.Size <= 4 * 1024 * 1024;
+        }
+
+        private bool CanUploadTaskFile(IBrowserFile file, int levelnr, int aufgabennr)
+        {
+            var level = _levels.FirstOrDefault(l => l.Levelnr == levelnr);
+            var task = level?.Aufgaben.FirstOrDefault(a => a.Aufgabennr == aufgabennr);
+            return task != null
+                && !IsEventInPast
+                && file != null
+                && file.ContentType == "text/plain"
+                && file.Size <= 4 * 1024 * 1024;
         }
 
         private async Task SaveLevels()
         {
-            if (_selectedEventId == 0 || IsEventInPast)
-                return;
-
             try
             {
-                // Retrieve existing levels from the database
-                var existingLevels = await dbContext.Levels
-                                                    .Where(l => l.Event_EventID == _selectedEventId)
-                                                    .ToListAsync();
-
-                // Update existing levels and add new levels
-                foreach (var level in _levels)
-                {
-                    if (level.Angabe_PDF == null)
-                    {
-                        throw new ArgumentException($"Es muss eine PDF bei Level {level.Levelnr} hochgeladen werden!");
-                    }
-
-                    foreach (var aufgabe in level.Aufgaben)
-                    {
-                        if (aufgabe.Input_TXT == null || aufgabe.Ergebnis_TXT == null)
-                        {
-                            throw new ArgumentException($"Die Aufgabe {aufgabe.Aufgabennr} im Level {level.Levelnr} muss sowohl eine Input.txt als auch eine Output.txt Datei haben!");
-                        }
-                    }
-
-                    var existingLevel = existingLevels.FirstOrDefault(l => l.Levelnr == level.Levelnr);
-                    if (existingLevel != null)
-                    {
-                        existingLevel.Angabe_PDF = level.Angabe_PDF;
-                        existingLevel.Aufgaben = level.Aufgaben.Select(aufgabe => new Aufgabe
-                        {
-                            Aufgabennr = aufgabe.Aufgabennr,
-                            Input_TXT = aufgabe.Input_TXT,
-                            Ergebnis_TXT = aufgabe.Ergebnis_TXT
-                        }).ToList();
-                    }
-                    else
-                    {
-                        dbContext.Levels.Add(new Level
-                        {
-                            Levelnr = level.Levelnr,
-                            Event_EventID = level.Event_EventID,
-                            Angabe_PDF = level.Angabe_PDF,
-                            Aufgaben = level.Aufgaben.Select(aufgabe => new Aufgabe
-                            {
-                                Aufgabennr = aufgabe.Aufgabennr,
-                                Input_TXT = aufgabe.Input_TXT,
-                                Ergebnis_TXT = aufgabe.Ergebnis_TXT
-                            }).ToList()
-                        });
-                    }
-                }
-
-                // Remove levels that are no longer present
-                var levelsToRemove = existingLevels.Where(existingLevel => !_levels.Any(level => level.Levelnr == existingLevel.Levelnr)).ToList();
-                dbContext.Levels.RemoveRange(levelsToRemove);
-
+                _levels.ForEach(l => { l.IsExpanded = false; l.Aufgaben.ForEach(a => a.IsExpanded = false); });
+                ValidateBeforeSave();
+                ShowSnackbar("Levels werden gespeichert...", Severity.Info);
+                await ProcessDatabaseOperations();
                 await dbContext.SaveChangesAsync();
-                Snackbar.Add("Levels erfolgreich gespeichert!", Severity.Success, config =>
-                {
-                    config.Icon = Icons.Material.Filled.CheckCircle;
-                });
+
+                _levels = await LoadLevelsAsync();
+                Snackbar.Remove(Snackbar.ShownSnackbars.Where(sn => sn.Message == "Levels werden gespeichert...").FirstOrDefault());
+                ShowSnackbar("Levels erfolgreich gespeichert!", Severity.Success);
             }
             catch (Exception ex)
             {
-                string result = ex.InnerException == null ? ex.Message : ex.InnerException.ToString();
-                Snackbar.Add($"Fehler beim Speichern der Levels: {ex.InnerException?.ToString() ?? ex.Message}", Severity.Error, config =>
+                if (ex.Source == "Microsoft.EntityFrameworkCore.Relational" || ex.Message.StartsWith("A second operation")) ShowSnackbar($"Fehler beim Speichern des Levels! (Bitte versuchen Sie es erneut)", Severity.Error);
+                else ShowSnackbar($"Fehler: {ex.Message}", Severity.Error);
+            }
+        }
+
+        private void ValidateBeforeSave()
+        {
+            foreach (var level in _levels)
+            {
+                if ((level.AngabeUpdated || level.IsNew) && level.NewAngabe_PDF == null)
+                    throw new Exception($"Level {level.Levelnr}: PDF fehlt!");
+
+                foreach (var task in level.Aufgaben)
                 {
-                    config.Icon = Icons.Material.Filled.Error;
-                });
+                    if (task.IsNew && (task.NewInput_TXT == null || task.NewErgebnis_TXT == null))
+                        throw new Exception($"Level {level.Levelnr}/Aufgabe {task.Aufgabennr}: Dateien fehlen!");
+                }
+            }
+        }
+
+        private async Task ProcessDatabaseOperations()
+        {
+            foreach (var level in _levels)
+            {
+                if (level.IsNew)
+                {
+                    await AddNewLevelToDb(level);
+                }
+                else
+                {
+                    await UpdateExistingLevel(level);
+                }
+            }
+        }
+
+        private async Task AddNewLevelToDb(LevelViewModel level)
+        {
+            var newLevel = new Level
+            {
+                Levelnr = level.Levelnr,
+                Event_EventID = _selectedEvent.EventID,
+                Angabe_PDF = level.NewAngabe_PDF,
+                Aufgaben = level.Aufgaben.Select(a => new Aufgabe
+                {
+                    Aufgabennr = a.Aufgabennr,
+                    Input_TXT = a.NewInput_TXT,
+                    Ergebnis_TXT = a.NewErgebnis_TXT
+                }).ToList()
+            };
+            dbContext.Levels.Add(newLevel);
+        }
+
+        private async Task UpdateExistingLevel(LevelViewModel level)
+        {
+            var dbLevel = await dbContext.Levels
+                .Include(l => l.Aufgaben)
+                .FirstAsync(l => l.LevelID == level.LevelId);
+
+            if (level.AngabeUpdated)
+                dbLevel.Angabe_PDF = level.NewAngabe_PDF;
+
+            foreach (var task in level.Aufgaben)
+            {
+                if (task.IsNew)
+                {
+                    dbLevel.Aufgaben.Add(new Aufgabe
+                    {
+                        Aufgabennr = task.Aufgabennr,
+                        Input_TXT = task.NewInput_TXT,
+                        Ergebnis_TXT = task.NewErgebnis_TXT
+                    });
+                }
+                else
+                {
+                    var dbTask = dbLevel.Aufgaben.First(a => a.AufgabenID == task.AufgabenId);
+                    if (task.InputUpdated) dbTask.Input_TXT = task.NewInput_TXT;
+                    if (task.ErgebnisUpdated) dbTask.Ergebnis_TXT = task.NewErgebnis_TXT;
+                }
             }
         }
 
         private void ReorderLevels()
         {
-            for (int i = 0; i < _levels.Count; i++)
-            {
+            for (var i = 0; i < _levels.Count; i++)
                 _levels[i].Levelnr = i + 1;
-            }
         }
+
+        private async Task<byte[]> ConvertToBytesAsync(IBrowserFile file)
+        {
+            await using var stream = file.OpenReadStream(5 * 1024 * 1024);
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+
+        private void ShowSnackbar(string message, Severity severity)
+            => Snackbar.Add(message, severity);
     }
 
     public class LevelViewModel
     {
+        public int LevelId { get; set; }
         public int Levelnr { get; set; }
-        public int Event_EventID { get; set; }
-        public byte[] Angabe_PDF { get; set; }
-        public List<AufgabeViewModel> Aufgaben { get; set; }
         public bool IsExpanded { get; set; }
+        public List<AufgabeViewModel> Aufgaben { get; set; } = new();
+        public byte[]? NewAngabe_PDF { get; set; }
+        public bool AngabeUpdated { get; set; }
+        public bool IsNew => LevelId == 0;
     }
 
     public class AufgabeViewModel
     {
+        public int AufgabenId { get; set; }
         public int Aufgabennr { get; set; }
-        public byte[] Input_TXT { get; set; }
-        public byte[] Ergebnis_TXT { get; set; }
         public bool IsExpanded { get; set; }
+        public byte[]? NewInput_TXT { get; set; }
+        public byte[]? NewErgebnis_TXT { get; set; }
+        public bool InputUpdated { get; set; }
+        public bool ErgebnisUpdated { get; set; }
+        public bool IsNew => AufgabenId == 0;
     }
-
-
 }
