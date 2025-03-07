@@ -11,9 +11,12 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using MySqlConnector
 @using VCC_Projekt.Data
 @using Microsoft.AspNetCore.Components.Forms;
 @using System;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
 
 <PageTitle>Meine Events</PageTitle>
 
@@ -141,6 +144,11 @@ else
                             {
                                 <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
                             }
+                        }
+
+                        else
+                        {
+                            <p><strong>Rang: </strong>@(dbContext.Set<RanglisteResult>().FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", eventItem.EventID)).ToList().Where(g => g.Gruppenname == userGroup.Gruppenname).Select(g => g.Rang).FirstOrDefault())</p>
                         }
                     </div>
                 </div>

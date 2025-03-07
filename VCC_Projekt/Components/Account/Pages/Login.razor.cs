@@ -59,8 +59,11 @@ namespace VCC_Projekt.Components.Account.Pages
                     if(groupId != 0)
                     {
                         UserInGruppe gruppe = new UserInGruppe(userName, groupId);
-
                         dbContext.UserInGruppe.Add(gruppe);
+                        dbContext.SaveChanges();
+
+                        EingeladeneUserInGruppe invitedMember = new EingeladeneUserInGruppe(user.Email, groupId);
+                        dbContext.EingeladeneUserInGruppe.Remove(invitedMember);
                         dbContext.SaveChanges();
 
                         var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
@@ -87,8 +90,6 @@ namespace VCC_Projekt.Components.Account.Pages
                     errorMessage = "Error: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
                     break;
             }
-
-
         }
 
         private sealed class InputModel

@@ -45,6 +45,8 @@ public class Gruppe
     public List<GruppeAbsolviertLevel>? Absolviert { get; set; }
 
     public List<UserInGruppe>? UserInGruppe { get; set; }
+
+    public List<EingeladeneUserInGruppe> EingeladeneUserInGruppe { get; set; }
 }
 
 public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>

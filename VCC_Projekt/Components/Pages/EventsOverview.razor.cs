@@ -20,6 +20,7 @@ namespace VCC_Projekt.Components.Pages
         private static string usernameLoggedInUser;
 
         private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
+        private List<RanglisteResult> Ranglist { get; set; }
 
         private bool isPastEventsActive = false;
         private bool isUpcomingEventsActive = false;
@@ -176,6 +177,10 @@ namespace VCC_Projekt.Components.Pages
 
                 await EmailSender.SendInvitationLinkAsync(usernameLoggedInUser, groupManagerEmail, newMemberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
 
+                EingeladeneUserInGruppe invitedMember = new EingeladeneUserInGruppe(newMemberEmail, groupId);
+                dbContext.EingeladeneUserInGruppe.Add(invitedMember);
+                dbContext.SaveChanges();
+
                 invitedUsers.Add(newMemberEmail);
 
                 isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
@@ -248,6 +253,7 @@ namespace VCC_Projekt.Components.Pages
                         }
                     }
 
+                    // Prüfen, ob die Person bereits am Event teilnimmt
                     if (usernameNewMember != null)
                     {
                         var groupIds = dbContext.UserInGruppe
