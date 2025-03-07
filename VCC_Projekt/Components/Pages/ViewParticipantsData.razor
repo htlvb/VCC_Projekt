@@ -4,6 +4,7 @@
 
 <MudContainer MaxWidth="MaxWidth.False">
     <MudGrid>
+        <!-- Dropdown for Event Selection -->
         <MudItem xs="12">
             <MudCard>
                 <MudCardContent>
@@ -17,5 +18,91 @@
                 </MudCardContent>
             </MudCard>
         </MudItem>
+
+        <!-- Space between Dropdown and DataGrid -->
+        <MudItem xs="12" Class="mt-4">
+            <!-- Empty space -->
+        </MudItem>
+
+        <!-- DataGrid for Participants -->
+        <MudItem xs="12">k
+            <div class="datagrid @(_selectedEvent.EventID == 0 ? "disabled" : "")">
+                <MudDataGrid T="Participant" Items="@_participants.Where(_quickFilter)" ColumnResizeMode="ResizeMode.Column"
+                             SortMode="SortMode.Multiple" Filterable="true" ReadOnly="true" QuickFilter="@_quickFilter">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Teilnehmer und Gruppen</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="_searchString"
+                                      Placeholder="Search"
+                                      Adornment="Adornment.Start"
+                                      Immediate="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      IconSize="Size.Medium"
+                                      Class="mt-0" />
+                    </ToolBarContent>
+
+                    <Columns>
+                        <HierarchyColumn T="Participant" ButtonDisabledFunc="@(x => x.Type != "Team")"/>
+                        <PropertyColumn Property="p => p.Name" Title="Name" />
+                        <PropertyColumn Property="p => p.Type" Title="Typ" />
+                        <PropertyColumn Property="p => string.Join(',', p.Members)" Title="Mitglieder"/>
+                    </Columns>
+
+                    @* <ChildRowContent>
+                        <MudDataGrid T="Participant" Items="@context.Item.Members" ColumnResizeMode="ResizeMode.Column"
+                                     SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                                     CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
+                            <Columns>
+                                <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
+                                <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false">
+                                </PropertyColumn>
+                                <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
+                                <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" Context="child_context">
+                                    <EditTemplate Context="child_context">
+                                        <MudSelect T="string" SelectedValues="child_context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(child_context.Item, newRoles))" MultiSelection="@(child_context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
+                                            @foreach (var role in roles)
+                                            {
+                                                <MudSelectItem T="string" Value="@role" Disabled="@(child_context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </EditTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn CellClass="d-flex justify-end" Context="child_context">
+                                    <CellTemplate Context="child_context">
+                                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@child_context.Actions.StartEditingItemAsync" />
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </ChildRowContent> *@
+
+                </MudDataGrid>
+            </div>
+        </MudItem>
     </MudGrid>
 </MudContainer>
+
+<style>
+    .datagrid {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        opacity: 1;
+        transform: scaleY(1);
+        transform-origin: top;
+    }
+
+        .datagrid.disabled {
+            opacity: 0.5;
+            pointer-events: none;
+            transform: scaleY(0.9);
+        }
+
+        /* Ensure the DataGrid has the same width as the dropdown */
+        .datagrid .mud-data-grid {
+            width: 100%;
+        }
+
+    /* Add space between the dropdown and the DataGrid */
+    .mt-4 {
+        margin-top: 1.5rem; /* Adjust this value as needed */
+    }
+</style>
