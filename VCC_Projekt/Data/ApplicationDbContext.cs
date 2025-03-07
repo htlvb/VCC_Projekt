@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Identity.Client;
+using MySqlConnector;
 
 namespace VCC_Projekt.Data
 {
@@ -34,6 +36,9 @@ namespace VCC_Projekt.Data
         public DbSet<LogKat> LogKats { get; set; }
         
         public DbSet<EventLog> EventLogs { get; set; }
+
+        public DbSet<RanglisteResult> Rangliste { get; set; }
+
     }
 
 
