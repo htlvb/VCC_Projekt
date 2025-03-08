@@ -1,0 +1,65 @@
+name: Code Check
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '0 0 */2 * *'
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        language: [csharp, javascript, css, html]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up .NET
+      if: matrix.language == 'csharp'
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '7.x'
+
+    - name: Set up Node.js
+      if: matrix.language == 'javascript' || matrix.language == 'css' || matrix.language == 'html'
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+
+    - name: Restore dependencies
+      if: matrix.language == 'csharp'
+      run: dotnet restore
+
+    - name: Install dependencies
+      if: matrix.language == 'javascript' || matrix.language == 'css' || matrix.language == 'html'
+      run: npm install
+
+    - name: Run dotnet format
+      if: matrix.language == 'csharp'
+      run: dotnet format
+
+    - name: Run dotnet analyzers
+      if: matrix.language == 'csharp'
+      run: dotnet build
+
+    - name: Run ESLint
+      if: matrix.language == 'javascript'
+      run: npm run lint
+
+    - name: Run Stylelint
+      if: matrix.language == 'css'
+      run: npx stylelint "**/*.css"
+
+    - name: Run HTMLHint
+      if: matrix.language == 'html'
+      run: npx htmlhint "**/*.html"
+
+    - name: Run tests
+      if: matrix.language == 'csharp'
+      run: dotnet test
