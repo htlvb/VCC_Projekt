@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNet.Identity;
 using VCC_Projekt.Data;
 using System.Linq;
+using VCC_Projekt.Components.Account.Pages.Manage;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -8,7 +10,7 @@ namespace VCC_Projekt.Components.Pages
     {
         private Event _selectedEvent = new() { EventID = 0 };
         private List<Event> _events = new();
-        private List<Participant> _participants = new();
+        private List<Participants> _participants = new();
         private string _searchString;
 
         protected override void OnInitialized()
@@ -24,21 +26,21 @@ namespace VCC_Projekt.Components.Pages
                 // Load participants for the selected event
                 var groups = dbContext.Gruppen
                     .Where(g => g.Event_EventID == _selectedEvent.EventID)
-                    .Select(g => new Participant
+                    .Select(g => new Participants
                     {
                         Name = g.Gruppenname ?? g.GruppenleiterId,
                         Type = g.Teilnehmertyp,
-                        Members = g.UserInGruppe.Select(u => u.User.UserName).ToList()
+                        Members = g.UserInGruppe.Select(u => u.User).ToList()
                     })
                     .ToList();
 
                 var individualUsers = dbContext.UserInGruppe
                     .Where(u => u.Gruppe.Event_EventID == _selectedEvent.EventID && u.Gruppe.Teilnehmertyp == "Einzelspieler")
-                    .Select(u => new Participant
+                    .Select(u => new Participants
                     {
                         Name = u.User.UserName,
                         Type = "Einzelspieler",
-                        Members = new List<string>()
+                        Members = new List<ApplicationUser>()
                     })
                     .ToList();
 
@@ -51,20 +53,21 @@ namespace VCC_Projekt.Components.Pages
         }
 
         // Search filter logic
-        private Func<Participant, bool> _quickFilter => x =>
+        private Func<Participants, bool> _quickFilter => x =>
         {
             if (string.IsNullOrWhiteSpace(_searchString)) return true; // Show all if empty
             var lowerSearch = _searchString.ToLower();
             return x.Name.ToLower().Contains(lowerSearch) ||
                    x.Type.ToLower().Contains(lowerSearch) ||
-                   x.Members.Any(m => m.ToLower().Contains(lowerSearch));
+                   x.Members.Any(m => m.UserName.ToLower().Contains(lowerSearch));
         };
     }
 
-    public class Participant
+    public class Participants
     {
         public string Name { get; set; }
         public string Type { get; set; }
-        public List<string> Members { get; set; }
+        public List<ApplicationUser>? Members { get; set; }
     }
+
 }
