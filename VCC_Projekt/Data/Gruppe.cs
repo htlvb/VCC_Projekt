@@ -70,6 +70,12 @@ public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
                .HasPrincipalKey(g => g.GruppenID)
                .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(g => g.EingeladeneUserInGruppe)
+               .WithOne(eu => eu.Gruppe)
+               .HasForeignKey(eu => eu.Gruppe_GruppenId)
+               .HasPrincipalKey(g => g.GruppenID)
+               .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasOne(g => g.GruppenleiterNavigation)
                .WithMany(u => u.GruppenleiterNavigation)
                .HasForeignKey(g => g.GruppenleiterId)

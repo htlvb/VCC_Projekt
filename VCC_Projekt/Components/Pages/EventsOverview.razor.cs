@@ -43,11 +43,14 @@ namespace VCC_Projekt.Components.Pages
                     userGroups = await dbContext.Gruppen
                         .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                         .Include(g => g.UserInGruppe)
+                        .Include(g => g.EingeladeneUserInGruppe)
+                        .AsNoTracking()
                         .ToListAsync();
 
                     events = await dbContext.Gruppen
                         .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                         .Select(g => g.Event)
+                        .AsNoTracking()
                         .ToListAsync();
 
                     ShowUpcomingEvents();
@@ -102,6 +105,16 @@ namespace VCC_Projekt.Components.Pages
 
                 if (isGroupEmpty)
                 {
+                    var invitedUsersToDelete = dbContext.EingeladeneUserInGruppe
+                        .Where(e => e.Gruppe_GruppenId == groupId)
+                        .ToList();
+
+                    if (invitedUsersToDelete.Any())
+                    {
+                        dbContext.EingeladeneUserInGruppe.RemoveRange(invitedUsersToDelete);
+                        await dbContext.SaveChangesAsync();
+                    }
+
                     var groupToDelete = await dbContext.Gruppen.FindAsync(groupId);
                     if (groupToDelete != null)
                     {
@@ -114,6 +127,15 @@ namespace VCC_Projekt.Components.Pages
                     .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                     .Select(g => g.Event)
                     .ToListAsync();
+
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Include(g => g.UserInGruppe)
+                    .Include(g => g.EingeladeneUserInGruppe)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                StateHasChanged();
             }
 
             else
@@ -132,10 +154,19 @@ namespace VCC_Projekt.Components.Pages
                 dbContext.UserInGruppe.Remove(memberEntry);
                 await dbContext.SaveChangesAsync();
 
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Include(g => g.UserInGruppe)
+                    .Include(g => g.EingeladeneUserInGruppe)
+                    .AsNoTracking()
+                    .ToListAsync();
+
                 events = await dbContext.Gruppen
                     .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
                     .Select(g => g.Event)
                     .ToListAsync();
+
+                StateHasChanged();
             }
         }
 
@@ -144,7 +175,7 @@ namespace VCC_Projekt.Components.Pages
             NavigationManager.NavigateTo($"/participation/{eventId}");
         }
 
-        private async Task AddMember(int groupId, int eventId, string newMemberEmail)
+        private async void AddMember(int groupId, int eventId, string newMemberEmail)
         {
             try
             {
@@ -181,10 +212,18 @@ namespace VCC_Projekt.Components.Pages
                 dbContext.EingeladeneUserInGruppe.Add(invitedMember);
                 dbContext.SaveChanges();
 
-                invitedUsers.Add(newMemberEmail);
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Include(g => g.UserInGruppe)
+                    .Include(g => g.EingeladeneUserInGruppe)
+                    .AsNoTracking()
+                    .ToListAsync();
+
 
                 isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
                 newMember.Email = string.Empty; // Eingabefeld zurücksetzen
+
+                StateHasChanged();
             }
 
             catch (Exception ex)
@@ -230,18 +269,19 @@ namespace VCC_Projekt.Components.Pages
                         errors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Email) }));
                     }
 
+                    var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == selectedEventId && g.GruppenleiterId == usernameLoggedInUser).Select(g => g.GruppenID).FirstOrDefault();
                     // Eingeladene Mitglieder
-                    foreach(string invitedMembers in invitedUsers)
+                    var invitedMembersInDatabase = dbContext.EingeladeneUserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.Email);
+                    foreach(var invitedMemberInDatabase in invitedMembersInDatabase)
                     {
-                        if(invitedMembers.ToLower() == Email.ToLower())
+                        if(invitedMemberInDatabase.ToLower() == Email.ToLower())
                         {
-                            errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
+                            errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits zur Gruppe eingeladen worden.", new[] { nameof(Email) }));
                             return errors;
                         }
                     }
 
                     // Mitglieder in der Datenbank
-                    var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == selectedEventId && g.GruppenleiterId == usernameLoggedInUser).Select(g => g.GruppenID).FirstOrDefault();
                     var membersInDatabase = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
 
                     foreach(var memberInDatabase in membersInDatabase)

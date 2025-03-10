@@ -49,6 +49,28 @@ namespace VCC_Projekt.Components.Account.Pages
                 errorMessage = "Du bist noch nicht registriert!";
                 return;
             }
+
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("email", out var emailValue) && user.Email != emailValue)
+            {
+                errorMessage = "Diese Einladung ist nicht für deine E-Mail-Adresse bestimmt.";
+                return;
+            }
+
+            if (groupId != 0)
+            {
+                var isAlreadyInGroup = dbContext.UserInGruppe
+                    .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
+
+                if (isAlreadyInGroup)
+                {
+                    errorMessage = "Du bist dieser Gruppe bereits beigetreten.";
+                    return;
+                }
+            }
+
             string userName = user.UserName ?? "";
             var result = await SignInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             switch (result)

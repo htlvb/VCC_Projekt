@@ -33,7 +33,7 @@ public class EingeladeneUserInGruppeConfiguration : IEntityTypeConfiguration<Ein
         builder.ToTable("vcc_EingeladeneUserInGruppe");
 
         // Composite Primary Key für UserId und GruppenId
-        builder.HasKey(t => new { t.Gruppe_GruppenId });
+        builder.HasKey(t => new { t.Gruppe_GruppenId, t.Email });
 
         // Beziehung zu Gruppe
         builder.HasOne(t => t.Gruppe)
