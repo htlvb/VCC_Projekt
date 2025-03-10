@@ -1,4 +1,4 @@
-Copyright (c) 2025 Marco Maier, Emma Laßl, Wolfgang Smolinsky, Dr. Alfred Spalt.  
+Copyright (c) 2025 Marco Maier, Emma Laßl, Wolfgang Smolinsky
 All rights reserved.  
 
 This code may not be copied, modified, distributed, or used in any form without explicit written permission from the authors.
