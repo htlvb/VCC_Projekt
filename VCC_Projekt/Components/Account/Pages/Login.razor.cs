@@ -61,6 +61,14 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (groupId != 0)
             {
+                var groupExists = dbContext.Gruppen.Any(g => g.GruppenID == groupId);
+
+                if (!groupExists)
+                {
+                    errorMessage = "Die Gruppe, der du beitreten möchtest, existiert nicht. Möglicherweise wurde sie gelöscht.";
+                    return;
+                }
+
                 var isAlreadyInGroup = dbContext.UserInGruppe
                     .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
 
@@ -70,6 +78,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     return;
                 }
             }
+
 
             string userName = user.UserName ?? "";
             var result = await SignInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
