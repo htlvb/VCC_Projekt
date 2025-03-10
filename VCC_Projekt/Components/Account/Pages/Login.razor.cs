@@ -46,7 +46,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (user == null)
             {
-                errorMessage = "Du bist noch nicht registriert!";
+                errorMessage = "Fehler: Du bist noch nicht registriert!";
                 return;
             }
 
@@ -55,7 +55,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (queryParams.TryGetValue("email", out var emailValue) && user.Email != emailValue)
             {
-                errorMessage = "Diese Einladung ist nicht für deine E-Mail-Adresse bestimmt.";
+                errorMessage = "Fehler: Diese Einladung ist nicht für deine E-Mail-Adresse bestimmt.";
                 return;
             }
 
@@ -65,7 +65,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
                 if (!groupExists)
                 {
-                    errorMessage = "Die Gruppe, der du beitreten möchtest, existiert nicht. Möglicherweise wurde sie gelöscht.";
+                    errorMessage = "Fehler: Die Gruppe, der du beitreten möchtest, existiert nicht. Möglicherweise wurde sie gelöscht.";
                     return;
                 }
 
@@ -74,7 +74,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
                 if (isAlreadyInGroup)
                 {
-                    errorMessage = "Du bist dieser Gruppe bereits beigetreten.";
+                    errorMessage = "Fehler: Du bist dieser Gruppe bereits beigetreten.";
                     return;
                 }
             }
@@ -118,7 +118,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     break;
 
                 default:
-                    errorMessage = "Error: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
+                    errorMessage = "Fehler: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
                     break;
             }
         }
