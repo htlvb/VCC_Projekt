@@ -200,8 +200,6 @@ namespace VCC_Projekt.Components.Pages
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
-
-
             // Prüfen, ob alle Aufgaben eine richtige Datei haben
             if (CurrentLevel?.Aufgaben.Count == 0)
             {
