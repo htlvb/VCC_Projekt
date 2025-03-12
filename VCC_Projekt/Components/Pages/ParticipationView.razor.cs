@@ -8,7 +8,7 @@ namespace VCC_Projekt.Components.Pages
 {
     public partial class ParticipationView
     {
-        static string Dashboardlink = "/Dashboard/";
+        static string Dashboardlink = "/dashboard/";
 
         [Parameter]
         public int EventId { get; set; }
