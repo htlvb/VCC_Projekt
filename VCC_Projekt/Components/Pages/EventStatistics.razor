@@ -1,0 +1,118 @@
+﻿@page "/event-statistics"
+
+<PageTitle>Event Statistiken</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.False" Class="vh-100">
+    <MudText Typo="Typo.h3" GutterBottom="true">Event Statistics</MudText>
+
+    <!-- Dropdown zur Auswahl des Events -->
+    <MudSelect T="Event" Label="Select an Event" Variant="Variant.Outlined" ValueChanged="e => OnEventSelected(e)">
+        @foreach (var eventItem in Events)
+        {
+            <MudSelectItem Value="eventItem">@eventItem.Bezeichnung</MudSelectItem>
+        }
+    </MudSelect>
+
+    <!-- Diagramme anzeigen, wenn ein Event ausgewählt ist -->
+    @if (_selectedEventStatistiks != null)
+    {
+        <MudGrid>
+            <!-- Balkendiagramm: Gruppen, die Levels abgeschlossen haben -->
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5" GutterBottom="true">Groups Completed Levels</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("bar"))" />
+                    </MudCardHeader>
+                    <MudCollapse Expanded="@barChartExpanded">
+                        <MudCardContent>
+                            <Chart Config="_barConfig"></Chart>
+                        </MudCardContent>
+                    </MudCollapse>
+                </MudCard>
+            </MudItem>
+
+            <!-- Tortendiagramm: Fehlversuche pro Level -->
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5" GutterBottom="true">Fehlversuche pro Level</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("pie"))" />
+                    </MudCardHeader>
+                    <MudCollapse Expanded="@pieChartExpanded">
+                        <MudCardContent>
+                            <Chart Config="_pieConfig"></Chart>
+                        </MudCardContent>
+                    </MudCollapse>
+                </MudCard>
+            </MudItem>
+
+            <!-- Liniendiagramm: Zeit pro Level -->
+            <MudItem xs="12" md="6">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5" GutterBottom="true">Zeit pro Level</MudText>
+                        <MudSpacer />
+                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("line"))" />
+                    </MudCardHeader>
+                    <MudCollapse Expanded="@lineChartExpanded">
+                        <MudCardContent>
+                            <Chart Config="_lineConfig"></Chart>
+                        </MudCardContent>
+                    </MudCollapse>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+
+        <!-- Rangliste -->
+        <MudCard Class="mt-4">
+            <MudCardHeader>
+                <MudText Typo="Typo.h5" GutterBottom="true">Rangliste</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("ranking"))" />
+            </MudCardHeader>
+            <MudCollapse Expanded="@rankingExpanded">
+                <MudCardContent>
+                    <MudTable Items="Rangliste" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Rang</MudTh>
+                            <MudTh>Gruppenname</MudTh>
+                            <MudTh>Teilnehmertyp</MudTh>
+                            <MudTh>Abgeschlossene Level</MudTh>
+                            <MudTh>Anzahl Level</MudTh>
+                            <MudTh>Gesamt Fehlversuche</MudTh>
+                            <MudTh>Max. Benötigte Zeit</MudTh>
+                            <MudTh>Gebrauchte Zeit</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Rang">@context.Rang</MudTd>
+                            <MudTd DataLabel="Gruppenname">@context.Gruppenname</MudTd>
+                            <MudTd DataLabel="Teilnehmertyp">@context.Teilnehmertyp</MudTd>
+                            <MudTd DataLabel="Abgeschlossene Level">@context.AbgeschlosseneLevel</MudTd>
+                            <MudTd DataLabel="Anzahl Level">@context.AnzahlLevel</MudTd>
+                            <MudTd DataLabel="Gesamt Fehlversuche">@context.GesamtFehlversuche</MudTd>
+                            <MudTd DataLabel="Max. Benötigte Zeit">@context.MaxBenötigteZeit</MudTd>
+                            <MudTd DataLabel="Gebrauchte Zeit">@context.GebrauchteZeit</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudCardContent>
+            </MudCollapse>
+        </MudCard>
+    }
+</MudContainer>
+
+<style>
+    .container {
+        height: 100vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .content {
+        flex: 1;
+        overflow: auto;
+    }
+</style>
