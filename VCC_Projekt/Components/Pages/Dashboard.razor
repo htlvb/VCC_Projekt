@@ -1,0 +1,64 @@
+﻿@page "/dashboard"
+
+@if (_events.Count > 1)
+{
+    <MudText Typo="Typo.h6">Event auswählen</MudText>
+    <MudSelect T="Event" Label="Event wählen" @bind-Value="_selectedEvent" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")">
+        @foreach (var ev in _events)
+        {
+            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+        }
+    </MudSelect>
+}
+else if (_events.Count == 1)
+{
+    <MudText Typo="Typo.h6">@_events[0].Bezeichnung</MudText>
+}
+else
+{
+    <MudText Typo="Typo.body1">No events are happening at the moment.</MudText>
+}
+
+@if (_selectedEvent != null)
+{
+    <MudText Typo="Typo.h6">Current Ranking for @_selectedEvent.Bezeichnung</MudText>
+
+    <MudTextField @bind-Value="_searchText" Label="Search" Variant="Variant.Outlined" Immediate="true" />
+
+    @if (_rankingList.Any())
+    {
+        <MudTable Items="@FilteredRankingList" Hover="true" Striped="true" Dense="true" SortLabel="Sort by" SortDirection="@SortDirection.Ascending" SortBy="@SortBy" RowsPerPage="10">
+            <HeaderContent>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.Rang)">Rank</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.GruppenID)">GruppenID</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.Gruppenname)">Gruppenname</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.GruppenleiterId)">GruppenleiterId</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.Teilnehmertyp)">Teilnehmertyp</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.AbgeschlosseneLevel)">AbgeschlosseneLevel</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.AnzahlLevel)">AnzahlLevel</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.GesamtFehlversuche)">GesamtFehlversuche</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.MaxBenötigteZeit)">MaxBenötigteZeit</MudTh>
+                <MudTh Sortable="true" SortBy="nameof(RanglisteResult.GebrauchteZeit)">GebrauchteZeit</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd Style="@(context.Rang <= 3 ? "background-color: lightgreen;" : "")">@context.Rang</MudTd>
+                <MudTd>@context.GruppenID</MudTd>
+                <MudTd>@context.Gruppenname</MudTd>
+                <MudTd>@context.GruppenleiterId</MudTd>
+                <MudTd>@context.Teilnehmertyp</MudTd>
+                <MudTd>@context.AbgeschlosseneLevel</MudTd>
+                <MudTd>@context.AnzahlLevel</MudTd>
+                <MudTd>@context.GesamtFehlversuche</MudTd>
+                <MudTd>@context.MaxBenötigteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
+                <MudTd>@context.GebrauchteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+            </PagerContent>
+        </MudTable>
+    }
+    else
+    {
+        <MudText Typo="Typo.body1">No ranking data available.</MudText>
+    }
+}
