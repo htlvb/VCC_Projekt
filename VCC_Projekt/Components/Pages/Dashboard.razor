@@ -27,7 +27,7 @@ else
 
     @if (_rankingList.Any())
     {
-        <MudTable Items="@FilteredRankingList" Hover="true" Striped="true" Dense="true" SortLabel="Sort by" SortDirection="@SortDirection.Ascending" SortBy="@SortBy" RowsPerPage="10">
+        <MudTable Items="@FilteredRankingList" Hover="true" Striped="true" Dense="true" SortLabel="Sort by" SortDirection="@_sortDirection" SortBy="@_sortBy" RowsPerPage="10" OnSort="OnSort">
             <HeaderContent>
                 <MudTh Sortable="true" SortBy="nameof(RanglisteResult.Rang)">Rank</MudTh>
                 <MudTh Sortable="true" SortBy="nameof(RanglisteResult.GruppenID)">GruppenID</MudTh>
