@@ -77,7 +77,7 @@
     {
         if (Input.NewEmail is null || Input.NewEmail == email)
         {
-            message = "Your email is unchanged.";
+            message = "Deine E-Mail-Adresse wurde nicht geändert.";
             return;
         }
 
@@ -90,7 +90,7 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Confirmation link to change email sent. Please check your email.";
+        message = "Bestätigungslink zum Ändern der E-Mail-Adresse gesendet. Bitte überprüfe dein Postfach.";
     }
 
     private async Task OnSendEmailVerificationAsync()
@@ -109,14 +109,31 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        message = "Verification email sent. Please check your email.";
+        message = "Bestätigungs-E-Mail gesendet. Bitte überprüfe dein Postfach.";
     }
 
     private sealed class InputModel
     {
-        [Required]
+        [Required(ErrorMessage = "E-Mail-Adresse ist erforderlich.")]
         [EmailAddress]
-        [Display(Name = "New email")]
-        public string? NewEmail { get; set; }
+        [RegularExpression(@"(?i)^.+@htlvb\.at$",
+            ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
+            "E-Mail-Adresse ein.")]
+        [UniqueEmail(ErrorMessage = "Diese E-Mail-Adresse existiert bereits.")]
+        [Display(Name = "E-Mail-Adresse")]
+        public string NewEmail { get; set; } = "";
+    }
+
+    public class UniqueEmailAttribute : ValidationAttribute
+    {
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        {
+            var context = validationContext.GetService<ApplicationDbContext>();
+            if (context.Users.Any(u => u.NormalizedEmail == value.ToString().ToUpper()))
+            {
+                return new ValidationResult(ErrorMessage, memberNames: [validationContext.MemberName]);
+            }
+            return ValidationResult.Success;
+        }
     }
 }

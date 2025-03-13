@@ -63,8 +63,8 @@ namespace VCC_Projekt.Components.Account
                     </head>
                     <body>
                         <div class='container'>
-                            <h1>Willkommen!</h1>
-                            <p>Vielen Dank, dass du dich bei uns registriert hast. Um deine E-Mail-Adresse zu bestätigen, klicke bitte auf den folgenden Button:</p>
+                            <h1>Bitte bestätige deine E-Mail-Adresse!</h1>
+                            <p>Um deine E-Mail-Adresse zu bestätigen, klicke bitte auf den folgenden Button:</p>
                             <a href='" + confirmationLink + @"' class='button'>E-Mail-Adresse bestätigen</a>
                             <p>Wenn du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.</p>
                             <p>Mit freundlichen Grüßen,<br>Dein VCC-Team</p>

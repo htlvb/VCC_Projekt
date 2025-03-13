@@ -35,13 +35,13 @@
         if (UserId is null || Email is null || Code is null)
         {
             RedirectManager.RedirectToWithStatus(
-                "Account/Login", "Error: Invalid email change confirmation link.", HttpContext);
+                "Account/Login", "Fehler: Ungültiger Bestätigungslink zur Änderung der E-Mail-Adresse.", HttpContext);
         }
 
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null)
         {
-            message = "Unable to find user with Id '{userId}'";
+            message = $"Fehler: Benutzer mit der ID '{UserId}' konnte nicht gefunden werden.";
             return;
         }
 
@@ -49,18 +49,18 @@
         var result = await UserManager.ChangeEmailAsync(user, Email, code);
         if (!result.Succeeded)
         {
-            message = "Error changing email.";
+            message = "Fehler beim Ändern der E-Mail-Adresse.";
             return;
         }
 
-        // In our UI email and user name are one and the same, so when we update the email
-        // we need to update the user name.
-        var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
-        if (!setUserNameResult.Succeeded)
-        {
-            message = "Error changing user name.";
-            return;
-        }
+        // // In our UI email and user name are one and the same, so when we update the email
+        // // we need to update the user name.
+        // var setUserNameResult = await UserManager.SetUserNameAsync(user, Email);
+        // if (!setUserNameResult.Succeeded)
+        // {
+        //     message = "Fehler beim Ändern des Benutzernamens.";
+        //     return;
+        // }
 
         await SignInManager.RefreshSignInAsync(user);
         message = "Danke fürs Bestätigen der neuen E-Mail.";

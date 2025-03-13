@@ -41,7 +41,7 @@
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = $"Error loading user with ID {UserId}";
+            statusMessage = $"Fehler beim Laden des Benutzers mit der ID {UserId}";
         }
         else
         {
