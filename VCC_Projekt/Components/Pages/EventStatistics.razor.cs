@@ -4,6 +4,8 @@ using ChartJs.Blazor.Common;
 using ChartJs.Blazor.Common.Axes;
 using ChartJs.Blazor.Common.Axes.Ticks;
 using ChartJs.Blazor.Common.Enums;
+using ChartJs.Blazor.Common.Handlers;
+using ChartJs.Blazor.Common.Time;
 using ChartJs.Blazor.LineChart;
 using ChartJs.Blazor.PieChart;
 using ChartJs.Blazor.Util;
@@ -42,16 +44,16 @@ namespace VCC_Projekt.Components.Pages
                     Scales = new BarScales
                     {
                         XAxes = new List<CartesianAxis>
-                {
-                    new CategoryAxis
-                    {
-                        Ticks = new CategoryTicks
                         {
-                            FontSize = 12,
-                            FontColor = "#000"
+                            new CategoryAxis
+                            {
+                                Ticks = new CategoryTicks
+                                {
+                                    FontSize = 12,
+                                    FontColor = "#000",
+                                }
+                            }
                         }
-                    }
-                }
                     },
                     Tooltips = new Tooltips
                     {
@@ -97,7 +99,6 @@ namespace VCC_Projekt.Components.Pages
                     }
                 }
             };
-
         }
 
         // Event-Handler für die Auswahl eines Events
@@ -162,7 +163,7 @@ namespace VCC_Projekt.Components.Pages
             {
                 _barConfig.Data.Labels.Add(labels[i]);
             }
-            var barDataset = new BarDataset<double>
+            var barDataset = new BarDataset<int>
             {
                 Label = "Completed Levels", // Set the dataset label
                 BackgroundColor = new[]
@@ -174,7 +175,7 @@ namespace VCC_Projekt.Components.Pages
             ColorUtil.ColorHexString(153, 102, 255)  // Lila
         }
             };
-            foreach (var data in _selectedEventStatistiks.Levels.Select(l => (double)(l.Absolviert?.Count ?? 0)))
+            foreach (var data in _selectedEventStatistiks.Levels.Select(l => (int)l.Absolviert.Count(a => a.BenoetigteZeit != null)))
             {
                 barDataset.Add(data);
             }
@@ -185,7 +186,7 @@ namespace VCC_Projekt.Components.Pages
             {
                 _pieConfig.Data.Labels.Add(labels[i]);
             }
-            var pieDataset = new PieDataset<double>
+            var pieDataset = new PieDataset<int>
             {
                 BackgroundColor = new[]
                 {
@@ -196,7 +197,7 @@ namespace VCC_Projekt.Components.Pages
             ColorUtil.ColorHexString(153, 102, 255)  // Lila
         }
             };
-            foreach (var data in _selectedEventStatistiks.Levels.Select(l => (double)(l.Absolviert?.Sum(a => a.Fehlversuche) ?? 0)))
+            foreach (var data in _selectedEventStatistiks.Levels.Select(l => (int)(l.Absolviert?.Sum(a => a.Fehlversuche) ?? 0)))
             {
                 pieDataset.Add(data);
             }
@@ -221,6 +222,7 @@ namespace VCC_Projekt.Components.Pages
                 lineDataset.Add(data);
             }
             _lineConfig.Data.Datasets.Add(lineDataset);
+            StateHasChanged();
         }
         // Chart-Toggle-Handler
         private void ToggleChart(string chartType)
@@ -241,5 +243,6 @@ namespace VCC_Projekt.Components.Pages
                     break;
             }
         }
+
     }
 }
