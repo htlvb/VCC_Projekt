@@ -22,7 +22,6 @@ namespace VCC_Projekt.Data
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
 
-
         // DbSets for the tables
         public DbSet<Gruppe> Gruppen { get; set; }
         public DbSet<Event> Events { get; set; }
@@ -38,6 +37,8 @@ namespace VCC_Projekt.Data
         public DbSet<EventLog> EventLogs { get; set; }
 
         public DbSet<RanglisteResult> Rangliste { get; set; }
+
+        public DbSet<EingeladeneUserInGruppe> EingeladeneUserInGruppe { get; set; }
 
     }
 

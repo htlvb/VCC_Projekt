@@ -9,34 +9,32 @@
 @inject IdentityUserAccessor UserAccessor
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Profile</PageTitle>
+<PageTitle>Profil</PageTitle>
 
-<h3>Profile</h3>
+<h3>Profil</h3>
 <StatusMessage />
 
 <div class="row">
     <div class="col-md-6">
         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
-                <input type="text" value="@username" class="form-control" placeholder="Please choose your username." disabled />
-                <label for="username" class="form-label">Username</label>
+                <input type="text" value="@currentUserName" class="form-control" placeholder="Aktueller Benutzername" disabled />
+                <label for="username" class="form-label">Aktueller Benutzername</label>
             </div>
             <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
-                <label for="phone-number" class="form-label">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
+                <InputText @bind-Value="Input.UserName" class="form-control" placeholder="Bitte gib deinen neuen Benutzernamen ein." />
+                <label for="username" class="form-label">Neuer Benutzername</label>
+                <ValidationMessage For="() => Input.UserName" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Speichern</button>
         </EditForm>
     </div>
 </div>
 
 @code {
     private ApplicationUser user = default!;
-    private string? username;
-    private string? phoneNumber;
+    private string? currentUserName;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -47,31 +45,63 @@
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-        username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        currentUserName = await UserManager.GetUserNameAsync(user);
 
-        Input.PhoneNumber ??= phoneNumber;
+        Input.UserName ??= currentUserName;
     }
 
     private async Task OnValidSubmitAsync()
     {
-        if (Input.PhoneNumber != phoneNumber)
+        if (Input.UserName != currentUserName)
         {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
+            try
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_aspnetusers SET UserName = '{Input.UserName}', NormalizedUserName = '{Input.UserName.ToUpper()}' WHERE UserName = '{currentUserName}'");
+                if(rowsEffected == 1)
+                {
+                    user.UserName = Input.UserName;
+                    user.NormalizedUserName = Input.UserName.ToUpper();
+                }
+            }
+
+            catch (Exception ex)
+            {
+                RedirectManager.RedirectToCurrentPageWithStatus($"Fehler: Der Benutzername konnte nicht geändert werden.", HttpContext);
             }
         }
 
+        else
+        {
+            RedirectManager.RedirectToCurrentPageWithStatus("Fehler: Der Benutzername ist unverändert.", HttpContext);
+            return;
+        }
+
         await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+        RedirectManager.RedirectToCurrentPageWithStatus("Dein Benutzername wurde aktualisiert.", HttpContext);
     }
 
     private sealed class InputModel
     {
-        [Phone]
-        [Display(Name = "Phone number")]
-        public string? PhoneNumber { get; set; }
+        [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
+        [RegularExpression(@"(?i)^(?!.*@htlvb\.at$).+$",
+            ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
+        [DataType(DataType.Text)]
+        [Display(Name = "Benutzername")]
+        [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+        [UniqueUsername(ErrorMessage = "Benutzername existiert bereits.")]
+        public string UserName { get; set; } = "";
+    }
+
+    public class UniqueUsernameAttribute : ValidationAttribute
+    {
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+        {
+            var context = validationContext.GetService<ApplicationDbContext>();
+            if (context.Users.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
+            {
+                return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
+            }
+            return ValidationResult.Success;
+        }
     }
 }

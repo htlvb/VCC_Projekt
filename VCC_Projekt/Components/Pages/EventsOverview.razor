@@ -11,32 +11,47 @@
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
+@using MySqlConnector
 @using VCC_Projekt.Data
 @using Microsoft.AspNetCore.Components.Forms;
 @using System;
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
 
 <PageTitle>Meine Events</PageTitle>
 
-<h1>Meine Events</h1>
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883;">Meine Events</h1>
+</div>
 
 @if (events == null)
 {
-    <p>Lade Events...</p>
+    <div class="text-center">
+        <p>Lade Events...</p>
+    </div>
 }
 else if (events.Count == 0)
 {
-    <p>Sie haben sich für keine Events angemeldet.</p>
+    <div class="text-center">
+        <p>Sie haben sich für keine Events angemeldet.</p>
+    </div>
 }
 else
 {
-    <div class="row">
+    <div class="text-center">
+        <button class="btn @((isPastEventsActive ? "btn-primary" : "btn-success")) me-2" style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowPastEvents()">Vergangene Events</button>
+        <button class="btn @((isUpcomingEventsActive ? "btn-primary" : "btn-success")) " style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowUpcomingEvents()">Zukünftige Events</button>
+    </div>
 
-        @foreach (var eventItem in events.OrderBy(e => e.Beginn))
+    <div class="row justify-content-center">
+
+        @foreach (var eventItem in filteredEvents.OrderBy(e => e.Beginn))
         {
+            selectedEventId = eventItem.EventID;
             var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
             if (userGroup == null) continue;
 
-            bool isGroupLeader = userGroup?.GruppenleiterId == userId;
+            bool isGroupLeader = userGroup?.GruppenleiterId == usernameLoggedInUser;
             bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
             bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
 
@@ -44,19 +59,22 @@ else
             bool eventStarted = eventItem.Beginn <= DateTime.Now;
             bool isCurrentEvent = eventItem.Beginn <= DateTime.Now && eventEndTime >= DateTime.Now;
 
-            <div class="col-md-6">
+            <div class="col-md-10">
                 <div class="card mb-4">
                     <div class="card-body">
                         <h5 class="card-title">@eventItem.Bezeichnung</h5>
                         <p class="card-text"><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</p>
+
                         @if(userGroup.Teilnehmertyp == "Team")
                         {
                             <p class="card-text"><strong>Teamname: </strong>@userGroup.Gruppenname</p>
                         }
+
                         @if(userGroup.Teilnehmertyp == "Einzelspieler")
                         {
                             <p class="card-text"><strong>Benutzername: </strong>@userGroup.GruppenleiterId</p>
                         }
+
                         <p class="card-text"><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</p>
 
                         @if (isCurrentEvent)
@@ -71,7 +89,7 @@ else
 
                                 @if (isGroupLeader)
                                 {
-                                    @if(userGroup.UserInGruppe.Count != 0)
+                                    @if(userGroup.UserInGruppe.Count > 1)
                                     {
                                         <p><strong>Gruppenmitglieder: </strong></p>
                                     }
@@ -83,16 +101,41 @@ else
                                             {
                                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                                     @member.User_UserId
-
                                                     <button class="btn btn-danger btn-sm" @onclick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</button>
                                                 </li>
                                             }
                                         }
+
+                                        @foreach(var invitedMember in userGroup.EingeladeneUserInGruppe)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                @invitedMember.Email - wurde zur Gruppe eingeladen
+                                            </li>
+                                        }
+
+@*                                         @foreach(var member in invitedUsers)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">@member - wurde zur Gruppe eingeladen</li>
+                                        } *@
+
+                                        @if (isAddingMember)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <EditForm Model="@newMember" OnValidSubmit="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMember.Email)" class="w-100">
+                                                    <DataAnnotationsValidator />
+                                                    <div class="d-flex justify-content-between w-100">
+                                                        <input type="text" @bind="newMember.Email" placeholder="E-Mail-Adresse hinzufügen" class="form-control me-2" />
+                                                        <button type="submit" class="btn btn-success btn-sm">Hinzufügen</button>
+                                                    </div>
+                                                    <ValidationMessage For="@(() => newMember.Email)" class="text-danger" />
+                                                </EditForm>
+                                            </li>
+                                        }
                                     </ul>
 
-                                    @if (canAddMember)
+                                    @if (canAddMember && !((userGroup.UserInGruppe.Count + userGroup.EingeladeneUserInGruppe.Count) > 4))
                                     {
-                                        <button class="btn btn-success me-2" @onclick="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID)">Mitglied hinzufügen</button>
+                                        <button class="btn btn-success me-2" @onclick="() => ShowAddMemberInput()">Mitglied hinzufügen</button>
                                     }
 
                                     @if (canDeleteGroup)
@@ -112,6 +155,18 @@ else
                             {
                                 <button class="btn btn-success me-2" @onclick="() => Unregister(eventItem.EventID)">Abmelden</button>
                             }
+                        }
+
+                        else
+                        {
+                            var rang = dbContext.Set<RanglisteResult>()
+                                .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", eventItem.EventID))
+                                .ToList()
+                                .Where(g => g.Gruppenname == userGroup.Gruppenname)
+                                .Select(g => g.Rang)
+                                .FirstOrDefault();
+
+                            <p><strong>Rang: </strong>@(rang == 0 ? "Leider kein Level absolviert" : rang.ToString())</p>
                         }
                     </div>
                 </div>
@@ -135,18 +190,14 @@ else
             border-color: #2f5e91;
         }
 
+    .btn-primary{
+        background-color: #2f5e91;
+        border-color: #2f5e91;
+    }
+
     h1, h2, h3 {
         color: #134883;
     }
-
-    .form-control {
-        border: 2px solid #134883;
-    }
-
-        .form-control:focus {
-            border-color: #2f5e91;
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
-        }
 
     .card {
         transition: transform 0.2s;

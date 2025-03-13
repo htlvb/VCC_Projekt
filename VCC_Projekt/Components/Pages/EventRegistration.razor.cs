@@ -136,12 +136,12 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.Gruppen.Add(team);
                         dbContext.SaveChanges();
 
-                        var teamId = dbContext.Gruppen
-                            .Where(u => u.Gruppenname == teamName)
+                        var groupId = dbContext.Gruppen
+                            .Where(u => u.Gruppenname == teamName && u.Event_EventID == eventId)
                             .Select(u => u.GruppenID)
                             .FirstOrDefault();
 
-                        UserInGruppe gruppe = new UserInGruppe(Input.Username, teamId);
+                        UserInGruppe gruppe = new UserInGruppe(Input.Username, groupId);
 
                         dbContext.UserInGruppe.Add(gruppe);
                         dbContext.SaveChanges();
@@ -150,9 +150,9 @@ namespace VCC_Projekt.Components.Pages
 
                         foreach (var memberEmail in Input.TeamMembers)
                         {
-                            var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(teamId.ToString()));
+                            var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(groupId.ToString()));
                             var invaitationLink = NavigationManager.GetUriWithQueryParameters(
-                                    NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={teamId}").AbsoluteUri,
+                                    NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={groupId}").AbsoluteUri,
                                     new Dictionary<string, object?>
                                     {
                                         ["inviteToken"] = inviteToken,
@@ -174,6 +174,10 @@ namespace VCC_Projekt.Components.Pages
                             }
 
                             await EmailSender.SendInvitationLinkAsync(groupManagerUsername, groupManagerEmail, memberEmail, teamName, HtmlEncoder.Default.Encode(invaitationLink), HtmlEncoder.Default.Encode(registerLink));
+
+                            EingeladeneUserInGruppe invitedMember = new EingeladeneUserInGruppe(memberEmail, groupId);
+                            dbContext.EingeladeneUserInGruppe.Add(invitedMember);
+                            dbContext.SaveChanges();
                         }
 
                         NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");

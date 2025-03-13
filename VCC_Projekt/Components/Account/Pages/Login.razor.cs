@@ -46,9 +46,40 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (user == null)
             {
-                errorMessage = "Du bist noch nicht registriert!";
+                errorMessage = "Fehler: Du bist noch nicht registriert!";
                 return;
             }
+
+            var uri = new Uri(NavigationManager.Uri);
+            var queryParams = QueryHelpers.ParseQuery(uri.Query);
+
+            if (queryParams.TryGetValue("email", out var emailValue) && user.Email != emailValue)
+            {
+                errorMessage = "Fehler: Diese Einladung ist nicht für deine E-Mail-Adresse bestimmt.";
+                return;
+            }
+
+            if (groupId != 0)
+            {
+                var groupExists = dbContext.Gruppen.Any(g => g.GruppenID == groupId);
+
+                if (!groupExists)
+                {
+                    errorMessage = "Fehler: Die Gruppe, der du beitreten möchtest, existiert nicht. Möglicherweise wurde sie gelöscht.";
+                    return;
+                }
+
+                var isAlreadyInGroup = dbContext.UserInGruppe
+                    .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
+
+                if (isAlreadyInGroup)
+                {
+                    errorMessage = "Fehler: Du bist dieser Gruppe bereits beigetreten.";
+                    return;
+                }
+            }
+
+
             string userName = user.UserName ?? "";
             var result = await SignInManager.PasswordSignInAsync(userName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
             switch (result)
@@ -59,8 +90,11 @@ namespace VCC_Projekt.Components.Account.Pages
                     if(groupId != 0)
                     {
                         UserInGruppe gruppe = new UserInGruppe(userName, groupId);
-
                         dbContext.UserInGruppe.Add(gruppe);
+                        dbContext.SaveChanges();
+
+                        EingeladeneUserInGruppe invitedMember = new EingeladeneUserInGruppe(user.Email, groupId);
+                        dbContext.EingeladeneUserInGruppe.Remove(invitedMember);
                         dbContext.SaveChanges();
 
                         var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
@@ -84,11 +118,9 @@ namespace VCC_Projekt.Components.Account.Pages
                     break;
 
                 default:
-                    errorMessage = "Error: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
+                    errorMessage = "Fehler: E-Mail-Adresse und/oder Passwort falsch. Bitte erneut probieren.";
                     break;
             }
-
-
         }
 
         private sealed class InputModel

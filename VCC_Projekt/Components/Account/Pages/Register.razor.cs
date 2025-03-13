@@ -75,7 +75,6 @@ namespace VCC_Projekt.Components.Account.Pages
 
 
             await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-            Logger.LogInformation("Confirmation Mail sent");
 
             if (UserManager.Options.SignIn.RequireConfirmedAccount)
             {
@@ -112,13 +111,13 @@ namespace VCC_Projekt.Components.Account.Pages
 
         private sealed class InputModel
         {
-            [Required(ErrorMessage = "E-Mail ist erforderlich.")]
+            [Required(ErrorMessage = "E-Mail-Adresse ist erforderlich.")]
             [EmailAddress]
             [RegularExpression(@"(?i)^.+@htlvb\.at$",
                 ErrorMessage = "Bitte geben Sie eine gültige @htlvb.at " +
                 "E-Mail-Adresse ein.")]
-            [UniqueEmail(ErrorMessage = "Diese Email existiert bereits")]
-            [Display(Name = "E-Mail")]
+            [UniqueEmail(ErrorMessage = "Diese E-Mail-Adresse existiert bereits.")]
+            [Display(Name = "E-Mail-Adresse")]
             public string Email { get; set; } = "";
 
             [Required(ErrorMessage = "Vorname ist erforderlich.")]
@@ -140,7 +139,7 @@ namespace VCC_Projekt.Components.Account.Pages
             [DataType(DataType.Text)]
             [Display(Name = "Benutzername")]
             [Required(ErrorMessage = "Benutzername ist erforderlich.")]
-            [UniqueUsername(ErrorMessage = "Benutzername existiert bereits")]
+            [UniqueUsername(ErrorMessage = "Benutzername existiert bereits.")]
             public string Username { get; set; } = "";
 
             [Required(ErrorMessage = "Passwort ist erforderlich.")]
@@ -157,9 +156,6 @@ namespace VCC_Projekt.Components.Account.Pages
             public string ConfirmPassword { get; set; } = "";
         }
 
-        /// <summary>
-        /// Custom Validations for UniqueUsername
-        /// </summary>
         public class UniqueUsernameAttribute : ValidationAttribute
         {
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
@@ -173,9 +169,6 @@ namespace VCC_Projekt.Components.Account.Pages
             }
         }
 
-        /// <summary>
-        /// Custom Validations for UniqueEmail
-        /// </summary>
         public class UniqueEmailAttribute : ValidationAttribute
         {
             protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

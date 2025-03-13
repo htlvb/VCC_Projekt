@@ -16,15 +16,6 @@
 <h1>E-Mail-Adresse bestätigen</h1>
 <StatusMessage Message="@statusMessage" />
 
-@if (teamname != string.Empty && eventId != 0)
-{
-    <div class="text-center mt-auto">
-        <a href="/signup-event-confirmation?teamname=@teamname&eventId=@eventId" class="w-25 btn btn-lg btn-success" @onclick="AddMemberToGroup">Bitte hier klicken, um der Gruppe @teamname beizutreten!</a>
-    </div>
-}
-
-
-
 @code {
     private string? statusMessage;
 
@@ -37,8 +28,6 @@
     [SupplyParameterFromQuery]
     private string? Code { get; set; }
 
-    private string teamname;
-    private int eventId;
     private ApplicationUser user;
 
     protected override async Task OnInitializedAsync()
@@ -52,7 +41,7 @@
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = $"Error loading user with ID {UserId}";
+            statusMessage = $"Fehler beim Laden des Benutzers mit der ID {UserId}";
         }
         else
         {
@@ -60,28 +49,5 @@
             var result = await UserManager.ConfirmEmailAsync(user, code);
             statusMessage = result.Succeeded ? "Danke fürs Bestätigen der Email." : "Fehler beim Bestätigen der Email";
         }
-
-        var uri = new Uri(NavigationManager.Uri);
-        var queryParams = QueryHelpers.ParseQuery(uri.Query);
-
-        if (queryParams.TryGetValue("teamname", out var teamnameValue))
-        {
-            teamname = teamnameValue;
-        }
-
-        if (queryParams.TryGetValue("eventId", out var eventIdValue) && int.TryParse(eventIdValue, out int parsedEventId))
-        {
-            eventId = parsedEventId;
-        }
-    }
-
-    private void AddMemberToGroup()
-    {
-        UserInGruppe gruppe = new UserInGruppe(user.UserName, dbContext.Gruppen.Where(g => g.Gruppenname == teamname && g.Event_EventID == eventId).Select(g => g.GruppenID).First());
-
-        dbContext.UserInGruppe.Add(gruppe);
-        dbContext.SaveChanges();
-
-        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
     }
 }

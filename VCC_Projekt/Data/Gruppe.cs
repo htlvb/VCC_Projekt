@@ -45,6 +45,8 @@ public class Gruppe
     public List<GruppeAbsolviertLevel>? Absolviert { get; set; }
 
     public List<UserInGruppe>? UserInGruppe { get; set; }
+
+    public List<EingeladeneUserInGruppe> EingeladeneUserInGruppe { get; set; }
 }
 
 public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
@@ -65,6 +67,12 @@ public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
         builder.HasMany(g => g.UserInGruppe)
                .WithOne(ug => ug.Gruppe)
                .HasForeignKey(ug => ug.Gruppe_GruppenId)
+               .HasPrincipalKey(g => g.GruppenID)
+               .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasMany(g => g.EingeladeneUserInGruppe)
+               .WithOne(eu => eu.Gruppe)
+               .HasForeignKey(eu => eu.Gruppe_GruppenId)
                .HasPrincipalKey(g => g.GruppenID)
                .OnDelete(DeleteBehavior.Cascade);
 
