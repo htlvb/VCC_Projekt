@@ -41,7 +41,17 @@ else
     <div class="text-center">
         <button class="btn @((isPastEventsActive ? "btn-primary" : "btn-success")) me-2" style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowPastEvents()">Vergangene Events</button>
         <button class="btn @((isUpcomingEventsActive ? "btn-primary" : "btn-success")) " style="margin-top: 10px; margin-bottom: 20px;" @onclick="() => ShowUpcomingEvents()">Zukünftige Events</button>
+        @if(filteredEvents.Count == 0 && isUpcomingEventsActive)
+        {
+            <p>Du hast dich für kein zufünftiges Event angemeldet. Entdecke hier kommende Events.</p>
+        }
+
+        @if(filteredEvents.Count == 0 && isPastEventsActive)
+        {
+            <p>Du hast noch kein Event absolviert.</p>
+        }
     </div>
+
 
     <div class="row justify-content-center">
 
@@ -112,11 +122,6 @@ else
                                                 @invitedMember.Email - wurde zur Gruppe eingeladen
                                             </li>
                                         }
-
-@*                                         @foreach(var member in invitedUsers)
-                                        {
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">@member - wurde zur Gruppe eingeladen</li>
-                                        } *@
 
                                         @if (isAddingMember)
                                         {
