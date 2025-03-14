@@ -29,7 +29,13 @@
                 @if (!string.IsNullOrEmpty(_searchString))
                 {
                     <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
-                    <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
+                    <TemplateColumn Title="Email" Editable="false" Required="false">
+                        <CellTemplate>
+                            <MudText Typo="Typo.body1">
+                                <a href="mailto:@context.Item.Email">@context.Item.Email</a>
+                            </MudText>
+                        </CellTemplate>
+                    </TemplateColumn>
                     <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false" />
                     <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
                     <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />
