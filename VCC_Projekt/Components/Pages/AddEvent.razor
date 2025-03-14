@@ -14,8 +14,22 @@
 @using VCC_Projekt.Data
 @using Microsoft.AspNetCore.Components.Forms;
 @using System;
+@using MudBlazor
 
 <PageTitle>Wettbewerb anlegen</PageTitle>
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid>
+        <MudItem xs="12">
+            <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
+                @foreach (var ev in _events)
+                {
+                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
 
 <div class="container mt-5">
     <div class="text-center">
