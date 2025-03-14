@@ -1,4 +1,4 @@
-@page "/add-event"
+@page "/events-manager"
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
@@ -35,136 +35,140 @@
                 }
             </MudSelect>
 
-        @if (_selectedEvent.EventID != 0)
-        {
-            <MudCard>
-                <MudCardContent>
-                    @if(_selectedEvent.Beginn > DateTime.Now)
-                    {
-                        <div class="text-end">
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@ToggleEditMode" />
-                        </div>
-                    }
-
-                    <EditForm EditContext="@editContext" OnValidSubmit="@UpdateEvent" method="post" FormName="eventRegistration">
-                        <DataAnnotationsValidator />
-
-                        <div class="form-floating mb-3">
-                            <InputText @bind-Value="Input.EventName" class="form-control" disabled="@(!isEditing)" />
-                            <label for="eventname">Wettbewerbsname</label>
-                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" disabled="@(!isEditing)" />
-                            <label for="eventdate">Datum</label>
-                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input type="time"
-                                            value="@Input.StartTime.ToString(@"hh\:mm")"
-                                            @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                                            class="form-control"
-                                            disabled="@(!isEditing)" />
-                                    <label for="starttime">Startzeit</label>
-                                    <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
-                                </div>
+            @if (_selectedEvent.EventID != 0)
+            {
+                <MudCard>
+                    <MudCardContent>
+                        @if (_selectedEvent.Beginn > DateTime.Now)
+                        {
+                            <div class="text-end">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@ToggleEditMode" />
                             </div>
-                            <div class="col">
-                                <div class="form-floating">
-                                    <input type="time"
-                                            value="@Input.EndTime.ToString(@"hh\:mm")"
-                                            @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
-                                            class="form-control"
-                                            disabled="@(!isEditing)" />
-                                    <label for="endtime">Endzeit</label>
-                                    <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
-                                </div>
+                        }
+
+                        <EditForm EditContext="@editContext" OnValidSubmit="@UpdateEvent" method="post" FormName="eventRegistration">
+                            <DataAnnotationsValidator />
+
+                            <div class="form-floating mb-3">
+                                <InputText @bind-Value="Input.EventName" class="form-control" disabled="@(!isEditing)" />
+                                <label for="eventname">Wettbewerbsname</label>
+                                <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
                             </div>
-                        </div>
 
-                        <div class="form-floating mb-3">
-                            <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" disabled="@(!isEditing)" />
-                            <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
-                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
-                        </div>
+                            <div class="form-floating mb-3">
+                                <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" disabled="@(!isEditing)" />
+                                <label for="eventdate">Datum</label>
+                                <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+                            </div>
 
-                        <div class="text-center mt-5">
-                            <button type="submit" class="w-25 btn btn-lg btn-success" disabled="@(!isEditing)">Wettbewerb speichern</button>
-                        </div>
-                    </EditForm>
-                </MudCardContent>
-            </MudCard>
-        }
-
-        else
-        {
-
-            <MudCard>
-                <MudCardContent>
-                    <div class="container mt-5">
-                        <div class="mt-4">
-                            <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
-                                <DataAnnotationsValidator />
-
-                                <div class="form-floating mb-3">
-                                    <InputText @bind-Value="Input.EventName" class="form-control" />
-                                    <label for="eventname">Wettbewerbsname</label>
-                                    <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
-                                </div>
-
-                                <div class="form-floating mb-3">
-                                    <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" />
-                                    <label for="eventdate">Datum</label>
-                                    <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col">
-                                        <div class="form-floating">
-                                            <input type="time"
-                                                    value="@Input.StartTime.ToString(@"hh\:mm")"
-                                                    @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                                                    class="form-control" />
-                                            <label for="starttime">Startzeit</label>
-                                            <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="form-floating">
-                                            <input type="time"
-                                                    value="@Input.EndTime.ToString(@"hh\:mm")"
-                                                    @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
-                                                    class="form-control" />
-                                            <label for="endtime">Endzeit</label>
-                                            <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
-                                        </div>
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <input type="time"
+                                               value="@Input.StartTime.ToString(@"hh\:mm")"
+                                               @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
+                                               class="form-control"
+                                               disabled="@(!isEditing)" />
+                                        <label for="starttime">Startzeit</label>
+                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
-
-                                <div class="form-floating mb-3">
-                                    <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" />
-                                    <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
-                                    <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <input type="time"
+                                               value="@Input.EndTime.ToString(@"hh\:mm")"
+                                               @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
+                                               class="form-control"
+                                               disabled="@(!isEditing)" />
+                                        <label for="endtime">Endzeit</label>
+                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
+                                    </div>
                                 </div>
+                            </div>
 
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" disabled="@(!isEditing)" />
+                                <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
+                                <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+                            </div>
 
+                            @if (_selectedEvent.Beginn > DateTime.Now)
+                            {
                                 <div class="text-center mt-5">
-                                    <button type="submit" class="w-25 btn btn-lg btn-success">Wettbewerb anlegen</button>
-                                    <p></p>
+                                    <button type="submit" class="w-25 btn btn-lg btn-success" disabled="@(!isEditing)">Wettbewerb speichern</button>
                                 </div>
-                            </EditForm>
+                            }
+
+                        </EditForm>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            else
+            {
+
+                <MudCard>
+                    <MudCardContent>
+                        <div class="container mt-5">
+                            <div class="mt-4">
+                                <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
+                                    <DataAnnotationsValidator />
+
+                                    <div class="form-floating mb-3">
+                                        <InputText @bind-Value="Input.EventName" class="form-control" />
+                                        <label for="eventname">Wettbewerbsname</label>
+                                        <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" />
+                                        <label for="eventdate">Datum</label>
+                                        <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <input type="time"
+                                                       value="@Input.StartTime.ToString(@"hh\:mm")"
+                                                       @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
+                                                       class="form-control" />
+                                                <label for="starttime">Startzeit</label>
+                                                <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-floating">
+                                                <input type="time"
+                                                       value="@Input.EndTime.ToString(@"hh\:mm")"
+                                                       @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
+                                                       class="form-control" />
+                                                <label for="endtime">Endzeit</label>
+                                                <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" />
+                                        <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
+                                        <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+                                    </div>
+
+
+                                    <div class="text-center mt-5">
+                                        <button type="submit" class="w-25 btn btn-lg btn-success">Wettbewerb anlegen</button>
+                                        <p></p>
+                                    </div>
+                                </EditForm>
+                            </div>
                         </div>
-                    </div>
-                </MudCardContent>
-            </MudCard>
-        }
+                    </MudCardContent>
+                </MudCard>
+            }
 
         </MudItem>
-     </MudGrid>
+    </MudGrid>
 </MudContainer>
 
 @* else
@@ -177,7 +181,7 @@
         <MudItem xs="12">
             <MudCard class="mt-3">
                 <MudCardContent>
-                    
+
                     <div class="container mt-5">
                         <div class="mt-4">
                             <EditForm EditContext="@editContext" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
