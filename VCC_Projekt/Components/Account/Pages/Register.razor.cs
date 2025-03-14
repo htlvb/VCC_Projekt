@@ -25,8 +25,6 @@ namespace VCC_Projekt.Components.Account.Pages
         [BindProperty]
         public string? InviteToken { get; set; }
 
-        private int groupId;
-
         public async Task RegisterUser(EditContext editContext)
         {
             IdentityResult result = new();

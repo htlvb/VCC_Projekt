@@ -220,8 +220,8 @@ namespace VCC_Projekt.Components.Pages
                     .ToListAsync();
 
 
-                isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
-                newMember.Email = string.Empty; // Eingabefeld zurücksetzen
+                isAddingMember = false;
+                newMember.Email = string.Empty;
 
                 StateHasChanged();
             }

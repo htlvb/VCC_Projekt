@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Humanizer;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using MudBlazor;
 using System.ComponentModel.DataAnnotations;
 using VCC_Projekt.Data;
 
@@ -9,7 +12,8 @@ namespace VCC_Projekt.Components.Pages
     {
         private List<Event> _events = new();
         private Event _selectedEvent = new() { EventID = 0 };
-        private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEvent.EventID)?.Beginn < DateTime.Now;
+        private EditContext editContext;     
+        private bool isEditing = false;
 
         protected override void OnInitialized()
         {
@@ -18,13 +22,31 @@ namespace VCC_Projekt.Components.Pages
             editContext = new EditContext(Input);
         }
 
+        private void SetEventData()
+        {
+            Input.EventName = _selectedEvent.Bezeichnung;
+            Input.EventDate = _selectedEvent.Beginn.Date;
+
+            DateTime dateTime = DateTime.Parse(_selectedEvent.Beginn.ToString());
+            TimeSpan timeSpan = dateTime.TimeOfDay;
+
+            Input.StartTime = timeSpan;
+            Input.EndTime = Input.StartTime.Add(new TimeSpan(0, _selectedEvent.Dauer, 0));
+            Input.PenaltyMinutes = _selectedEvent.StrafminutenProFehlversuch;
+        }
+
+        private void ToggleEditMode()
+        {
+            isEditing = !isEditing;
+        }
+
         private async Task OnEventSelected(Event selectedEvent)
         {
             _selectedEvent = selectedEvent;
+            _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
+            SetEventData();
+            if (isEditing == true) ToggleEditMode();
         }
-
-
-        private EditContext editContext;
 
         private void UpdateStartTime(string value)
         {
@@ -44,7 +66,7 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
-        private async Task HandleSubmit()
+        private async Task UpdateEvent()
         {
             try
             {
@@ -61,40 +83,68 @@ namespace VCC_Projekt.Components.Pages
                     return;
                 }
 
-                await SaveCompetition(Input);
+                try
+                {
+                    int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_event SET Bezeichnung = '{Input.EventName}', Beginn = '{Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime}', Dauer = {(int)(Input.EndTime - Input.StartTime).TotalMinutes}, StrafminutenProFehlversuch = {Input.PenaltyMinutes} WHERE EventID = {_selectedEvent.EventID}" );
+                    ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
+                    ToggleEditMode();
+
+                    //Refresh
+                }
+
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
             catch (Exception ex)
             {
+                ShowSnackbar("Fehler beim Bearbeiten des Wettbewerbs. Bitte versuche es erneut.", Severity.Error);
                 Console.WriteLine($"Error during submission: {ex.Message}");
             }
         }
 
-        private async Task SaveCompetition(InputModel model)
+        private async Task CreateEvent()
         {
             try
             {
-                int duration = (int)(model.EndTime - model.StartTime).TotalMinutes;
-                DateTime eventStartTime = model.EventDate.Date + model.StartTime;
+                var validationResults = new List<ValidationResult>();
+                var validationContext = new ValidationContext(Input);
+                bool isValid = Validator.TryValidateObject(Input, validationContext, validationResults, true);
+
+                if (!isValid)
+                {
+                    foreach (var validationResult in validationResults)
+                    {
+                        Console.WriteLine($"Validation Error: {validationResult.ErrorMessage}");
+                    }
+                    return;
+                }
 
                 Event ev = new Event();
-
                 ev.Bezeichnung = Input.EventName;
-                ev.Dauer = duration;
+                ev.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
                 ev.StrafminutenProFehlversuch = Input.PenaltyMinutes;
-                ev.Beginn = eventStartTime;
+                ev.Beginn = Input.EventDate.Date + Input.StartTime;
 
                 dbContext.Events.Add(ev);
                 dbContext.SaveChanges();
 
-                NavigationManager.NavigateTo("/add-event-confirmation");
+                ShowSnackbar("Wettbewerb wurde erfolgreich angelegt.", Severity.Success);
 
+                Input = new InputModel();
 
+                //Refresh
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                ShowSnackbar("Fehler beim Anlegen des Wettbewerbs. Bitte versuche es erneut.", Severity.Error);
+                Console.WriteLine($"Error during submission: {ex.Message}");
             }
         }
+
+        private void ShowSnackbar(string message, Severity severity)
+             => Snackbar.Add(message, severity);
 
         private InputModel Input { get; set; } = new();
 
