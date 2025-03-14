@@ -2,20 +2,24 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
 
+<PageTitle>Level-Manager</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883;">Level-Manager</h1>
+    <p class="lead text-muted">
+        Wähle ein Event aus, um neue Levels für das Event anzulegen oder vorhandene zu bearbeiten oder zu löschen.
+    </p>
+</div>
+
 <MudContainer MaxWidth="MaxWidth.False">
     <MudGrid>
         <MudItem xs="12">
-            <MudCard>
-                <MudCardContent>
-                    <MudText Typo="Typo.h6">Event auswählen</MudText>
-                    <MudSelect T="Event" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")">
-                        @foreach (var ev in _events)
-                        {
-                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudCardContent>
-            </MudCard>
+            <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
+                @foreach (var ev in _events)
+                {
+                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
 
         <!-- Levels List -->

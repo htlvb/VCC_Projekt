@@ -16,29 +16,59 @@
 @using System;
 @using MudBlazor
 
-<PageTitle>Wettbewerb anlegen</PageTitle>
+<PageTitle>Wettbewerb-Manager</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883;">Wettbewerb-Manager</h1>
+    <p class="lead text-muted">
+        Wähle ein Event aus, um dieses zu bearbeiten oder legen ein neues Event an.
+    </p>
+</div>
+
 <MudContainer MaxWidth="MaxWidth.False">
     <MudGrid>
         <MudItem xs="12">
             <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
                 @foreach (var ev in _events)
                 {
-                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
     </MudGrid>
 </MudContainer>
 
+@if(_selectedEvent.EventID != 0)
+{
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard class="mt-3">
+                <MudCardContent>
+
+@*                     <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Outlined" InputType="@PasswordInput" Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon" OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+                    
+                    <MudButton OnClick="() => AddLevel()" Color="Color.Primary" Disabled="@(_levels.Count >= 5 || _selectedEvent.EventID == 0 || IsEventInPast)">Neues Level hinzufügen</MudButton>
+ *@                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
+
+else
+{
+    <MudGrid>
+        <MudItem xs="12">
+            <MudCard class="mt-3">
+                <MudCardContent>
+@*                     <MudButton OnClick="() => AddLevel()" Color="Color.Primary" Disabled="@(_levels.Count >= 5 || _selectedEvent.EventID == 0 || IsEventInPast)">Neues Level hinzufügen</MudButton>
+ *@                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+}
+
 
 <div class="container mt-5">
-    <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Wettbewerb anlegen</h1>
-        <p class="lead text-muted">
-            Fülle die folgenden Informationen aus, um einen neuen Wettbewerb zu erstellen.
-        </p>
-    </div>
-
     <div class="mt-4">
         <EditForm EditContext="@editContext" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
             <DataAnnotationsValidator />
