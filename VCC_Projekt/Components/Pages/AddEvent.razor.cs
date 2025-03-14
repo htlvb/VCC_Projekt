@@ -1,18 +1,30 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System.ComponentModel.DataAnnotations;
+using VCC_Projekt.Data;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class AddEvent
     {
-        private EditContext editContext;
+        private List<Event> _events = new();
+        private Event _selectedEvent = new() { EventID = 0 };
+        private bool IsEventInPast => _events.FirstOrDefault(e => e.EventID == _selectedEvent.EventID)?.Beginn < DateTime.Now;
 
         protected override void OnInitialized()
         {
+            _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
             Input = new();
             editContext = new EditContext(Input);
         }
+
+        private async Task OnEventSelected(Event selectedEvent)
+        {
+            _selectedEvent = selectedEvent;
+        }
+
+
+        private EditContext editContext;
 
         private void UpdateStartTime(string value)
         {
