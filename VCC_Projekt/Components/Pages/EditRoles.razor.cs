@@ -1,4 +1,9 @@
-﻿using MudBlazor;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using MudBlazor;
+using MudBlazor.Extensions.Components;
+using MudExRichTextEditor;
+using MudExRichTextEditor.Types;
+using System.Net.Mail;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -9,9 +14,16 @@ namespace VCC_Projekt.Components.Pages
 
         private string _searchString;
 
+        private bool isEmailDialogVisible;
+        private string emailSubject;
+        private List<string> selectedEmails = new List<string>();
+        private MudExRichTextEdit Editor;
+        private List<IBrowserFile> attachments = new List<IBrowserFile>();
+
         // For the Grid
         private List<EditRoleUser> users;
         private List<EditRoleUser> allUsers; // Gemeinsame Liste für alle Benutzer
+
 
         protected override void OnInitialized()
         {
@@ -185,6 +197,58 @@ namespace VCC_Projekt.Components.Pages
             {
                 user.Roles = updatedRoles;
             }
+        }
+
+        private void OpenEmailDialog(string email)
+        {
+            selectedEmails.Clear();
+            attachments.Clear();
+            selectedEmails.Add(email);
+            isEmailDialogVisible = true;
+        }
+
+        private async Task StartSendingEmails()
+        {
+            var recipients = selectedEmails;
+            var subject = emailSubject;
+            string? body = await Editor.GetHtml();
+
+            Snackbar.Add("Emails werden geschickt...", Severity.Info);
+            isEmailDialogVisible = false;
+            StateHasChanged();
+            await emailSender.SendBulkEmailsAsync(selectedEmails, emailSubject, body, await ConvertToAttachmentsAsync(attachments));
+            Snackbar.Clear();
+            Snackbar.Add("Emails wurden geschickt!", Severity.Success);
+        }
+
+        private void Cancel()
+        {
+            isEmailDialogVisible = false;
+        }
+
+        private void UploadFiles(IReadOnlyList<IBrowserFile> files)
+        {
+            attachments = files.ToList();
+        }
+        private void RemoveAttachment(IBrowserFile file)
+        {
+            attachments.Remove(file);
+        }
+
+        private async Task<List<Attachment>> ConvertToAttachmentsAsync(List<IBrowserFile> browserFiles)
+        {
+            var attachments = new List<Attachment>();
+
+            foreach (var browserFile in browserFiles)
+            {
+                var stream = new MemoryStream();
+                await browserFile.OpenReadStream().CopyToAsync(stream);
+                stream.Position = 0; // Reset stream position
+                var attachment = new Attachment(stream, browserFile.Name);
+                attachments.Add(attachment);
+            }
+
+            return attachments;
         }
     }
 

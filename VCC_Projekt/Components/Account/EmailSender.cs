@@ -2,24 +2,63 @@
 using System.Net;
 using System.Net.Mail;
 
-namespace VCC_Projekt.Components.Account
+
+public class EmailSender : IEmailSender<ApplicationUser>
 {
-    public class EmailSender : IEmailSender<ApplicationUser>
+    private readonly MailOptions _options;
+    private readonly SmtpClient _smtpClient;
+
+    public EmailSender(IOptions<MailOptions> mailOptions)
     {
-        private readonly MailOptions _options;
-
-        public EmailSender(IOptions<MailOptions> mailOptions)
+        _options = mailOptions.Value;
+        _smtpClient = new SmtpClient
         {
-            _options = mailOptions.Value;
+            Host = _options.Host,
+            Port = _options.Port,
+            Credentials = new NetworkCredential(_options.Email, _options.Password),
+            EnableSsl = true
+        };
+    }
+
+    public async Task SendEmailAsync(MailMessage message)
+    {
+        message.From = new MailAddress(_options.Email);
+        try
+        {
+            await _smtpClient.SendMailAsync(message);
         }
-
-        public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
+        catch (Exception ex)
         {
-            MailMessage message = new MailMessage
+            Console.WriteLine($"Error sending Email: {ex.Message} To: {string.Join(",",message.To)}");
+        }
+    }
+    public async Task SendBulkEmailsAsync(List<string> recipients, string subject, string body, List<Attachment> attachments)
+    {
+        var tasks = recipients.Select(email =>
+        {
+            var message = new MailMessage(_options.Email, email, subject, body)
             {
-                From = new MailAddress(_options.Email),
-                Subject = "Bestätige deine E-Mail-Adresse",
-                Body = @"
+                IsBodyHtml = true
+            };
+
+            foreach (var attachment in attachments)
+            {
+                message.Attachments.Add(attachment);
+            }
+
+            return SendEmailAsync(message);
+        }).ToList();
+
+        await Task.WhenAll(tasks);
+    }
+
+    public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
+    {
+        MailMessage message = new()
+        {
+            From = new MailAddress(_options.Email),
+            Subject = "Bestätige deine E-Mail-Adresse",
+            Body = @"
                     <html>
                     <head>
                         <meta charset='utf-8' />
@@ -71,38 +110,31 @@ namespace VCC_Projekt.Components.Account
                         </div>
                     </body>
                     </html>",
-                IsBodyHtml = true,
-            }; message.To.Add(email);
+            IsBodyHtml = true,
+        }; message.To.Add(email);
 
-            using var smtpClient = new SmtpClient();
-            smtpClient.Host = _options.Host;
-            smtpClient.Port = _options.Port;
-            smtpClient.Credentials = new NetworkCredential(
-                _options.Email, _options.Password);
-            smtpClient.EnableSsl = true;
-
-            try
-            {
-                await smtpClient.SendMailAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending Email: {ex.Message}");
-            }
-        }
-
-        public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
+        try
         {
-            throw new NotImplementedException();
+            await _smtpClient.SendMailAsync(message);
         }
-
-        public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
+        catch (Exception ex)
         {
-            MailMessage message = new MailMessage
-            {
-                From = new MailAddress(_options.Email),
-                Subject = "Setze dein Passwort zurück",
-                Body = @"
+            Console.WriteLine($"Error sending Email: {ex.Message}");
+        }
+    }
+
+    public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
+    {
+        MailMessage message = new()
+        {
+            From = new MailAddress(_options.Email),
+            Subject = "Setze dein Passwort zurück",
+            Body = @"
                     <html>
                     <head>
                         <meta charset='utf-8' />
@@ -154,36 +186,29 @@ namespace VCC_Projekt.Components.Account
                         </div>
                     </body>
                     </html>",
-                IsBodyHtml = true,
-            };
+            IsBodyHtml = true,
+        };
 
-            message.To.Add(email);
+        message.To.Add(email);
 
-            using var smtpClient = new SmtpClient();
-            smtpClient.Host = _options.Host;
-            smtpClient.Port = _options.Port;
-            smtpClient.Credentials = new NetworkCredential(
-                _options.Email, _options.Password);
-            smtpClient.EnableSsl = true;
-
-            try
-            {
-                await smtpClient.SendMailAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending Email: {ex.Message}");
-            }
-
+        try
+        {
+            await _smtpClient.SendMailAsync(message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending Email: {ex.Message}");
         }
 
-        public async Task SendInvitationLinkAsync(string groupManagerUsername, string groupManagerEmail, string email, string teamName, string invitationLink, string registerLink)
+    }
+
+    public async Task SendInvitationLinkAsync(string groupManagerUsername, string groupManagerEmail, string email, string teamName, string invitationLink, string registerLink)
+    {
+        MailMessage message = new()
         {
-            MailMessage message = new MailMessage
-            {
-                From = new MailAddress(_options.Email),
-                Subject = "Gruppeneinladung",
-                Body = @"
+            From = new MailAddress(_options.Email),
+            Subject = "Gruppeneinladung",
+            Body = @"
                         <html>
                         <head>
                             <meta charset='utf-8' />
@@ -229,8 +254,8 @@ namespace VCC_Projekt.Components.Account
                             <div class='container'>
                                 <h1>Gruppeneinladung!</h1>
                                 <p>Du wurdest von <strong>" + groupManagerUsername + @"</strong> (" + groupManagerEmail + @") eingeladen, um der Gruppe <strong>" + teamName + @"</strong> beizutreten.</p>                                " + (string.IsNullOrEmpty(registerLink) ? string.Empty :
-                                "<p>Da du noch nicht registriert bist, klicke bitte auf den folgenden Button, um dich zu registrieren (erst wenn du registriert bist, kannst du einer Gruppe betreten):</p>" +
-                                "<a href='" + registerLink + @"' class='button'>Registrieren</a>") + @"
+                            "<p>Da du noch nicht registriert bist, klicke bitte auf den folgenden Button, um dich zu registrieren (erst wenn du registriert bist, kannst du einer Gruppe betreten):</p>" +
+                            "<a href='" + registerLink + @"' class='button'>Registrieren</a>") + @"
                                 <p>Um der Gruppe beizutreten, klicke bitte auf den folgenden Button:</p>
                                 <a href='" + invitationLink + @"' class='button'>Gruppe beitreten</a>
                                 <p>Wenn du dieser Gruppe nicht betreten willst, kannst du diese E-Mail ignorieren.</p>
@@ -238,27 +263,18 @@ namespace VCC_Projekt.Components.Account
                             </div>
                         </body>
                         </html>",
-                IsBodyHtml = true,
-            };
+            IsBodyHtml = true,
+        };
 
-            message.To.Add(email);
+        message.To.Add(email);
 
-            using var smtpClient = new SmtpClient
-            {
-                Host = _options.Host,
-                Port = _options.Port,
-                Credentials = new NetworkCredential(_options.Email, _options.Password),
-                EnableSsl = true
-            };
-
-            try
-            {
-                await smtpClient.SendMailAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error sending Email: {ex.Message}");
-            }
+        try
+        {
+            await _smtpClient.SendMailAsync(message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error sending Email: {ex.Message}");
         }
     }
 }
