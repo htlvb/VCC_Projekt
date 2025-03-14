@@ -1,11 +1,13 @@
 ﻿using ChartJs.Blazor;
 using ChartJs.Blazor.BarChart;
+using ChartJs.Blazor.BarChart.Axes;
 using ChartJs.Blazor.Common;
 using ChartJs.Blazor.Common.Axes;
 using ChartJs.Blazor.Common.Axes.Ticks;
 using ChartJs.Blazor.Common.Enums;
 using ChartJs.Blazor.Common.Handlers;
 using ChartJs.Blazor.Common.Time;
+using ChartJs.Blazor.Interop;
 using ChartJs.Blazor.LineChart;
 using ChartJs.Blazor.PieChart;
 using ChartJs.Blazor.Util;
@@ -60,6 +62,10 @@ namespace VCC_Projekt.Components.Pages
                         Enabled = true,
                         Mode = InteractionMode.Index,
                         Intersect = false
+                    },
+                    Legend = new Legend
+                    {
+                        Display = false
                     }
                 }
             };
@@ -96,6 +102,10 @@ namespace VCC_Projekt.Components.Pages
                         Enabled = true,
                         Mode = InteractionMode.Index,
                         Intersect = false
+                    },
+                    Legend = new Legend
+                    {
+                        Display = false
                     }
                 }
             };
@@ -217,7 +227,16 @@ namespace VCC_Projekt.Components.Pages
                 BackgroundColor = ColorUtil.ColorHexString(75, 192, 192),
                 BorderColor = ColorUtil.ColorHexString(75, 192, 192)
             };
-            foreach (var data in _selectedEventStatistiks.Levels.Select(l => Math.Round(l.Absolviert?.Sum(a => a.BenoetigteZeit?.TotalMinutes ?? 0) ?? 0, 2)))
+            foreach (var data in _selectedEventStatistiks.Levels.Select(l =>
+            {
+                var absolviert = l.Absolviert?.Where(a => a.BenoetigteZeit != null).ToList();
+                if (absolviert == null || !absolviert.Any())
+                {
+                    return 0.0; // oder ein anderer Standardwert
+                }
+                var averageMinutes = absolviert.Average(a => a.BenoetigteZeit.Value.TotalMinutes);
+                return Math.Round(averageMinutes, 2);
+            }))
             {
                 lineDataset.Add(data);
             }
@@ -243,6 +262,7 @@ namespace VCC_Projekt.Components.Pages
                     break;
             }
         }
+
 
     }
 }
