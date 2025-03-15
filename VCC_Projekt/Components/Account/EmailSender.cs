@@ -6,12 +6,16 @@ using System.Net;
 using System.Net.Mail;
 using VCC_Projekt.Components.Account.Pages.Manage;
 using MailKit.Net.Imap;
+using System.Composition;
+using MailKit.Security;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 
 public class EmailSender : IEmailSender<ApplicationUser>
 {
     private readonly MailOptions _options;
     private readonly SmtpClient _smtpClient;
+    public string emailAddress;
 
     public EmailSender(IOptions<MailOptions> mailOptions)
     {
@@ -23,6 +27,7 @@ public class EmailSender : IEmailSender<ApplicationUser>
             Credentials = new NetworkCredential(_options.Email, _options.Password),
             EnableSsl = true
         };
+        emailAddress = _options.Email;
     }
 
     public async Task SendEmailAsync(MailMessage message)
@@ -327,5 +332,39 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         await client.DisconnectAsync(true);
         return messages;
+    }
+
+    public async Task DeleteEmailsAsync(List<string> messageIds)
+    {
+        using (var client = new ImapClient())
+        {
+            // Verbindung zum IMAP-Server herstellen
+            await client.ConnectAsync("imap.gmail.com", 993, true);
+            await client.AuthenticateAsync(_options.Email, _options.Password);
+
+            // Alle Ordner durchlaufen und E-Mails löschen
+            var inboxFolder = client.Inbox;
+            await inboxFolder.OpenAsync(FolderAccess.ReadWrite);
+            await DeleteEmailsInFolderAsync(inboxFolder, messageIds);
+
+            await DeleteEmailsInFolderAsync(inboxFolder, messageIds);
+
+            // Verbindung trennen
+            await client.DisconnectAsync(true);
+        }
+    }
+
+    private async Task DeleteEmailsInFolderAsync(IMailFolder folder, List<string> messageIds)
+    {
+        await folder.OpenAsync(FolderAccess.ReadWrite);
+
+        // E-Mails anhand der Message-IDs suchen
+        foreach (var message in messageIds)
+        {
+            var uids = folder.Search(SearchQuery.HeaderContains("Message-Id", message));
+            folder.AddFlags(uids, MessageFlags.Deleted, silent: true);
+        }
+        // Änderungen speichern und E-Mails endgültig löschen
+        await folder.ExpungeAsync();
     }
 }

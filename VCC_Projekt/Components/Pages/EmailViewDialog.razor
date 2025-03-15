@@ -1,0 +1,48 @@
+﻿@using MudBlazor
+@using System.Net.Mail
+
+<MudDialog>
+    <DialogContent>
+        <div>
+            @((MarkupString)EmailBody)
+        </div>
+
+        <MudText Typo="Typo.h6" Class="mt-4 mb-2">Anhänge</MudText>
+        <MudList T="Attachment">
+            @foreach (var attachment in Attachments)
+            {
+                <MudListItem>
+                    <MudIcon Icon="@Icons.Material.Filled.Attachment" Class="mr-2" />
+                    <MudText>@attachment.Name</MudText>
+                    <MudButton OnClick="() => DownloadAttachment(attachment)" Color="Color.Primary" Class="ml-auto">
+                        Herunterladen
+                    </MudButton>
+                </MudListItem>
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog" Color="Color.Primary">Schließen</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public string EmailBody { get; set; }
+
+    [Parameter]
+    public List<Attachment> Attachments { get; set; } = new List<Attachment>();
+
+    private void CloseDialog()
+    {
+        MudDialog.Close();
+    }
+
+    private void DownloadAttachment(Attachment attachment)
+    {
+        // Logik zum Herunterladen des Anhangs
+        Snackbar.Add($"Anhang {attachment.Name} wird heruntergeladen...", Severity.Info);
+    }
+}

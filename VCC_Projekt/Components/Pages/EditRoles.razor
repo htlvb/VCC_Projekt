@@ -107,7 +107,7 @@
     </div>
 </div>
 
-<EmailDialog Visible="@isEmailDialogVisible" VisibleChanged="@((bool value) => isEmailDialogVisible = value)" SelectedEmails="@selectedEmails" 
+<EmailSendDialog Visible="@isEmailDialogVisible" VisibleChanged="@((bool value) => isEmailDialogVisible = value)" SelectedEmails="@selectedEmails" 
     Emails="@users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList()" ReadOnly="false" UseDropdown="true"/>
 
 <style>
