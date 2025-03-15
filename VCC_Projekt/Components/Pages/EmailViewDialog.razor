@@ -1,5 +1,6 @@
 ﻿@using MudBlazor
 @using System.Net.Mail
+@inject IJSRuntime JSRuntime
 
 <MudDialog>
     <DialogContent>
@@ -25,6 +26,16 @@
         <MudButton OnClick="CloseDialog" Color="Color.Primary">Schließen</MudButton>
     </DialogActions>
 </MudDialog>
+<script>
+    function downloadFile(fileName, base64Content) {
+        const link = document.createElement('a');
+        link.href = 'data:application/octet-stream;base64,' + base64Content;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
 
 @code {
     [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
@@ -40,9 +51,27 @@
         MudDialog.Close();
     }
 
-    private void DownloadAttachment(Attachment attachment)
+    private async Task DownloadAttachment(Attachment attachment)
     {
-        // Logik zum Herunterladen des Anhangs
-        Snackbar.Add($"Anhang {attachment.Name} wird heruntergeladen...", Severity.Info);
+        try
+        {
+            // Konvertiere den Inhalt des Anhangs in einen Base64-String
+            using (var memoryStream = new MemoryStream())
+            {
+                await attachment.ContentStream.CopyToAsync(memoryStream);
+                var base64Content = Convert.ToBase64String(memoryStream.ToArray());
+
+                // Rufe die JavaScript-Funktion auf, um die Datei herunterzuladen
+                await JSRuntime.InvokeVoidAsync("downloadFile", attachment.Name, base64Content);
+
+                // Zeige eine Snackbar-Nachricht an
+                Snackbar.Add($"Anhang {attachment.Name} wird heruntergeladen...", Severity.Info);
+            }
+        }
+        catch (Exception ex)
+        {
+            // Fehlerbehandlung
+            Snackbar.Add($"Fehler beim Herunterladen des Anhangs: {ex.Message}", Severity.Error);
+        }
     }
 }

@@ -38,46 +38,41 @@ namespace VCC_Projekt.Components.Pages
             return email.From.Mailboxes.Any(m => m.Address.Contains("vcc",StringComparison.OrdinalIgnoreCase));
         }
 
-        private void OpenEmailDialog(MimeMessage email)
+        private async Task OpenEmailDialog(MimeMessage email)
         {
-            fixedEmail = FormatEmail(email.From.Mailboxes.FirstOrDefault().Address);
             if(!email.Subject.StartsWith("AW",StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
             else curSubject = email.Subject;
-            baseMessage = email;
             isEmailDialogVisible = true;
-        }
 
-        private string FormatEmail(string email)
-        {
-            // Überprüfen, ob die E-Mail mit @htlvb.at endet
-            if (email.EndsWith("@htlvb.at", StringComparison.OrdinalIgnoreCase))
+
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+            var parameters = new DialogParameters
             {
-                // Teile der E-Mail-Adresse extrahieren
-                var parts = email.Split('@');
-                var localPart = parts[0]; // Teil vor dem @
-                var domain = parts[1];    // Teil nach dem @
+                { "UseDropdown", false },
+                { "FixedEmail", email.From.Mailboxes.FirstOrDefault().Address },
+                { "ReadOnly", true },
+                { "Subject", curSubject },
+                { "baseMessageMail", email }
+            };
 
-                // Lokalen Teil in "m.maier" umwandeln
-                var nameParts = localPart.Split('.');
-                if (nameParts.Length == 2)
-                {
-                    var firstName = nameParts[0];
-                    var lastName = nameParts[1];
+            var dialog = await DialogService.ShowAsync<EmailSendDialog>("Support Email Senden", parameters, options);
+            var result = await dialog.Result;
 
-                    // Formatierte E-Mail-Adresse erstellen
-                    return $"{firstName[0]}.{lastName}@{domain}".ToLower();
-                }
+            if (!result.Canceled)
+            {
+                unansweredEmails.Remove(email);
+                supportEmails.Remove(email);
+                StateHasChanged();
+                await EmailService.DeleteEmailsAsync(new List<string> { email.MessageId });
             }
 
-            // Falls die E-Mail nicht mit @htlvb.at endet, unverändert zurückgeben
-            return email;
         }
 
         private void ReadEmailBody(MimeMessage email)
         {
             var parameters = new DialogParameters();
             parameters.Add("EmailBody", email.HtmlBody ?? email.TextBody); // Oder email.HtmlBody für HTML-Inhalt
-            // parameters.Add("Attachments", email.Attachments.Select(a => new Attachment(null, null)).ToList());
+            parameters.Add("Attachments", email.Attachments.OfType<MimePart>().Select(a => new Attachment(a.Content.Open(), a.FileName)).ToList());
 
             var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
 
@@ -106,9 +101,9 @@ namespace VCC_Projekt.Components.Pages
         private async Task DeleteEmails()
         {
             var parameters = new DialogParameters();
+            selectedEmails = selectedEmails;
             parameters.Add("Question", $"Willst du wirklich {selectedEmails.Count} Emails löschen?");
             var result = await DialogService.ShowAsync<DeleteEmailDialog>("E-Mail löschen", parameters);
-            StateHasChanged();
             var dialogResult = await result.Result;
             if (!dialogResult.Canceled)
             {
@@ -125,9 +120,19 @@ namespace VCC_Projekt.Components.Pages
 
         private Func<MimeMessage, bool> _quickFilter => x =>
         {
-            if (string.IsNullOrEmpty(x.Subject)) return true;
-            return true;
+            if (string.IsNullOrEmpty(_searchString)) return true;
+            if (x.From.Mailboxes.FirstOrDefault().Address.Contains(_searchString,StringComparison.OrdinalIgnoreCase)) return true;
+            if (x.Subject.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            if (x.Date.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            if (x.From.Mailboxes.FirstOrDefault().Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
         };
+
+        private Task UpdateSelection(HashSet<MimeMessage> messages)
+        {
+            selectedEmails = messages;
+            return Task.CompletedTask;
+        }
 
         private void ClearSelectedEmails()
         {

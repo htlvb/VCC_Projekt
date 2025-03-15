@@ -1,4 +1,5 @@
-﻿@using System.Net.Mail
+﻿@page "/email-send-dialog"
+@using System.Net.Mail
 @using Microsoft.AspNetCore.Components.Forms
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
@@ -7,9 +8,8 @@
 @using MudExRichTextEditor
 @using MudExRichTextEditor.Types
 
-<MudDialog @bind-Visible="Visible">
+<MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.h6">E-Mail senden</MudText>
         @if (UseDropdown)
         {
             <MudSelect T="string" SelectedValues="@SelectedEmails" SelectAll="Multiselect" SelectAllText="Alle auswählen" Label="An" MultiSelection="Multiselect" Required="true" SelectedValuesChanged="async e => await ValuesChanged(e)" Disabled="ReadOnly">
@@ -48,8 +48,7 @@
 </MudDialog>
 
 @code {
-    [Parameter] public bool Visible { get; set; }
-    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
     [Parameter] public List<string> SelectedEmails { get; set; } = new List<string>();
     [Parameter] public List<string> Emails { get; set; } = new List<string>();
     [Parameter] public bool Multiselect { get; set; } = true;
@@ -66,7 +65,7 @@
 
     protected override void OnParametersSet()
     {
-        EmailSubject = string.IsNullOrEmpty(Subject) ? "" : Subject; 
+        EmailSubject = string.IsNullOrEmpty(Subject) ? "" : Subject;
     }
 
     private async Task StartSendingEmails()
@@ -78,8 +77,6 @@
         var tempSelectedEmails = new List<string>(SelectedEmails);
         var tempFixedEmail = FixedEmail;
 
-        Visible = false;
-        await VisibleChanged.InvokeAsync(Visible);
         Snackbar.Add("Emails werden geschickt...", Severity.Info);
 
         if (UseDropdown)
@@ -94,7 +91,7 @@
                     Body = await richTextEditor.GetHtml(),
                     IsBodyHtml = true
                 };
-            if(baseMessageMail != null)
+            if (baseMessageMail != null)
             {
                 string layout = @"<div id='x_appendonsend'></div>
                                 <hr tabindex='-1' style='display:inline-block; width:98%'>
@@ -105,7 +102,7 @@
                                 <div>&nbsp;</div>
                                 </div>
                                 <div>
-                                <p>"+ baseMessageMail.HtmlBody + @"</p>
+                                <p>" + baseMessageMail.HtmlBody + @"</p>
                                 </div>";
 
                 message.Headers.Add("In-Reply-To", $"<{baseMessageMail.MessageId}>");
@@ -119,11 +116,11 @@
                 message.Attachments.Add(attachment);
             }
             await emailSender.SendEmailAsync(message);
-            if (baseMessageMail != null) emailSender.DeleteEmailsAsync(new List<string>() { baseMessageMail.MessageId }) ;
         }
 
         Snackbar.Clear();
         Snackbar.Add("Emails wurden geschickt!", Severity.Success);
+        MudDialog.Close();
     }
 
     private async Task ValuesChanged(IEnumerable<string> newValues)
@@ -134,8 +131,7 @@
 
     private void Cancel()
     {
-        Visible = false;
-        VisibleChanged.InvokeAsync(Visible);
+        MudDialog.Close();
     }
 
     private void UploadFiles(IReadOnlyList<IBrowserFile> files)
@@ -167,8 +163,7 @@
             var stream = new MemoryStream();
             await browserFile.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
             stream.Position = 0; // Reset stream position
-            var attachment = new Attachment(stream, browserFile.Name);
-            attachments.Add(attachment);
+            attachments.Add(new Attachment(stream, browserFile.Name));
         }
 
         return attachments;

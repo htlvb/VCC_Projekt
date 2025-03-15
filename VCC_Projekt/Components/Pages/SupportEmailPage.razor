@@ -8,7 +8,7 @@
 <MudTabs Elevation="2" Rounded="true" Centered="true" @bind-ActiveTabIndex="activeTabIndex" ActivePanelIndexChanged="() => ClearSelectedEmails()">
     <MudTabPanel ToolTip="Unbeantwortet" Icon="@Icons.Material.Filled.MarkEmailUnread" BadgeColor="Color.Info" BadgeData="@unansweredEmails.Count">
         <br />
-        <MudDataGrid T="MimeMessage" Items="unansweredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" SelectedItems="selectedEmails">
+        <MudDataGrid T="MimeMessage" Items="unansweredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" SelectedItems="selectedEmails" SelectedItemsChanged="e => UpdateSelection(e)">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Unbeantwortete E-Mails</MudText>
                 <MudSpacer />
@@ -37,7 +37,7 @@
 
     <MudTabPanel ToolTip="Beantwortet" Icon="@Icons.Material.Filled.MarkEmailRead" BadgeColor="Color.Info" BadgeData="@answeredEmails.Count">
         <br />
-        <MudDataGrid T="MimeMessage" Items="@answeredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" SelectedItems="selectedEmails">
+        <MudDataGrid T="MimeMessage" Items="@answeredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter" SelectedItems="selectedEmails" SelectedItemsChanged="e => UpdateSelection(e)">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Beantwortete E-Mails</MudText>
                 <MudSpacer />
@@ -64,5 +64,3 @@
         </MudDataGrid>
     </MudTabPanel>
 </MudTabs>
-
-<EmailSendDialog VisibleChanged="@((bool value) => isEmailDialogVisible = value)" Visible="@isEmailDialogVisible" UseDropdown="false" FixedEmail="@fixedEmail" ReadOnly="true" Subject="@curSubject" baseMessageMail="@baseMessage" />
