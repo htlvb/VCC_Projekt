@@ -1,6 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using MailKit.Search;
+using MailKit;
+using Microsoft.Extensions.Options;
+using MimeKit;
 using System.Net;
 using System.Net.Mail;
+using VCC_Projekt.Components.Account.Pages.Manage;
+using MailKit.Net.Imap;
 
 
 public class EmailSender : IEmailSender<ApplicationUser>
@@ -298,5 +303,29 @@ public class EmailSender : IEmailSender<ApplicationUser>
         {
             Console.WriteLine($"Error sending Email: {ex.Message}");
         }
+    }
+
+    public async Task<List<MimeMessage>> GetEmailsAsync(string filter = "")
+    {
+        using var client = new ImapClient();
+        await client.ConnectAsync("imap.gmail.com", 993, true);
+        await client.AuthenticateAsync(_options.Email, _options.Password);
+
+        var inbox = client.Inbox;
+        await inbox.OpenAsync(FolderAccess.ReadOnly);
+
+        // Suche nach E-Mails, die den Filter im Betreff oder im Körper enthalten (Groß- und Kleinschreibung wird ignoriert)
+        var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
+        var uids = await inbox.SearchAsync(query);
+        var messages = new List<MimeMessage>();
+
+        foreach (var uid in uids)
+        {
+            var message = await inbox.GetMessageAsync(uid);
+            messages.Add(message);
+        }
+
+        await client.DisconnectAsync(true);
+        return messages;
     }
 }

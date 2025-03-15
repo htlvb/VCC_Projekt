@@ -22,7 +22,7 @@
         {
             <MudTextField @bind-Value="FixedEmail" ReadOnly="ReadOnly" Label="E-Mail-Adresse" Required="true" />
         }
-        <MudTextField @bind-Value="EmailSubject" Label="Betreff" Required="true" />
+        <MudTextField @bind-Value="EmailSubject" Label="Betreff" Required="true" ReadOnly="!string.IsNullOrEmpty(Subject)" />
         <MudExRichTextEdit Height="444" @ref="richTextEditor" Class="m-2" Placeholder="Nachricht bearbeiten" EnableResize="true" Tools="@(QuillTool.All().Where(q => q.Class != "" && q.Class != "ql-video").ToArray())" Immediate="false" Required="true" />
         <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
             <ActivatorContent>
@@ -55,11 +55,17 @@
     [Parameter] public bool UseDropdown { get; set; } = true;
     [Parameter] public string FixedEmail { get; set; }
     [Parameter] public bool ReadOnly { get; set; } = false;
+    [Parameter] public string Subject { get; set; }
 
     private string EmailSubject;
     private MudExRichTextEdit richTextEditor;
     private List<IBrowserFile> Attachments = new List<IBrowserFile>();
     private const long maxAllowedSize = 20 * 1024 * 1024; // 20 MB
+
+    protected override void OnParametersSet()
+    {
+        EmailSubject = string.IsNullOrEmpty(Subject) ? "" : Subject; 
+    }
 
     private async Task StartSendingEmails()
     {

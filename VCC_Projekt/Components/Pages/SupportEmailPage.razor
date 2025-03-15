@@ -1,0 +1,63 @@
+﻿@page "/support-emails"
+@inject EmailSender EmailService
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@using MimeKit
+
+<MudTabs Elevation="2" Rounded="true" Centered="true" @bind-ActiveTabIndex="activeTabIndex">
+    <MudTabPanel Text="Unbeantwortet" Icon="@Icons.Material.Filled.MarkEmailUnread">
+        <MudDataGrid T="MimeMessage" Items="unansweredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Unbeantwortete E-Mails</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Suchen..." Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn T="MimeMessage" />
+                <PropertyColumn Property="x => x.From.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => x.Subject" Title="Betreff" />
+                <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
+                <TemplateColumn Title="Aktionen">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(context.Item)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(context.Item)" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="MimeMessage" />
+            </PagerContent>
+        </MudDataGrid>
+    </MudTabPanel>
+
+    <MudTabPanel Text="Beantwortet" Icon="@Icons.Material.Filled.MarkEmailRead">
+        <MudDataGrid T="MimeMessage" Items="@answeredEmails" MultiSelection="true" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@_quickFilter">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Beantwortete E-Mails</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Suchen..." Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+            </ToolBarContent>
+            <Columns>
+                <SelectColumn T="MimeMessage" />
+                <PropertyColumn Property="x => x.From.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => x.Subject" Title="Betreff" />
+                <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
+                <TemplateColumn Title="Aktionen">
+                    <CellTemplate>
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(context.Item)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(context.Item)" />
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="MimeMessage" />
+            </PagerContent>
+        </MudDataGrid>
+    </MudTabPanel>
+</MudTabs>
+
+<EmailDialog VisibleChanged="@((bool value) => isEmailDialogVisible = value)" Visible="@isEmailDialogVisible" UseDropdown="false" FixedEmail="@fixedEmail" ReadOnly="true" Subject="@curSubject" />
