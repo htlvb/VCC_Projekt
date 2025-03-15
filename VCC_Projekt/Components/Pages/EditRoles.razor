@@ -1,10 +1,5 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
-@inject IDialogService DialogService
-@inject EmailSender emailSender
-@using MudExRichTextEditor
-@using MudExRichTextEditor.Types
-
 
 <PageTitle>Rollen ändern</PageTitle>
 
@@ -112,45 +107,8 @@
     </div>
 </div>
 
-
-
-
-<MudDialog @bind-Visible="isEmailDialogVisible">
-    <DialogContent>
-        <MudText Typo="Typo.h6">E-Mail senden</MudText>
-        <MudSelect T="string" SelectedValues="selectedEmails" SelectAll="true" SelectAllText="Alle auswählen" Label="An" MultiSelection="true" Required="true" SelectedValuesChanged="async e => ValuesChanged(e)">
-            @foreach (var email in users.Where(user => !string.IsNullOrEmpty(user.Email)))
-            {
-                <MudSelectItem Value="@email.Email">@email.Email</MudSelectItem>
-            }
-        </MudSelect>
-        <MudTextField @bind-Value="emailSubject" Label="Betreff" Required="true" />
-        <MudExRichTextEdit Height="444" @ref="richTextEditor" Class="m-2" Placeholder="Nachricht bearbeiten" EnableResize="true" Tools="@(QuillTool.All().Where(q => q.Class != "" && q.Class != "ql-video").ToArray())" Immediate="false" Required="true" />
-        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
-            <ActivatorContent>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
-                    Anhänge hinzufügen
-                </MudButton>
-            </ActivatorContent>
-        </MudFileUpload>
-        <MudList T="IBrowserFile">
-            @foreach (var file in attachments)
-            {
-                <MudListItem Icon="@Icons.Material.Filled.AttachFile" OnClick="@(() => RemoveAttachment(file))">
-                    @file.Name <code>@file.Size bytes</code>
-                </MudListItem>
-            }
-        </MudList>
-    </DialogContent>
-    <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="StartSendingEmails" Disabled="@string.IsNullOrEmpty(emailSubject)">Senden</MudButton>
-        <MudButton Color="Color.Secondary" OnClick="Cancel">Abbrechen</MudButton>
-    </DialogActions>
-</MudDialog>
-@code
-{
-
-}
+<EmailDialog Visible="@isEmailDialogVisible" VisibleChanged="@((bool value) => isEmailDialogVisible = value)" SelectedEmails="@selectedEmails" 
+    Emails="@users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList()" ReadOnly="false" UseDropdown="true"/>
 
 <style>
     body {

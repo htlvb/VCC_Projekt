@@ -13,12 +13,9 @@ namespace VCC_Projekt.Components.Pages
         private List<string> roles;
 
         private string _searchString;
-        int maxAllowedSize = 20 * 1024 * 1024;
 
         private bool isEmailDialogVisible;
-        private string emailSubject;
-        private List<string> selectedEmails;
-        private MudExRichTextEdit richTextEditor;
+        private List<string> selectedEmails = new();
 
         private List<IBrowserFile> attachments = new();
 
@@ -208,69 +205,6 @@ namespace VCC_Projekt.Components.Pages
             attachments.Clear();
             isEmailDialogVisible = true;
         }
-
-        private async Task StartSendingEmails()
-        {
-            List<Attachment> att = await ConvertToAttachmentsAsync(attachments);
-            attachments.Clear();
-            isEmailDialogVisible = false;
-            StateHasChanged();
-            Snackbar.Add("Emails werden geschickt...", Severity.Info);
-            await emailSender.SendBulkEmailsAsync(selectedEmails, emailSubject, await richTextEditor.GetHtml(), att);
-            Snackbar.Clear();
-            Snackbar.Add("Emails wurden geschickt!", Severity.Success);
-        }
-
-        private async Task ValuesChanged(IEnumerable<string> newValues)
-        {
-            selectedEmails = newValues.ToList();
-            await Task.CompletedTask;
-        }
-
-        private async void Cancel()
-        {
-            isEmailDialogVisible = false;
-            StateHasChanged();
-        }
-
-        private void UploadFiles(IReadOnlyList<IBrowserFile> files)
-        {
-
-            foreach (var file in files)
-            {
-                if (file.Size > maxAllowedSize)
-                {
-                    // Snackbar-Meldung anzeigen, falls die Datei zu groß ist
-                    Snackbar.Add($"Datei {file.Name} ist zu groß (max. 20 MB erlaubt).", Severity.Error);
-                }
-                else
-                {
-                    // Datei zur Liste der Anhänge hinzufügen
-                    attachments.Add(file);
-                }
-            }
-        }
-        private void RemoveAttachment(IBrowserFile file)
-        {
-            attachments.Remove(file);
-        }
-
-        private async Task<List<Attachment>> ConvertToAttachmentsAsync(List<IBrowserFile> browserFiles)
-        {
-            var attachments = new List<Attachment>();
-
-            foreach (var browserFile in browserFiles)
-            {
-                var stream = new MemoryStream();
-                await browserFile.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
-                stream.Position = 0; // Reset stream position
-                var attachment = new Attachment(stream, browserFile.Name);
-                attachments.Add(attachment);
-            }
-
-            return attachments;
-        }
-
     }
 
 
