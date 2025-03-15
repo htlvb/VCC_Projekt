@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
-using MudBlazor.Extensions.Components;
 using MudExRichTextEditor;
-using MudExRichTextEditor.Types;
+using Nextended.Core.Extensions;
 using System.Net.Mail;
 
 namespace VCC_Projekt.Components.Pages
@@ -13,16 +13,19 @@ namespace VCC_Projekt.Components.Pages
         private List<string> roles;
 
         private string _searchString;
+        int maxAllowedSize = 20 * 1024 * 1024;
 
         private bool isEmailDialogVisible;
         private string emailSubject;
-        private List<string> selectedEmails = new List<string>();
-        private MudExRichTextEdit Editor;
-        private List<IBrowserFile> attachments = new List<IBrowserFile>();
+        private List<string> selectedEmails;
+        private MudExRichTextEdit richTextEditor;
+
+        private List<IBrowserFile> attachments = new();
 
         // For the Grid
         private List<EditRoleUser> users;
         private List<EditRoleUser> allUsers; // Gemeinsame Liste für alle Benutzer
+
 
 
         protected override void OnInitialized()
@@ -201,34 +204,51 @@ namespace VCC_Projekt.Components.Pages
 
         private void OpenEmailDialog(string email)
         {
-            selectedEmails.Clear();
+            selectedEmails = new List<string>() {email };
             attachments.Clear();
-            selectedEmails.Add(email);
             isEmailDialogVisible = true;
         }
 
         private async Task StartSendingEmails()
         {
-            var recipients = selectedEmails;
-            var subject = emailSubject;
-            string? body = await Editor.GetHtml();
-
-            Snackbar.Add("Emails werden geschickt...", Severity.Info);
+            List<Attachment> att = await ConvertToAttachmentsAsync(attachments);
+            attachments.Clear();
             isEmailDialogVisible = false;
             StateHasChanged();
-            await emailSender.SendBulkEmailsAsync(selectedEmails, emailSubject, body, await ConvertToAttachmentsAsync(attachments));
+            Snackbar.Add("Emails werden geschickt...", Severity.Info);
+            await emailSender.SendBulkEmailsAsync(selectedEmails, emailSubject, await richTextEditor.GetHtml(), att);
             Snackbar.Clear();
             Snackbar.Add("Emails wurden geschickt!", Severity.Success);
         }
 
-        private void Cancel()
+        private async Task ValuesChanged(IEnumerable<string> newValues)
+        {
+            selectedEmails = newValues.ToList();
+            await Task.CompletedTask;
+        }
+
+        private async void Cancel()
         {
             isEmailDialogVisible = false;
+            StateHasChanged();
         }
 
         private void UploadFiles(IReadOnlyList<IBrowserFile> files)
         {
-            attachments = files.ToList();
+
+            foreach (var file in files)
+            {
+                if (file.Size > maxAllowedSize)
+                {
+                    // Snackbar-Meldung anzeigen, falls die Datei zu groß ist
+                    Snackbar.Add($"Datei {file.Name} ist zu groß (max. 20 MB erlaubt).", Severity.Error);
+                }
+                else
+                {
+                    // Datei zur Liste der Anhänge hinzufügen
+                    attachments.Add(file);
+                }
+            }
         }
         private void RemoveAttachment(IBrowserFile file)
         {
@@ -242,7 +262,7 @@ namespace VCC_Projekt.Components.Pages
             foreach (var browserFile in browserFiles)
             {
                 var stream = new MemoryStream();
-                await browserFile.OpenReadStream().CopyToAsync(stream);
+                await browserFile.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
                 stream.Position = 0; // Reset stream position
                 var attachment = new Attachment(stream, browserFile.Name);
                 attachments.Add(attachment);
@@ -250,6 +270,7 @@ namespace VCC_Projekt.Components.Pages
 
             return attachments;
         }
+
     }
 
 

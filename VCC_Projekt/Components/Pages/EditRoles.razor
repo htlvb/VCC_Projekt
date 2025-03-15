@@ -118,14 +118,14 @@
 <MudDialog @bind-Visible="isEmailDialogVisible">
     <DialogContent>
         <MudText Typo="Typo.h6">E-Mail senden</MudText>
-        <MudSelect T="string" SelectAll="true" SelectedValues="selectedEmails" SelectAllText="@("Alle auswählen")" Label="An" MultiSelection="true" Required="true">
+        <MudSelect T="string" SelectedValues="selectedEmails" SelectAll="true" SelectAllText="Alle auswählen" Label="An" MultiSelection="true" Required="true" SelectedValuesChanged="async e => ValuesChanged(e)">
             @foreach (var email in users.Where(user => !string.IsNullOrEmpty(user.Email)))
             {
                 <MudSelectItem Value="@email.Email">@email.Email</MudSelectItem>
             }
         </MudSelect>
         <MudTextField @bind-Value="emailSubject" Label="Betreff" Required="true" />
-        <MudExRichTextEdit @ref="Editor" Height="444" Class="m-2" Placeholder="Nachricht bearbeiten" EnableResize="true" Tools="@(QuillTool.All().Where(q => q.Class != "" && q.Class != "ql-video").ToArray())" />
+        <MudExRichTextEdit Height="444" @ref="richTextEditor" Class="m-2" Placeholder="Nachricht bearbeiten" EnableResize="true" Tools="@(QuillTool.All().Where(q => q.Class != "" && q.Class != "ql-video").ToArray())" Immediate="false" Required="true" />
         <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
             <ActivatorContent>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
@@ -133,23 +133,24 @@
                 </MudButton>
             </ActivatorContent>
         </MudFileUpload>
-        @if (attachments != null && attachments.Any())
-        {
-            <MudList T="IBrowserFile">
-                @foreach (var file in attachments)
-                {
-                    <MudListItem Icon="@Icons.Material.Filled.AttachFile" OnClick="@(() => RemoveAttachment(file))">
-                        @file.Name <code>@file.Size bytes</code>
-                    </MudListItem>
-                }
-            </MudList>
-        }
+        <MudList T="IBrowserFile">
+            @foreach (var file in attachments)
+            {
+                <MudListItem Icon="@Icons.Material.Filled.AttachFile" OnClick="@(() => RemoveAttachment(file))">
+                    @file.Name <code>@file.Size bytes</code>
+                </MudListItem>
+            }
+        </MudList>
     </DialogContent>
     <DialogActions>
         <MudButton Color="Color.Primary" OnClick="StartSendingEmails" Disabled="@string.IsNullOrEmpty(emailSubject)">Senden</MudButton>
         <MudButton Color="Color.Secondary" OnClick="Cancel">Abbrechen</MudButton>
     </DialogActions>
 </MudDialog>
+@code
+{
+
+}
 
 <style>
     body {

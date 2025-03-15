@@ -22,16 +22,23 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
     public async Task SendEmailAsync(MailMessage message)
     {
-        message.From = new MailAddress(_options.Email);
-        try
+        using (var smtpClient = new SmtpClient(_options.Host, _options.Port))
         {
-            await _smtpClient.SendMailAsync(message);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error sending Email: {ex.Message} To: {string.Join(",",message.To)}");
+            smtpClient.Credentials = new NetworkCredential(_options.Email, _options.Password);
+            smtpClient.EnableSsl = true;
+
+            message.From = new MailAddress(_options.Email);
+            try
+            {
+                await smtpClient.SendMailAsync(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending Email: {ex.Message} To: {string.Join(",", message.To)}");
+            }
         }
     }
+
     public async Task SendBulkEmailsAsync(List<string> recipients, string subject, string body, List<Attachment> attachments)
     {
         var tasks = recipients.Select(email =>
@@ -115,7 +122,12 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         try
         {
-            await _smtpClient.SendMailAsync(message);
+            using (var smtpClient = new SmtpClient(_options.Host, _options.Port))
+            {
+                smtpClient.Credentials = new NetworkCredential(_options.Email, _options.Password);
+                smtpClient.EnableSsl = true;
+                await smtpClient.SendMailAsync(message);
+            }
         }
         catch (Exception ex)
         {
@@ -193,7 +205,12 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         try
         {
-            await _smtpClient.SendMailAsync(message);
+            using (var smtpClient = new SmtpClient(_options.Host, _options.Port))
+            {
+                smtpClient.Credentials = new NetworkCredential(_options.Email, _options.Password);
+                smtpClient.EnableSsl = true;
+                await smtpClient.SendMailAsync(message);
+            }
         }
         catch (Exception ex)
         {
@@ -270,7 +287,12 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         try
         {
-            await _smtpClient.SendMailAsync(message);
+            using (var smtpClient = new SmtpClient(_options.Host, _options.Port))
+            {
+                smtpClient.Credentials = new NetworkCredential(_options.Email, _options.Password);
+                smtpClient.EnableSsl = true;
+                await smtpClient.SendMailAsync(message);
+            }
         }
         catch (Exception ex)
         {
