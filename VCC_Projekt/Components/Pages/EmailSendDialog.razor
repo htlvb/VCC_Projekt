@@ -78,7 +78,7 @@
         var tempFixedEmail = FixedEmail;
 
         Snackbar.Add("Emails werden geschickt...", Severity.Info);
-
+        MudDialog.Close();
         if (UseDropdown)
         {
             await emailSender.SendBulkEmailsAsync(tempSelectedEmails, EmailSubject, await richTextEditor.GetHtml(), att);
@@ -120,7 +120,6 @@
 
         Snackbar.Clear();
         Snackbar.Add("Emails wurden geschickt!", Severity.Success);
-        MudDialog.Close();
     }
 
     private async Task ValuesChanged(IEnumerable<string> newValues)

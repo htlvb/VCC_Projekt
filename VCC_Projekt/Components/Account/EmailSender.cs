@@ -14,20 +14,14 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 public class EmailSender : IEmailSender<ApplicationUser>
 {
     private readonly MailOptions _options;
-    private readonly SmtpClient _smtpClient;
     public string emailAddress;
+    public string domain;
 
     public EmailSender(IOptions<MailOptions> mailOptions)
     {
         _options = mailOptions.Value;
-        _smtpClient = new SmtpClient
-        {
-            Host = _options.Host,
-            Port = _options.Port,
-            Credentials = new NetworkCredential(_options.Email, _options.Password),
-            EnableSsl = true
-        };
         emailAddress = _options.Email;
+        domain = emailAddress.Split("@",2)[1];
     }
 
     public async Task SendEmailAsync(MailMessage message)
@@ -313,7 +307,7 @@ public class EmailSender : IEmailSender<ApplicationUser>
     public async Task<List<MimeMessage>> GetEmailsAsync(string filter = "")
     {
         using var client = new ImapClient();
-        await client.ConnectAsync("imap.gmail.com", 993, true);
+        await client.ConnectAsync($"imap.{domain.ToLower()}", 993, true);
         await client.AuthenticateAsync(_options.Email, _options.Password);
 
         var inbox = client.Inbox;
@@ -351,7 +345,7 @@ public class EmailSender : IEmailSender<ApplicationUser>
         using (var client = new ImapClient())
         {
             // Verbindung zum IMAP-Server herstellen
-            await client.ConnectAsync("imap.gmail.com", 993, true);
+            await client.ConnectAsync($"imap.{domain.ToLower()}", 993, true);
             await client.AuthenticateAsync(_options.Email, _options.Password);
 
             // Alle Ordner durchlaufen und E-Mails löschen

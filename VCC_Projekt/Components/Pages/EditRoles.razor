@@ -1,5 +1,6 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
+@inject IDialogService DialogService
 
 <PageTitle>Rollen ändern</PageTitle>
 
@@ -107,7 +108,7 @@
     </div>
 </div>
 
-<EmailSendDialog Visible="@isEmailDialogVisible" VisibleChanged="@((bool value) => isEmailDialogVisible = value)" SelectedEmails="@selectedEmails" 
+<EmailSendDialog SelectedEmails="@selectedEmails" 
     Emails="@users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList()" ReadOnly="false" UseDropdown="true"/>
 
 <style>

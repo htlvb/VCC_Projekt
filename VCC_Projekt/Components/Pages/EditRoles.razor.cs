@@ -14,10 +14,7 @@ namespace VCC_Projekt.Components.Pages
 
         private string _searchString;
 
-        private bool isEmailDialogVisible;
         private List<string> selectedEmails = new();
-
-        private List<IBrowserFile> attachments = new();
 
         // For the Grid
         private List<EditRoleUser> users;
@@ -199,11 +196,21 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
-        private void OpenEmailDialog(string email)
+        private async void OpenEmailDialog(string email)
         {
             selectedEmails = new List<string>() {email };
-            attachments.Clear();
-            isEmailDialogVisible = true;
+            var parameters = new DialogParameters
+                                {
+                                    { "SelectedEmails", selectedEmails },
+                                    { "Emails", users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList() },
+                                    { "ReadOnly", false },
+                                    { "UseDropdown", true }
+                                };
+
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+            var dialog = await DialogService.ShowAsync<EmailSendDialog>("Email senden", parameters, options);
+
         }
     }
 
