@@ -7,7 +7,7 @@ namespace VCC_Projekt.Components.Pages
 {
     public partial class SupportEmailPage
     {
-        private List<MimeMessage> supportEmails = new();
+        private List<(MimeMessage Message, MessageFlags? Flags)> supportEmails = new();
         private List<MimeMessage> unansweredEmails = new();
         private List<MimeMessage> answeredEmails = new();
         private string _searchString = string.Empty;
@@ -25,11 +25,11 @@ namespace VCC_Projekt.Components.Pages
 
         private void CategorizeEmails()
         {
-            unansweredEmails = supportEmails.Where(email => !IsEmailAnswered(email)).ToList();
-            answeredEmails = supportEmails.Where(IsEmailAnswered).ToList();
+            unansweredEmails = supportEmails.Where(email => !IsEmailAnswered(email.Message, email.Flags)).Select(e => e.Message).ToList();
+            answeredEmails = supportEmails.Where(email => IsEmailAnswered(email.Message, email.Flags)).Select(e => e.Message).ToList();
         }
 
-        private bool IsEmailAnswered(MimeMessage email)
+        private bool IsEmailAnswered(MimeMessage email, MessageFlags? flags)
         {
             // Ihre E-Mail-Adresse (z. B. "ihre-email@example.com")
             string yourEmail = EmailService.emailAddress;
@@ -38,10 +38,10 @@ namespace VCC_Projekt.Components.Pages
             bool isFromYou = email.From.Mailboxes.Any(m => m.Address.Equals(yourEmail, StringComparison.OrdinalIgnoreCase));
 
             // Überprüfen, ob die E-Mail als beantwortet markiert ist
-            // bool isAnswered = email. .HasFlag(MessageFlags.Answered);
+            bool isAnswered = flags.HasValue && flags.Value.HasFlag(MessageFlags.Answered);
 
-            // Wenn die E-Mail von Ihnen stammt, eine Antwort ist oder bereits als beantwortet markiert ist, gilt sie als beantwortet
-            return isFromYou; //isAnswered;
+            // Wenn die E-Mail von Ihnen stammt oder bereits als beantwortet markiert ist, gilt sie als beantwortet
+            return isFromYou || isAnswered;
         }
 
         private async Task OpenEmailDialog(MimeMessage email)
@@ -65,7 +65,7 @@ namespace VCC_Projekt.Components.Pages
 
             if (!result.Canceled)
             {
-                EmailService.MarkEmailAsAnswered(email.MessageId);
+                await EmailService.MarkEmailAsAnsweredByMessageIdAsync(email.MessageId);
                 unansweredEmails.Remove(email);
                 StateHasChanged();
             }
@@ -92,9 +92,9 @@ namespace VCC_Projekt.Components.Pages
             var dialogResult = await result.Result;
             if (!dialogResult.Canceled)
             {
-                Snackbar.Add("Emails werden gelöscht...", Severity.Info);
+                Snackbar.Add("E-Mail wirden gelöscht...", Severity.Info);
                 await EmailService.DeleteEmailsAsync(new List<string>() { email.MessageId });
-                supportEmails.Remove(email);
+                supportEmails.RemoveAll(em => em.Message.MessageId == email.MessageId);
                 CategorizeEmails(); // Kategorien aktualisieren
                 Snackbar.Clear();
                 Snackbar.Add("E-Mail wurde gelöscht.", Severity.Success);
@@ -105,20 +105,30 @@ namespace VCC_Projekt.Components.Pages
         private async Task DeleteEmails()
         {
             var parameters = new DialogParameters();
-            selectedEmails = selectedEmails;
             parameters.Add("Question", $"Willst du wirklich {selectedEmails.Count} Emails löschen?");
             var result = await DialogService.ShowAsync<DeleteEmailDialog>("E-Mail löschen", parameters);
             var dialogResult = await result.Result;
+
             if (!dialogResult.Canceled)
             {
-                Snackbar.Add("Emails werden gelöscht...", Severity.Info);
+                Snackbar.Add("E-Mails werden gelöscht...", Severity.Info);
+
+                // Löschen der E-Mails
                 await EmailService.DeleteEmailsAsync(new List<string>(selectedEmails.Select(e => e.MessageId).ToList()));
-                supportEmails.RemoveAll(e => selectedEmails.Contains(e));
+
+                // Entfernen der E-Mails aus supportEmails
+                supportEmails.RemoveAll(e => selectedEmails.Any(se => se.MessageId == e.Message.MessageId));
+
+                // Leeren der ausgewählten E-Mails
                 selectedEmails.Clear();
-                CategorizeEmails(); // Kategorien aktualisieren
+
+                // Kategorien aktualisieren
+                CategorizeEmails();
+
                 Snackbar.Clear();
                 Snackbar.Add("E-Mail wurde gelöscht.", Severity.Success);
             }
+
             StateHasChanged();
         }
 
