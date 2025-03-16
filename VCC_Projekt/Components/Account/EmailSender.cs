@@ -5,7 +5,6 @@ using Microsoft.Extensions.Options;
 using MimeKit;
 using System.Net;
 using System.Net.Mail;
-using System.Threading.Tasks;
 
 public class EmailSender : IEmailSender<ApplicationUser>
 {
@@ -84,6 +83,99 @@ public class EmailSender : IEmailSender<ApplicationUser>
             return SendEmailAsync(message);
         }).ToList();
         await Task.WhenAll(tasks).ConfigureAwait(false);
+    }
+
+    public async Task<List<(MimeMessage Message, MessageFlags? Flags)>> GetEmailsAsync(string filter = "")
+    {
+        await EnsureImapConnectedAsync().ConfigureAwait(false);
+
+        var inbox = _imapClient.Inbox;
+        await inbox.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
+
+        var messagesWithFlags = new List<(MimeMessage Message, MessageFlags? Flags)>();
+
+        if (string.IsNullOrEmpty(filter))
+        {
+            var uids = await inbox.SearchAsync(SearchQuery.All).ConfigureAwait(false);
+            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
+
+            foreach (var summary in summaries)
+            {
+                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
+                messagesWithFlags.Add((message, summary.Flags));
+            }
+        }
+        else
+        {
+            var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
+            var uids = await inbox.SearchAsync(query).ConfigureAwait(false);
+            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
+
+            foreach (var summary in summaries)
+            {
+                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
+                messagesWithFlags.Add((message, summary.Flags));
+            }
+        }
+
+        _operationCount++;
+        return messagesWithFlags;
+    }
+
+    public async Task DeleteEmailsAsync(List<string> messageIds)
+    {
+        await EnsureImapConnectedAsync().ConfigureAwait(false);
+
+        var inboxFolder = _imapClient.Inbox;
+        await inboxFolder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
+
+        await DeleteEmailsInFolderAsync(inboxFolder, messageIds).ConfigureAwait(false);
+
+        _operationCount++;
+    }
+
+    private async Task DeleteEmailsInFolderAsync(IMailFolder folder, List<string> messageIds)
+    {
+        await folder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
+
+        foreach (var messageId in messageIds)
+        {
+            var uids = await folder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId)).ConfigureAwait(false);
+            await folder.AddFlagsAsync(uids, MessageFlags.Deleted, true).ConfigureAwait(false);
+        }
+
+        await folder.ExpungeAsync().ConfigureAwait(false);
+    }
+
+    public async Task MarkEmailAsAnsweredByMessageIdAsync(string messageId)
+    {
+        await EnsureImapConnectedAsync().ConfigureAwait(false);
+
+        var inboxFolder = _imapClient.Inbox;
+        await inboxFolder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
+
+        var emailSummaries = await inboxFolder.FetchAsync(0, -1, MessageSummaryItems.UniqueId | MessageSummaryItems.Envelope).ConfigureAwait(false);
+
+        UniqueId? emailId = null;
+        foreach (var summary in emailSummaries)
+        {
+            if (summary.Envelope.MessageId == messageId)
+            {
+                emailId = summary.UniqueId;
+                break;
+            }
+        }
+
+        if (emailId.HasValue)
+        {
+            await inboxFolder.AddFlagsAsync(emailId.Value, MessageFlags.Answered, true).ConfigureAwait(false);
+        }
+        else
+        {
+            throw new Exception("Keine E-Mail mit der angegebenen MessageId gefunden.");
+        }
+
+        _operationCount++;
     }
 
     public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
@@ -284,98 +376,5 @@ public class EmailSender : IEmailSender<ApplicationUser>
         };
         message.To.Add(email);
         await SendEmailAsync(message).ConfigureAwait(false);
-    }
-
-    public async Task<List<(MimeMessage Message, MessageFlags? Flags)>> GetEmailsAsync(string filter = "")
-    {
-        await EnsureImapConnectedAsync().ConfigureAwait(false);
-
-        var inbox = _imapClient.Inbox;
-        await inbox.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
-
-        var messagesWithFlags = new List<(MimeMessage Message, MessageFlags? Flags)>();
-
-        if (string.IsNullOrEmpty(filter))
-        {
-            var uids = await inbox.SearchAsync(SearchQuery.All).ConfigureAwait(false);
-            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
-
-            foreach (var summary in summaries)
-            {
-                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
-                messagesWithFlags.Add((message, summary.Flags));
-            }
-        }
-        else
-        {
-            var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
-            var uids = await inbox.SearchAsync(query).ConfigureAwait(false);
-            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
-
-            foreach (var summary in summaries)
-            {
-                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
-                messagesWithFlags.Add((message, summary.Flags));
-            }
-        }
-
-        _operationCount++;
-        return messagesWithFlags;
-    }
-
-    public async Task DeleteEmailsAsync(List<string> messageIds)
-    {
-        await EnsureImapConnectedAsync().ConfigureAwait(false);
-
-        var inboxFolder = _imapClient.Inbox;
-        await inboxFolder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
-
-        await DeleteEmailsInFolderAsync(inboxFolder, messageIds).ConfigureAwait(false);
-
-        _operationCount++;
-    }
-
-    private async Task DeleteEmailsInFolderAsync(IMailFolder folder, List<string> messageIds)
-    {
-        await folder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
-
-        foreach (var messageId in messageIds)
-        {
-            var uids = await folder.SearchAsync(SearchQuery.HeaderContains("Message-Id", messageId)).ConfigureAwait(false);
-            await folder.AddFlagsAsync(uids, MessageFlags.Deleted, true).ConfigureAwait(false);
-        }
-
-        await folder.ExpungeAsync().ConfigureAwait(false);
-    }
-
-    public async Task MarkEmailAsAnsweredByMessageIdAsync(string messageId)
-    {
-        await EnsureImapConnectedAsync().ConfigureAwait(false);
-
-        var inboxFolder = _imapClient.Inbox;
-        await inboxFolder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
-
-        var emailSummaries = await inboxFolder.FetchAsync(0, -1, MessageSummaryItems.UniqueId | MessageSummaryItems.Envelope).ConfigureAwait(false);
-
-        UniqueId? emailId = null;
-        foreach (var summary in emailSummaries)
-        {
-            if (summary.Envelope.MessageId == messageId)
-            {
-                emailId = summary.UniqueId;
-                break;
-            }
-        }
-
-        if (emailId.HasValue)
-        {
-            await inboxFolder.AddFlagsAsync(emailId.Value, MessageFlags.Answered, true).ConfigureAwait(false);
-        }
-        else
-        {
-            throw new Exception("Keine E-Mail mit der angegebenen MessageId gefunden.");
-        }
-
-        _operationCount++;
     }
 }
