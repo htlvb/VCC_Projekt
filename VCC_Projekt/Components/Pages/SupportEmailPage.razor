@@ -12,6 +12,7 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Unbeantwortete E-Mails</MudText>
                 <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="() => RefreshEmails()" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmails()" />
                 <MudTextField @bind-Value="_searchString" Placeholder="Suchen..." Adornment="Adornment.Start" Immediate="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
@@ -41,6 +42,7 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Beantwortete E-Mails</MudText>
                 <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="() => RefreshEmails()" />
                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmails()" />
                 <MudTextField @bind-Value="_searchString" Placeholder="Suchen..." Adornment="Adornment.Start" Immediate="true"
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />

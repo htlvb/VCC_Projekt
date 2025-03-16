@@ -70,6 +70,7 @@
 
     private async Task StartSendingEmails()
     {
+        string body = await richTextEditor.GetHtml();
         List<Attachment> att = await ConvertToAttachmentsAsync(Attachments);
         Attachments.Clear();
 
@@ -77,18 +78,18 @@
         var tempSelectedEmails = new List<string>(SelectedEmails);
         var tempFixedEmail = FixedEmail;
 
-        Snackbar.Add("Emails werden geschickt...", Severity.Info);
+        Snackbar.Add("Email wirden geschickt...", Severity.Info);
         MudDialog.Close();
         if (UseDropdown)
         {
-            await emailSender.SendBulkEmailsAsync(tempSelectedEmails, EmailSubject, await richTextEditor.GetHtml(), att);
+            await emailSender.SendBulkEmailsAsync(tempSelectedEmails, EmailSubject, body, att);
         }
         else
         {
             var message = new MailMessage
                 {
                     Subject = EmailSubject,
-                    Body = await richTextEditor.GetHtml(),
+                    Body = body,
                     IsBodyHtml = true
                 };
             if (baseMessageMail != null)
@@ -119,7 +120,7 @@
         }
 
         Snackbar.Clear();
-        Snackbar.Add("Emails wurden geschickt!", Severity.Success);
+        Snackbar.Add("Email wurden geschickt!", Severity.Success);
     }
 
     private async Task ValuesChanged(IEnumerable<string> newValues)
@@ -130,7 +131,7 @@
 
     private void Cancel()
     {
-        MudDialog.Close();
+        MudDialog.Cancel();
     }
 
     private void UploadFiles(IReadOnlyList<IBrowserFile> files)

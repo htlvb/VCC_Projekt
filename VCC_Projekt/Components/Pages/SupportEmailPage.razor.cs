@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using MailKit;
 using MimeKit;
 using MudBlazor;
 using System.Net.Mail;
@@ -7,15 +7,11 @@ namespace VCC_Projekt.Components.Pages
 {
     public partial class SupportEmailPage
     {
-        private bool isEmailDialogVisible = false;
-        string curSubject;
-        private string fixedEmail;
         private List<MimeMessage> supportEmails = new();
         private List<MimeMessage> unansweredEmails = new();
         private List<MimeMessage> answeredEmails = new();
         private string _searchString = string.Empty;
         private int activeTabIndex = 0;
-        private MimeMessage baseMessage = null;
         private HashSet<MimeMessage> selectedEmails = new();
 
         protected override async Task OnInitializedAsync()
@@ -24,7 +20,7 @@ namespace VCC_Projekt.Components.Pages
             supportEmails = await EmailService.GetEmailsAsync("support");
             CategorizeEmails();
             Snackbar.Clear();
-            Snackbar.Add("Emails erfolgreich geladen.",Severity.Success);
+            Snackbar.Add("Emails erfolgreich geladen.", Severity.Success);
         }
 
         private void CategorizeEmails()
@@ -35,17 +31,26 @@ namespace VCC_Projekt.Components.Pages
 
         private bool IsEmailAnswered(MimeMessage email)
         {
-            return email.From.Mailboxes.Any(m => m.Address.Contains("vcc",StringComparison.OrdinalIgnoreCase));
+            // Ihre E-Mail-Adresse (z. B. "ihre-email@example.com")
+            string yourEmail = EmailService.emailAddress;
+
+            // Überprüfen, ob die E-Mail von Ihnen stammt (d. h. Sie haben geantwortet)
+            bool isFromYou = email.From.Mailboxes.Any(m => m.Address.Equals(yourEmail, StringComparison.OrdinalIgnoreCase));
+
+            // Überprüfen, ob die E-Mail als beantwortet markiert ist
+            // bool isAnswered = email. .HasFlag(MessageFlags.Answered);
+
+            // Wenn die E-Mail von Ihnen stammt, eine Antwort ist oder bereits als beantwortet markiert ist, gilt sie als beantwortet
+            return isFromYou; //isAnswered;
         }
 
         private async Task OpenEmailDialog(MimeMessage email)
         {
-            if(!email.Subject.StartsWith("AW",StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
+            string curSubject = "";
+            if (!email.Subject.StartsWith("AW", StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
             else curSubject = email.Subject;
-            isEmailDialogVisible = true;
 
-
-            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+            var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
             var parameters = new DialogParameters
             {
                 { "UseDropdown", false },
@@ -60,10 +65,9 @@ namespace VCC_Projekt.Components.Pages
 
             if (!result.Canceled)
             {
+                EmailService.MarkEmailAsAnswered(email.MessageId);
                 unansweredEmails.Remove(email);
-                supportEmails.Remove(email);
                 StateHasChanged();
-                await EmailService.DeleteEmailsAsync(new List<string> { email.MessageId });
             }
 
         }
@@ -121,7 +125,7 @@ namespace VCC_Projekt.Components.Pages
         private Func<MimeMessage, bool> _quickFilter => x =>
         {
             if (string.IsNullOrEmpty(_searchString)) return true;
-            if (x.From.Mailboxes.FirstOrDefault().Address.Contains(_searchString,StringComparison.OrdinalIgnoreCase)) return true;
+            if (x.From.Mailboxes.FirstOrDefault().Address.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
             if (x.Subject.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
             if (x.Date.ToString().Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
             if (x.From.Mailboxes.FirstOrDefault().Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase)) return true;
@@ -137,6 +141,11 @@ namespace VCC_Projekt.Components.Pages
         private void ClearSelectedEmails()
         {
             selectedEmails.Clear();
+        }
+        private async Task RefreshEmails()
+        {
+            await OnInitializedAsync();
+            StateHasChanged();
         }
 
 

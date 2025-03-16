@@ -312,7 +312,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         var inbox = client.Inbox;
         await inbox.OpenAsync(FolderAccess.ReadOnly);
-
         // Suche nach E-Mails, die den Filter im Betreff oder im Körper enthalten (Groß- und Kleinschreibung wird ignoriert)
         var messages = new List<MimeMessage>();
         if(string.IsNullOrEmpty(filter))
@@ -372,5 +371,24 @@ public class EmailSender : IEmailSender<ApplicationUser>
         }
         // Änderungen speichern und E-Mails endgültig löschen
         await folder.ExpungeAsync();
+    }
+
+    public async Task MarkEmailAsAnswered(string uniqueIdString)
+    {
+        using (var client = new ImapClient())
+        {
+            await client.ConnectAsync($"imap.{domain.ToLower()}", 993, true);
+            await client.AuthenticateAsync(_options.Email, _options.Password);
+
+            // Öffnen Sie den Posteingangsordner im Lese-/Schreibmodus
+            var inboxFolder = client.Inbox;
+            await inboxFolder.OpenAsync(FolderAccess.ReadWrite);
+
+            // Konvertieren Sie die UniqueId von string zu UniqueId
+            UniqueId emailId = UniqueId.Parse(uniqueIdString);
+
+            // Markieren Sie die E-Mail als beantwortet
+            await inboxFolder.AddFlagsAsync(emailId, MessageFlags.Answered, true);
+        }
     }
 }
