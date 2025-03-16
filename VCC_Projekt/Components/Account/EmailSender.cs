@@ -320,14 +320,26 @@ public class EmailSender : IEmailSender<ApplicationUser>
         await inbox.OpenAsync(FolderAccess.ReadOnly);
 
         // Suche nach E-Mails, die den Filter im Betreff oder im Körper enthalten (Groß- und Kleinschreibung wird ignoriert)
-        var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
-        var uids = await inbox.SearchAsync(query);
         var messages = new List<MimeMessage>();
-
-        foreach (var uid in uids)
+        if(string.IsNullOrEmpty(filter))
         {
-            var message = await inbox.GetMessageAsync(uid);
-            messages.Add(message);
+            var uids = await inbox.SearchAsync(SearchQuery.All);
+            foreach (var uid in uids)
+            {
+                var message = await inbox.GetMessageAsync(uid);
+                messages.Add(message);
+            }
+        }
+        else
+        {
+            var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
+            var uids = await inbox.SearchAsync(query);
+
+            foreach (var uid in uids)
+            {
+                var message = await inbox.GetMessageAsync(uid);
+                messages.Add(message);
+            }
         }
 
         await client.DisconnectAsync(true);
