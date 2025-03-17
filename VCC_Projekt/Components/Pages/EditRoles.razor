@@ -1,6 +1,6 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
-
+@inject IDialogService DialogService
 
 <PageTitle>Rollen ändern</PageTitle>
 
@@ -31,9 +31,15 @@
                     <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
                     <TemplateColumn Title="Email" Editable="false" Required="false">
                         <CellTemplate>
-                            <MudText Typo="Typo.body1">
-                                <a href="mailto:@context.Item.Email">@context.Item.Email</a>
-                            </MudText>
+                            <div class="email-cell">
+                                <span>@context.Item.Email</span>
+                                @if (!string.IsNullOrEmpty(context.Item.Email))
+                                {
+                                    <MudTooltip Text="Email senden" Placement="Placement.Bottom">
+                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="@(() => OpenEmailDialog(context.Item.Email))" />
+                                    </MudTooltip>
+                                }
+                            </div>
                         </CellTemplate>
                     </TemplateColumn>
                     <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false" />
@@ -71,8 +77,7 @@
                              CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
                     <Columns>
                         <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
-                        <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false">
-                        </PropertyColumn>
+                        <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false"/>
                         <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
                         <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" Context="child_context">
                             <EditTemplate Context="child_context">
@@ -103,6 +108,9 @@
     </div>
 </div>
 
+<EmailSendDialog SelectedEmails="@selectedEmails" 
+    Emails="@users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList()" ReadOnly="false" UseDropdown="true"/>
+
 <style>
     body {
         background-color: #f8f9fa;
@@ -110,6 +118,13 @@
 
     h1, h2, h3 {
         color: #134883;
+    }
+
+    .email-cell {
+        display: flex;
+        align-items: center; /* Vertikal zentrieren */
+        justify-content: space-between; /* Button am Ende der Zelle */
+        width: 100%; /* Volle Breite der Zelle nutzen */
     }
 
     .btn-success {

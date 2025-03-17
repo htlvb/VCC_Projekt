@@ -1,4 +1,9 @@
-﻿using MudBlazor;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using MudBlazor;
+using MudExRichTextEditor;
+using Nextended.Core.Extensions;
+using System.Net.Mail;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -9,9 +14,13 @@ namespace VCC_Projekt.Components.Pages
 
         private string _searchString;
 
+        private List<string> selectedEmails = new();
+
         // For the Grid
         private List<EditRoleUser> users;
         private List<EditRoleUser> allUsers; // Gemeinsame Liste für alle Benutzer
+
+
 
         protected override void OnInitialized()
         {
@@ -185,6 +194,23 @@ namespace VCC_Projekt.Components.Pages
             {
                 user.Roles = updatedRoles;
             }
+        }
+
+        private async void OpenEmailDialog(string email)
+        {
+            selectedEmails = new List<string>() {email };
+            var parameters = new DialogParameters
+                                {
+                                    { "SelectedEmails", selectedEmails },
+                                    { "Emails", users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList() },
+                                    { "ReadOnly", false },
+                                    { "UseDropdown", true }
+                                };
+
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+
+            var dialog = await DialogService.ShowAsync<EmailSendDialog>("Email senden", parameters, options);
+
         }
     }
 

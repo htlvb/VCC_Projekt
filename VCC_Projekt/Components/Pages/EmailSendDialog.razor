@@ -1,0 +1,171 @@
+﻿@page "/email-send-dialog"
+@using System.Net.Mail
+@using Microsoft.AspNetCore.Components.Forms
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject EmailSender emailSender
+@using MimeKit
+@using MudExRichTextEditor
+@using MudExRichTextEditor.Types
+
+<MudDialog>
+    <DialogContent>
+        @if (UseDropdown)
+        {
+            <MudSelect T="string" SelectedValues="@SelectedEmails" SelectAll="Multiselect" SelectAllText="Alle auswählen" Label="An" MultiSelection="Multiselect" Required="true" SelectedValuesChanged="async e => await ValuesChanged(e)" Disabled="ReadOnly">
+                @foreach (var email in Emails)
+                {
+                    <MudSelectItem Value="@email">@email</MudSelectItem>
+                }
+            </MudSelect>
+        }
+        else
+        {
+            <MudTextField @bind-Value="FixedEmail" ReadOnly="ReadOnly" Label="E-Mail-Adresse" Required="true" />
+        }
+        <MudTextField @bind-Value="EmailSubject" Label="Betreff" Required="true" ReadOnly="!string.IsNullOrEmpty(Subject)" />
+        <MudExRichTextEdit Height="444" @ref="richTextEditor" Class="m-2" Placeholder="Nachricht bearbeiten" EnableResize="true" Tools="@(QuillTool.All().Where(q => q.Class != "" && q.Class != "ql-video").ToArray())" Immediate="false" Required="true" />
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>" FilesChanged="UploadFiles">
+            <ActivatorContent>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.CloudUpload">
+                    Anhänge hinzufügen
+                </MudButton>
+            </ActivatorContent>
+        </MudFileUpload>
+        <MudList T="IBrowserFile">
+            @foreach (var file in Attachments)
+            {
+                <MudListItem Icon="@Icons.Material.Filled.AttachFile" OnClick="@(() => RemoveAttachment(file))">
+                    @file.Name <code>@file.Size bytes</code>
+                </MudListItem>
+            }
+        </MudList>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="StartSendingEmails" Disabled="@string.IsNullOrEmpty(EmailSubject)">Senden</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="Cancel">Abbrechen</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public List<string> SelectedEmails { get; set; } = new List<string>();
+    [Parameter] public List<string> Emails { get; set; } = new List<string>();
+    [Parameter] public bool Multiselect { get; set; } = true;
+    [Parameter] public bool UseDropdown { get; set; } = true;
+    [Parameter] public string FixedEmail { get; set; }
+    [Parameter] public bool ReadOnly { get; set; } = false;
+    [Parameter] public string Subject { get; set; }
+    [Parameter] public MimeMessage baseMessageMail { get; set; }
+
+    private string EmailSubject;
+    private MudExRichTextEdit richTextEditor;
+    private List<IBrowserFile> Attachments = new List<IBrowserFile>();
+    private const long maxAllowedSize = 20 * 1024 * 1024; // 20 MB
+
+    protected override void OnParametersSet()
+    {
+        EmailSubject = string.IsNullOrEmpty(Subject) ? "" : Subject;
+    }
+
+    private async Task StartSendingEmails()
+    {
+        string body = await richTextEditor.GetHtml();
+        List<Attachment> att = await ConvertToAttachmentsAsync(Attachments);
+        Attachments.Clear();
+
+        // Speichere die aktuellen E-Mails in einer temporären Variablen
+        var tempSelectedEmails = new List<string>(SelectedEmails);
+        var tempFixedEmail = FixedEmail;
+
+        Snackbar.Add("Email wird geschickt...", Severity.Info);
+        MudDialog.Close();
+        if (UseDropdown)
+        {
+            await emailSender.SendBulkEmailsAsync(tempSelectedEmails, EmailSubject, body, att);
+        }
+        else
+        {
+            var message = new MailMessage
+                {
+                    Subject = EmailSubject,
+                    Body = body,
+                    IsBodyHtml = true
+                };
+            if (baseMessageMail != null)
+            {
+                string layout = @"<div id='x_appendonsend'></div>
+                                <hr tabindex='-1' style='display:inline-block; width:98%'>
+                                <div id='x_divRplyFwdMsg' dir='ltr'><font face='Calibri, sans-serif' color='#000000' style='font-size:11pt'><b>Von:</b> " + emailSender.emailAddress + @"<br>
+                                <b>Gesendet:</b> " + DateTime.Now.ToString("dddd, dd. MMMM yyyy HH:mm") + @" <br>
+                                <b>An:</b> " + tempFixedEmail + @" <br>
+                                <b>Betreff:</b> " + Subject + @"</font>
+                                <div>&nbsp;</div>
+                                </div>
+                                <div>
+                                <p>" + baseMessageMail.HtmlBody + @"</p>
+                                </div>";
+
+                message.Headers.Add("In-Reply-To", $"<{baseMessageMail.MessageId}>");
+                message.Headers.Add("References", $"<{baseMessageMail.MessageId}>");
+                message.Body = message.Body + layout;
+            }
+
+            message.To.Add(tempFixedEmail);
+            foreach (var attachment in att)
+            {
+                message.Attachments.Add(attachment);
+            }
+            await emailSender.SendEmailAsync(message);
+        }
+
+        Snackbar.Clear();
+        Snackbar.Add("Email wurden geschickt!", Severity.Success);
+    }
+
+    private async Task ValuesChanged(IEnumerable<string> newValues)
+    {
+        SelectedEmails = newValues.ToList();
+        await Task.CompletedTask;
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void UploadFiles(IReadOnlyList<IBrowserFile> files)
+    {
+        foreach (var file in files)
+        {
+            if (file.Size > maxAllowedSize)
+            {
+                Snackbar.Add($"Datei {file.Name} ist zu groß (max. 20 MB erlaubt).", Severity.Error);
+            }
+            else
+            {
+                Attachments.Add(file);
+            }
+        }
+    }
+
+    private void RemoveAttachment(IBrowserFile file)
+    {
+        Attachments.Remove(file);
+    }
+
+    private async Task<List<Attachment>> ConvertToAttachmentsAsync(List<IBrowserFile> browserFiles)
+    {
+        var attachments = new List<Attachment>();
+
+        foreach (var browserFile in browserFiles)
+        {
+            var stream = new MemoryStream();
+            await browserFile.OpenReadStream(maxAllowedSize).CopyToAsync(stream);
+            stream.Position = 0; // Reset stream position
+            attachments.Add(new Attachment(stream, browserFile.Name));
+        }
+
+        return attachments;
+    }
+}
