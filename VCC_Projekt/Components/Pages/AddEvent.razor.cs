@@ -1,10 +1,6 @@
-﻿using Humanizer;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
+﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
-using VCC_Projekt.Data;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -12,8 +8,9 @@ namespace VCC_Projekt.Components.Pages
     {
         private List<Event> _events = new();
         private Event _selectedEvent = new() { EventID = 0 };
-        private EditContext editContext;     
+        private EditContext editContext;
         private bool isEditing = false;
+        private InputModel Input { get; set; } = new();
 
         protected override void OnInitialized()
         {
@@ -85,14 +82,20 @@ namespace VCC_Projekt.Components.Pages
 
                 try
                 {
-                    int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_event SET Bezeichnung = '{Input.EventName}', Beginn = '{Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime}', Dauer = {(int)(Input.EndTime - Input.StartTime).TotalMinutes}, StrafminutenProFehlversuch = {Input.PenaltyMinutes} WHERE EventID = {_selectedEvent.EventID}" );
+
+
+                    int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_event SET Bezeichnung = '{Input.EventName}', Beginn = '{Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime}', Dauer = {(int)(Input.EndTime - Input.StartTime).TotalMinutes}, StrafminutenProFehlversuch = {Input.PenaltyMinutes} WHERE EventID = {_selectedEvent.EventID}");
+                    dbContext.Events.Update(new Event() {EventID = _selectedEvent.EventID,  Bezeichnung = Input.EventName, Beginn = Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime, Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes, StrafminutenProFehlversuch = Input.PenaltyMinutes });
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
                     ToggleEditMode();
 
                     //Refresh
+                    _events = new List<Event>();
+                    _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
+                    StateHasChanged();
                 }
 
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
@@ -145,8 +148,6 @@ namespace VCC_Projekt.Components.Pages
 
         private void ShowSnackbar(string message, Severity severity)
              => Snackbar.Add(message, severity);
-
-        private InputModel Input { get; set; } = new();
 
         public sealed class InputModel : IValidatableObject
         {
