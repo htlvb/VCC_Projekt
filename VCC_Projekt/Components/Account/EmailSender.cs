@@ -60,8 +60,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
         EnsureSmtpConnected();
         message.From = new MailAddress(_options.Email);
         message.BodyEncoding = Encoding.UTF8;
-        message.Headers.Add("X-Location", "Vienna");
-        message.Headers.Add("X-Time-Sent", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
 
         try
         {
