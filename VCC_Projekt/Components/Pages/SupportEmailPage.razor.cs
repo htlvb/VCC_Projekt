@@ -24,7 +24,7 @@ namespace VCC_Projekt.Components.Pages
         private async Task LoadEmails()
         {
             Snackbar.Add("Emails werden geladen. Bitte warten ...", Severity.Info);
-            supportEmails = await EmailService.GetEmailsAsync("support");
+            supportEmails = await EmailService.GetEmailsAsync("");
             CategorizeEmails();
             Snackbar.Clear();
             Snackbar.Add("Emails erfolgreich geladen.", Severity.Success);
@@ -33,24 +33,37 @@ namespace VCC_Projekt.Components.Pages
         private void CategorizeEmails()
         {
             var emailGroups = new Dictionary<string, EmailGroup>();
+            var emailLookup = supportEmails.ToDictionary(e => e.Message.MessageId, e => e);
 
             foreach (var email in supportEmails)
             {
-                var subject = email.Message.Subject;
-                var originalSubject = subject.StartsWith("AW:") ? subject.Substring(4) : subject;
+                var messageId = email.Message.MessageId;
+                var references = email.Message.References;
 
-                if (!emailGroups.ContainsKey(originalSubject))
+                // Versuchen, die E-Mail anhand der References-Header zu gruppieren
+                if (references != null && references.Any(refId => emailLookup.ContainsKey(refId)))
                 {
-                    emailGroups[originalSubject] = new EmailGroup { OriginalEmail = email.Message, Replies = new List<MimeMessage>(), Flags = email.Flags };
-                }
-
-                if (subject.StartsWith("AW:"))
-                {
-                    emailGroups[originalSubject].Replies.Add(email.Message);
+                    var refId = references.First(refId => emailLookup.ContainsKey(refId));
+                    if (!emailGroups.ContainsKey(refId))
+                    {
+                        emailGroups[refId] = new EmailGroup { OriginalEmail = emailLookup[refId].Message, Replies = new List<MimeMessage>(), Flags = emailLookup[refId].Flags };
+                    }
+                    emailGroups[refId].Replies.Add(email.Message);
                 }
                 else
                 {
-                    emailGroups[originalSubject].OriginalEmail = email.Message;
+                    if (!emailGroups.ContainsKey(messageId))
+                    {
+                        emailGroups[messageId] = new EmailGroup { OriginalEmail = email.Message, Replies = new List<MimeMessage>(), Flags = email.Flags };
+                    }
+                    if (email.Message.Subject.StartsWith("RE:"))
+                    {
+                        emailGroups[messageId].Replies.Add(email.Message);
+                    }
+                    else
+                    {
+                        emailGroups[messageId].OriginalEmail = email.Message;
+                    }
                 }
             }
 
@@ -80,7 +93,7 @@ namespace VCC_Projekt.Components.Pages
         private async Task OpenEmailDialog(MimeMessage email)
         {
             string curSubject = "";
-            if (!email.Subject.StartsWith("AW", StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
+            if (!email.Subject.StartsWith("RE", StringComparison.OrdinalIgnoreCase)) curSubject = $"RE: {email.Subject}";
             else curSubject = email.Subject;
             var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
             var parameters = new DialogParameters

@@ -47,7 +47,7 @@ public class EmailSender : IEmailSender<ApplicationUser>
     {
         if (_smtpClient == null)
         {
-            _smtpClient = new SmtpClient(_options.Host, _options.Port)
+            _smtpClient = new SmtpClient($"smtp.{domain}", 587)
             {
                 Credentials = new NetworkCredential(_options.Email, _options.Password),
                 EnableSsl = true
@@ -98,9 +98,19 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         var messagesWithFlags = new List<(MimeMessage Message, MessageFlags? Flags)>();
 
-        if (string.IsNullOrEmpty(filter))
+        try
         {
-            var uids = await inbox.SearchAsync(SearchQuery.All).ConfigureAwait(false);
+            IList<UniqueId> uids;
+            if (string.IsNullOrEmpty(filter))
+            {
+                uids = await inbox.SearchAsync(SearchQuery.All).ConfigureAwait(false);
+            }
+            else
+            {
+                var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
+                uids = await inbox.SearchAsync(query).ConfigureAwait(false);
+            }
+
             var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
 
             foreach (var summary in summaries)
@@ -109,17 +119,10 @@ public class EmailSender : IEmailSender<ApplicationUser>
                 messagesWithFlags.Add((message, summary.Flags));
             }
         }
-        else
+        catch (Exception ex)
         {
-            var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
-            var uids = await inbox.SearchAsync(query).ConfigureAwait(false);
-            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
-
-            foreach (var summary in summaries)
-            {
-                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
-                messagesWithFlags.Add((message, summary.Flags));
-            }
+            // Fehlerbehandlung
+            Console.WriteLine($"Fehler beim Abrufen der E-Mails: {ex.Message}");
         }
 
         _operationCount++;
