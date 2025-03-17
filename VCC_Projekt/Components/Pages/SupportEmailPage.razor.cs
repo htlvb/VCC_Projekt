@@ -13,8 +13,15 @@ namespace VCC_Projekt.Components.Pages
         private string _searchString = string.Empty;
         private int activeTabIndex = 0;
         private HashSet<MimeMessage> selectedEmails = new();
+        private bool initlized;
 
         protected override async Task OnInitializedAsync()
+        {
+            if (initlized) return;
+            await LoadEmails();
+        }
+
+        private async Task LoadEmails()
         {
             Snackbar.Add("Emails werden geladen. Bitte warten ...", Severity.Info);
             supportEmails = await EmailService.GetEmailsAsync("support");
@@ -66,7 +73,15 @@ namespace VCC_Projekt.Components.Pages
             if (!result.Canceled)
             {
                 await EmailService.MarkEmailAsAnsweredByMessageIdAsync(email.MessageId);
-                unansweredEmails.Remove(email);
+                var index = supportEmails.FindIndex(em => em.Message == email);
+                if (index != -1)
+                {
+                    var emailToUpdate = supportEmails[index];
+                    emailToUpdate.Flags ??= new MessageFlags(); // Initialisiere Flags, falls null
+                    emailToUpdate.Flags = MessageFlags.Answered; // Füge das Flag hinzu
+                    supportEmails[index] = emailToUpdate; // Aktualisiere die Liste
+                }
+                CategorizeEmails();
                 StateHasChanged();
             }
 
@@ -154,7 +169,7 @@ namespace VCC_Projekt.Components.Pages
         }
         private async Task RefreshEmails()
         {
-            await OnInitializedAsync();
+            await LoadEmails();
             StateHasChanged();
         }
 
