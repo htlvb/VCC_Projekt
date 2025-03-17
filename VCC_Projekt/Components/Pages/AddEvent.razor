@@ -42,63 +42,42 @@
                         @if (_selectedEvent.Beginn > DateTime.Now)
                         {
                             <div class="text-end">
-                                <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@ToggleEditMode" />
+                                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="@ToggleEditMode">Wettbewerb bearbeiten</MudButton>
                             </div>
                         }
 
                         <EditForm EditContext="@editContext" OnValidSubmit="@UpdateEvent" method="post" FormName="eventRegistration">
                             <DataAnnotationsValidator />
 
-                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                             <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
-                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                             <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
-
-                            <MudTextField T="TimeSpan"
-                                          Label="Startzeit"
-                                          InputType="InputType.Time"
-                                          @bind-Value="Input.StartTime.ToString(@"hh\:mm")"
-                                          @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                                          Variant="Variant.Outlined"
-                                          Disabled="@(!isEditing)">
-                            </MudTextField>
-                            <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
-                                        <input type="time"
-                                               value="@Input.StartTime.ToString(@"hh\:mm")"
-                                               @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                                               class="form-control"
-                                               disabled="@(!isEditing)" />
-                                        <label for="starttime">Startzeit</label>
-
-
+                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                                         <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <input type="time"
-                                               value="@Input.EndTime.ToString(@"hh\:mm")"
-                                               @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
-                                               class="form-control"
-                                               disabled="@(!isEditing)" />
-                                        <label for="endtime">Endzeit</label>
+                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                                         <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
                                 </div>
                             </div>
 
-                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                             <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
 
                             @if (_selectedEvent.Beginn > DateTime.Now)
                             {
-                                <div class="text-center mt-5">
-                                    <button type="submit" class="w-25 btn btn-lg btn-success" disabled="@(!isEditing)">Wettbewerb speichern</button>
+                                <div class="text-center">
+                                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb speichern</MudButton>
+                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton>
                                 </div>
                             }
 
@@ -109,63 +88,40 @@
 
             else
             {
-
                 <MudCard>
                     <MudCardContent>
-                        <div class="container mt-5">
-                            <div class="mt-4">
-                                <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
-                                    <DataAnnotationsValidator />
+                        <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
+                            <DataAnnotationsValidator />
 
-                                    <div class="form-floating mb-3">
-                                        <InputText @bind-Value="Input.EventName" class="form-control" />
-                                        <label for="eventname">Wettbewerbsname</label>
-                                        <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+
+                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
-
-                                    <div class="form-floating mb-3">
-                                        <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" />
-                                        <label for="eventdate">Datum</label>
-                                        <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
-
-                                    <div class="row mb-3">
-                                        <div class="col">
-                                            <div class="form-floating">
-                                                <input type="time"
-                                                       value="@Input.StartTime.ToString(@"hh\:mm")"
-                                                       @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                                                       class="form-control" />
-                                                <label for="starttime">Startzeit</label>
-                                                <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
-                                            </div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="form-floating">
-                                                <input type="time"
-                                                       value="@Input.EndTime.ToString(@"hh\:mm")"
-                                                       @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
-                                                       class="form-control" />
-                                                <label for="endtime">Endzeit</label>
-                                                <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-floating mb-3">
-                                        <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" />
-                                        <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
-                                        <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
-                                    </div>
-
-
-                                    <div class="text-center mt-5">
-                                        <button type="submit" class="w-25 btn btn-lg btn-success">Wettbewerb anlegen</button>
-                                        <p></p>
-                                    </div>
-                                </EditForm>
+                                </div>
                             </div>
-                        </div>
+
+                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+
+                            <div class="text-center">
+                                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">Wettbewerb anlegen</MudButton>
+                            </div>
+
+                        </EditForm>
                     </MudCardContent>
                 </MudCard>
             }

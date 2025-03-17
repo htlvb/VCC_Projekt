@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -45,23 +46,23 @@ namespace VCC_Projekt.Components.Pages
             if (isEditing == true) ToggleEditMode();
         }
 
-        private void UpdateStartTime(string value)
-        {
-            if (TimeSpan.TryParse(value, out TimeSpan time))
-            {
-                Input.StartTime = time;
-                editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.StartTime));
-            }
-        }
+        //private void UpdateStartTime(string value)
+        //{
+        //    if (TimeSpan.TryParse(value, out TimeSpan time))
+        //    {
+        //        Input.StartTime = time;
+        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.StartTime));
+        //    }
+        //}
 
-        private void UpdateEndTime(string value)
-        {
-            if (TimeSpan.TryParse(value, out TimeSpan time))
-            {
-                Input.EndTime = time;
-                editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.EndTime));
-            }
-        }
+        //private void UpdateEndTime(string value)
+        //{
+        //    if (TimeSpan.TryParse(value, out TimeSpan time))
+        //    {
+        //        Input.EndTime = time;
+        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.EndTime));
+        //    }
+        //}
 
         private async Task UpdateEvent()
         {
@@ -82,23 +83,21 @@ namespace VCC_Projekt.Components.Pages
 
                 try
                 {
-                    var enventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
-                    if(enventToUpdate != null)
+                    var eventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
+                    if(eventToUpdate != null)
                     {
-                        enventToUpdate.Bezeichnung = Input.EventName;
-                        enventToUpdate.Beginn = DateTime.Parse(Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
-                        enventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
-                        enventToUpdate.StrafminutenProFehlversuch = Input.PenaltyMinutes;
+                        eventToUpdate.Bezeichnung = Input.EventName;
+                        eventToUpdate.Beginn = DateTime.Parse(Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
+                        eventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                        eventToUpdate.StrafminutenProFehlversuch = Input.PenaltyMinutes;
 
                         dbContext.SaveChanges();
                     }
                     
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
-                    //ToggleEditMode();
+                    ToggleEditMode();
 
-                    _selectedEvent.EventID = 0;
-
-                    Input = new InputModel();
+                    //Input = new InputModel();
                 }
 
                 catch (Exception ex)
@@ -147,6 +146,27 @@ namespace VCC_Projekt.Components.Pages
             {
                 ShowSnackbar("Fehler beim Anlegen des Wettbewerbs. Bitte versuche es erneut.", Severity.Error);
                 Console.WriteLine($"Error during submission: {ex.Message}");
+            }
+        }
+
+        private async Task DeleteEvent()
+        {
+            try
+            {
+                var eventToDelete = await dbContext.Events.FindAsync(_selectedEvent.EventID);
+                if (eventToDelete != null)
+                {
+                    dbContext.Events.Remove(eventToDelete);
+                    await dbContext.SaveChangesAsync();
+
+                    ShowSnackbar("Wettbewerb wurde erfolgreich gelöscht.", Severity.Success);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                ShowSnackbar("Fehler beim Lösches des Wettbewerbs. Bitte versuche es erneut.", Severity.Error);
+                Console.WriteLine($"Error during DeleteGroup: {ex.Message}");
             }
         }
 

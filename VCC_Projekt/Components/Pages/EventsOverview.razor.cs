@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Text;
-using System.Text.RegularExpressions;
-using VCC_Projekt.Data;
-using VCC_Projekt.Components.Account.Pages.Manage;
 using MudBlazor;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -272,9 +269,9 @@ namespace VCC_Projekt.Components.Pages
                     var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == selectedEventId && g.GruppenleiterId == usernameLoggedInUser).Select(g => g.GruppenID).FirstOrDefault();
                     // Eingeladene Mitglieder
                     var invitedMembersInDatabase = dbContext.EingeladeneUserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.Email);
-                    foreach(var invitedMemberInDatabase in invitedMembersInDatabase)
+                    foreach (var invitedMemberInDatabase in invitedMembersInDatabase)
                     {
-                        if(invitedMemberInDatabase.ToLower() == Email.ToLower())
+                        if (invitedMemberInDatabase.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits zur Gruppe eingeladen worden.", new[] { nameof(Email) }));
                             return errors;
@@ -284,9 +281,9 @@ namespace VCC_Projekt.Components.Pages
                     // Mitglieder in der Datenbank
                     var membersInDatabase = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
 
-                    foreach(var memberInDatabase in membersInDatabase)
+                    foreach (var memberInDatabase in membersInDatabase)
                     {
-                        if(memberInDatabase.ToLower() == Email.ToLower())
+                        if (memberInDatabase.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
                             return errors;
