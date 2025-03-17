@@ -82,17 +82,23 @@ namespace VCC_Projekt.Components.Pages
 
                 try
                 {
+                    var enventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
+                    if(enventToUpdate != null)
+                    {
+                        enventToUpdate.Bezeichnung = Input.EventName;
+                        enventToUpdate.Beginn = DateTime.Parse(Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
+                        enventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                        enventToUpdate.StrafminutenProFehlversuch = Input.PenaltyMinutes;
 
-
-                    int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_event SET Bezeichnung = '{Input.EventName}', Beginn = '{Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime}', Dauer = {(int)(Input.EndTime - Input.StartTime).TotalMinutes}, StrafminutenProFehlversuch = {Input.PenaltyMinutes} WHERE EventID = {_selectedEvent.EventID}");
-                    dbContext.Events.Update(new Event() {EventID = _selectedEvent.EventID,  Bezeichnung = Input.EventName, Beginn = Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime, Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes, StrafminutenProFehlversuch = Input.PenaltyMinutes });
+                        dbContext.SaveChanges();
+                    }
+                    
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
-                    ToggleEditMode();
+                    //ToggleEditMode();
 
-                    //Refresh
-                    _events = new List<Event>();
-                    _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
-                    StateHasChanged();
+                    _selectedEvent.EventID = 0;
+
+                    Input = new InputModel();
                 }
 
                 catch (Exception ex)
@@ -136,8 +142,6 @@ namespace VCC_Projekt.Components.Pages
                 ShowSnackbar("Wettbewerb wurde erfolgreich angelegt.", Severity.Success);
 
                 Input = new InputModel();
-
-                //Refresh
             }
             catch (Exception ex)
             {

@@ -49,17 +49,21 @@
                         <EditForm EditContext="@editContext" OnValidSubmit="@UpdateEvent" method="post" FormName="eventRegistration">
                             <DataAnnotationsValidator />
 
-                            <div class="form-floating mb-3">
-                                <InputText @bind-Value="Input.EventName" class="form-control" disabled="@(!isEditing)" />
-                                <label for="eventname">Wettbewerbsname</label>
-                                <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
-                            </div>
+                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
-                            <div class="form-floating mb-3">
-                                <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" disabled="@(!isEditing)" />
-                                <label for="eventdate">Datum</label>
-                                <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
-                            </div>
+                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+
+                            <MudTextField T="TimeSpan"
+                                          Label="Startzeit"
+                                          InputType="InputType.Time"
+                                          @bind-Value="Input.StartTime.ToString(@"hh\:mm")"
+                                          @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
+                                          Variant="Variant.Outlined"
+                                          Disabled="@(!isEditing)">
+                            </MudTextField>
+                            <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
@@ -70,6 +74,8 @@
                                                class="form-control"
                                                disabled="@(!isEditing)" />
                                         <label for="starttime">Startzeit</label>
+
+
                                         <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
@@ -86,11 +92,8 @@
                                 </div>
                             </div>
 
-                            <div class="form-floating mb-3">
-                                <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" disabled="@(!isEditing)" />
-                                <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
-                                <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
-                            </div>
+                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Disabled="@(!isEditing)"></MudTextField>
+                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
 
                             @if (_selectedEvent.Beginn > DateTime.Now)
                             {
