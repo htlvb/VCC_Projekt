@@ -6,6 +6,7 @@ using MimeKit;
 using System.Globalization;
 using System.Net;
 using System.Net.Mail;
+using System.Text;
 
 public class EmailSender : IEmailSender<ApplicationUser>
 {
@@ -58,8 +59,10 @@ public class EmailSender : IEmailSender<ApplicationUser>
     {
         EnsureSmtpConnected();
         message.From = new MailAddress(_options.Email);
-        message.Headers.Add("X-Location", "Wien");
-        message.Headers.Add("X-Time",DateTime.Now.ToString("HH:mm:ss"));
+        message.BodyEncoding = Encoding.UTF8;
+        message.Headers.Add("X-Location", "Vienna");
+        message.Headers.Add("X-Time-Sent", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
+
         try
         {
             await _smtpClient.SendMailAsync(message).ConfigureAwait(false);
@@ -130,9 +133,12 @@ public class EmailSender : IEmailSender<ApplicationUser>
         await EnsureImapConnectedAsync().ConfigureAwait(false);
 
         var inboxFolder = _imapClient.Inbox;
-        await inboxFolder.OpenAsync(FolderAccess.ReadWrite).ConfigureAwait(false);
 
         await DeleteEmailsInFolderAsync(inboxFolder, messageIds).ConfigureAwait(false);
+
+        var sentFolder = _imapClient.GetFolder(SpecialFolder.Sent);
+
+        await DeleteEmailsInFolderAsync(sentFolder, messageIds).ConfigureAwait(false);
 
         _operationCount++;
     }
