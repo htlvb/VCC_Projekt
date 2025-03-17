@@ -71,56 +71,85 @@ namespace VCC_Projekt.Components.Pages
             try
             {
                 // Fetch ranking data for the selected event
-                _rankingList = dbContext.Set<RanglisteResult>()
+                var rankingData = dbContext.Set<RanglisteResult>()
                     .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", eventId))
                     .ToList();
 
-                // Check if ranking is null or empty
-                isRanking = _rankingList != null && _rankingList.Any();
+                // Fetch all participants (groups and individual users) for the event
+                var groups = dbContext.Gruppen
+                    .Where(g => g.Event_EventID == eventId)
+                    .Select(g => new RanglisteResult
+                    {
+                        GruppenID = g.GruppenID,
+                        Gruppenname = g.Gruppenname,
+                        GruppenleiterId = g.GruppenleiterId,
+                        Teilnehmertyp = g.Teilnehmertyp,
+                        AbgeschlosseneLevel = "", // Default to 0 for participants who haven't completed any levels
+                        AnzahlLevel = 0, // Default to 0
+                        GesamtFehlversuche = 0, // Default to 0
+                        MaxBenötigteZeit = null, // No time data
+                        GebrauchteZeit = null // No time data
+                    })
+                    .ToList();
 
-                // If ranking is null or empty, populate it with participants
-                if (!isRanking)
+                var individualUsers = dbContext.UserInGruppe
+                    .Where(u => u.Gruppe.Event_EventID == eventId && u.Gruppe.Teilnehmertyp == "Einzelspieler")
+                    .Select(u => new RanglisteResult
+                    {
+                        GruppenID = u.Gruppe.GruppenID,
+                        Gruppenname = null, // Individual players have no group name
+                        GruppenleiterId = u.User.Id,
+                        Teilnehmertyp = "Einzelspieler",
+                        AbgeschlosseneLevel = "", // Default to 0
+                        AnzahlLevel = 0, // Default to 0
+                        GesamtFehlversuche = 0, // Default to 0
+                        MaxBenötigteZeit = null, // No time data
+                        GebrauchteZeit = null // No time data
+                    })
+                    .ToList();
+
+                // Combine all participants
+                var allParticipants = groups.Concat(individualUsers).ToList();
+
+                // Merge ranking data with all participants
+                var rankedParticipants = rankingData
+                    .Select(ranking => new RanglisteResult
+                    {
+                        GruppenID = ranking.GruppenID,
+                        Gruppenname = ranking.Gruppenname,
+                        GruppenleiterId = ranking.GruppenleiterId,
+                        Teilnehmertyp = ranking.Teilnehmertyp,
+                        AbgeschlosseneLevel = ranking.AbgeschlosseneLevel,
+                        AnzahlLevel = ranking.AnzahlLevel,
+                        GesamtFehlversuche = ranking.GesamtFehlversuche,
+                        MaxBenötigteZeit = ranking.MaxBenötigteZeit,
+                        GebrauchteZeit = ranking.GebrauchteZeit,
+                        Rang = ranking.Rang // Preserve the ranking
+                    })
+                    .ToList();
+
+                // Find participants who haven't completed any levels
+                var unrankedParticipants = allParticipants
+                    .Where(participant => !rankingData.Any(ranking => ranking.GruppenID == participant.GruppenID))
+                    .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString()) // Sort alphabetically
+                    .ToList();
+
+                // Combine ranked and unranked participants
+                _rankingList = rankedParticipants
+                    .Concat(unrankedParticipants)
+                    .ToList();
+
+                // Assign ranks to unranked participants (starting after the last ranked participant)
+                int lastRank = rankedParticipants.Count;
+                for (int i = 0; i < unrankedParticipants.Count(); i++)
                 {
-                    var groups = dbContext.Gruppen
-                        .Where(g => g.Event_EventID == eventId)
-                        .Select(g => new RanglisteResult
-                        {
-                            GruppenID = g.GruppenID,
-                            Gruppenname = g.Gruppenname,
-                            GruppenleiterId = g.GruppenleiterId,
-                            Teilnehmertyp = g.Teilnehmertyp,
-                            AbgeschlosseneLevel = "", // No levels completed
-                            AnzahlLevel = 0, // No levels completed
-                            GesamtFehlversuche = 0, // No attempts
-                            MaxBenötigteZeit = null, // No time data
-                            GebrauchteZeit = null // No time data
-                        })
-                        .ToList();
-
-                    var individualUsers = dbContext.UserInGruppe
-                        .Where(u => u.Gruppe.Event_EventID == eventId && u.Gruppe.Teilnehmertyp == "Einzelspieler")
-                        .Select(u => new RanglisteResult
-                        {
-                            GruppenID = u.Gruppe.GruppenID,
-                            Gruppenname = u.User.UserName,
-                            GruppenleiterId = u.User.Id,
-                            Teilnehmertyp = "Einzelspieler",
-                            AbgeschlosseneLevel = "", // No levels completed
-                            AnzahlLevel = 0, // No levels completed
-                            GesamtFehlversuche = 0, // No attempts
-                            MaxBenötigteZeit = null, // No time data
-                            GebrauchteZeit = null // No time data
-                        })
-                        .ToList();
-
-                    _rankingList = groups.Concat(individualUsers).ToList();
+                    unrankedParticipants[i].Rang = lastRank + i + 1;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error loading ranking: {ex.Message}");
                 _rankingList = new List<RanglisteResult>();
-                isRanking = false; // Reset the flag in case of an error
             }
         }
 

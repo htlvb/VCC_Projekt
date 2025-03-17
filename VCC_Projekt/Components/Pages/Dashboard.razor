@@ -35,16 +35,31 @@ else
             <MudTh>GebrauchteZeit</MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd Style="@(context.Rang <= 3 ? "background-color: lightgreen;" : "")">@context.Rang</MudTd>
-            <MudTd>@context.GruppenID</MudTd>
-            <MudTd>@context.Gruppenname</MudTd>
-            <MudTd>@context.GruppenleiterId</MudTd>
-            <MudTd>@context.Teilnehmertyp</MudTd>
-            <MudTd>@context.AbgeschlosseneLevel</MudTd>
-            <MudTd>@context.AnzahlLevel</MudTd>
-            <MudTd>@context.GesamtFehlversuche</MudTd>
-            <MudTd>@context.MaxBenötigteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
-            <MudTd>@context.GebrauchteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
+            @{
+                var rowColor = "";
+                if (context.Rang == 1)
+                {
+                    rowColor = "background-color: gold;"; // Gold for 1st place
+                }
+                else if (context.Rang == 2)
+                {
+                    rowColor = "background-color: silver;"; // Silver for 2nd place
+                }
+                else if (context.Rang == 3)
+                {
+                    rowColor = "background-color: #cd7f32;"; // Bronze for 3rd place
+                }
+            }
+            <MudTd Style="@rowColor">@context.Rang</MudTd>
+            <MudTd Style="@rowColor">@context.GruppenID</MudTd>
+            <MudTd Style="@rowColor">@context.Gruppenname</MudTd>
+            <MudTd Style="@rowColor">@context.GruppenleiterId</MudTd>
+            <MudTd Style="@rowColor">@context.Teilnehmertyp</MudTd>
+            <MudTd Style="@rowColor">@context.AbgeschlosseneLevel</MudTd>
+            <MudTd Style="@rowColor">@context.AnzahlLevel</MudTd>
+            <MudTd Style="@rowColor">@context.GesamtFehlversuche</MudTd>
+            <MudTd Style="@rowColor">@context.MaxBenötigteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
+            <MudTd Style="@rowColor">@context.GebrauchteZeit?.ToString(@"hh\:mm\:ss")</MudTd>
         </RowTemplate>
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
