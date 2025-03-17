@@ -3,6 +3,7 @@ using MailKit.Net.Imap;
 using MailKit.Search;
 using Microsoft.Extensions.Options;
 using MimeKit;
+using System.Globalization;
 using System.Net;
 using System.Net.Mail;
 
@@ -57,6 +58,8 @@ public class EmailSender : IEmailSender<ApplicationUser>
     {
         EnsureSmtpConnected();
         message.From = new MailAddress(_options.Email);
+        message.Headers.Add("X-Location", "Wien");
+        message.Headers.Add("X-Time",DateTime.Now.ToString("HH:mm:ss"));
         try
         {
             await _smtpClient.SendMailAsync(message).ConfigureAwait(false);

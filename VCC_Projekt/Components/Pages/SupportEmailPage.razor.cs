@@ -13,12 +13,13 @@ namespace VCC_Projekt.Components.Pages
         private string _searchString = string.Empty;
         private int activeTabIndex = 0;
         private HashSet<MimeMessage> selectedEmails = new();
-        private bool initlized;
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (initlized) return;
+            if (!firstRender) return; // Nur beim ersten Rendern und wenn nicht bereits initialisiert
+
             await LoadEmails();
+            StateHasChanged();
         }
 
         private async Task LoadEmails()
