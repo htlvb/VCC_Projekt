@@ -118,6 +118,27 @@ namespace VCC_Projekt.Components.Pages
             DialogService.ShowAsync<EmailViewDialog>("E-Mail-Body", parameters, options);
         }
 
+        private async Task DeleteEmailThread(EmailGroup emailGroup)
+        {
+            var parameters = new DialogParameters();
+            parameters.Add("Question", "Willst du den gesamten E-Mail-Thread wirklich löschen?");
+            var result = await DialogService.ShowAsync<DeleteEmailDialog>("E-Mail-Thread löschen", parameters);
+            StateHasChanged();
+            var dialogResult = await result.Result;
+            if (!dialogResult.Canceled)
+            {
+                Snackbar.Add("E-Mail-Thread wird gelöscht...", Severity.Info);
+                var emailsToDelete = emailGroup.Replies.Select(e => e.MessageId).ToList();
+                emailsToDelete.Add(emailGroup.OriginalEmail.MessageId);
+                await EmailService.DeleteEmailsAsync(emailsToDelete);
+                supportEmails.RemoveAll(e => emailsToDelete.Contains(e.Message.MessageId));
+                CategorizeEmails(); // Kategorien aktualisieren
+                Snackbar.Clear();
+                Snackbar.Add("E-Mail-Thread wurde gelöscht.", Severity.Success);
+            }
+            StateHasChanged();
+        }
+
         private async Task DeleteEmail(MimeMessage email)
         {
             var parameters = new DialogParameters();

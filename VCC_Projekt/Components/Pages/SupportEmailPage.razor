@@ -18,16 +18,16 @@
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
             </ToolBarContent>
             <Columns>
-                <HierarchyColumn T="EmailGroup" ButtonDisabledFunc="x => x.Replies.Count == 0" />
                 <SelectColumn T="EmailGroup" />
+                <HierarchyColumn T="EmailGroup" />
                 <PropertyColumn Property="x => x.OriginalEmail.From.ToString()" Title="Absender" />
                 <PropertyColumn Property="x => x.OriginalEmail.Subject" Title="Betreff" />
                 <PropertyColumn Property="x => x.OriginalEmail.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                 <TemplateColumn Title="Aktionen">
                     <CellTemplate>
-                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item.OriginalEmail)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item.OriginalEmail)" Disabled="@(context.Item.OriginalEmail.From.Mailboxes.Any(m => m.Address.Equals(EmailService.emailAddress, StringComparison.OrdinalIgnoreCase)))" />
                         <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(context.Item.OriginalEmail)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(context.Item.OriginalEmail)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmailThread(context.Item)" />
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>
@@ -39,7 +39,7 @@
                         <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                         <TemplateColumn Title="Aktionen" Context="child_context">
                             <CellTemplate Context="child_context">
-                                <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(child_context.Item)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(child_context.Item)" Disabled="@(child_context.Item.From.Mailboxes.Any(m => m.Address.Equals(EmailService.emailAddress, StringComparison.OrdinalIgnoreCase)))" />
                                 <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(child_context.Item)" />
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(child_context.Item)" />
                             </CellTemplate>
@@ -65,16 +65,16 @@
                               AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
             </ToolBarContent>
             <Columns>
-                <HierarchyColumn T="EmailGroup" ButtonDisabledFunc="x => x.Replies.Count == 0"/>
                 <SelectColumn T="EmailGroup" />
+                <HierarchyColumn T="EmailGroup" />
                 <PropertyColumn Property="x => x.OriginalEmail.From.ToString()" Title="Absender" />
                 <PropertyColumn Property="x => x.OriginalEmail.Subject" Title="Betreff" />
                 <PropertyColumn Property="x => x.OriginalEmail.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                 <TemplateColumn Title="Aktionen">
                     <CellTemplate>
-                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item.OriginalEmail)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(context.Item.OriginalEmail)" Disabled="@(context.Item.OriginalEmail.From.Mailboxes.Any(m => m.Address.Equals(EmailService.emailAddress, StringComparison.OrdinalIgnoreCase)))" />
                         <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(context.Item.OriginalEmail)" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(context.Item.OriginalEmail)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmailThread(context.Item)" />
                     </CellTemplate>
                 </TemplateColumn>
             </Columns>
@@ -86,7 +86,7 @@
                         <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                         <TemplateColumn Title="Aktionen" Context="child_context">
                             <CellTemplate Context="child_context">
-                                <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(child_context.Item)" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="() => OpenEmailDialog(child_context.Item)" Disabled="@(child_context.Item.From.Mailboxes.Any(m => m.Address.Equals(EmailService.emailAddress, StringComparison.OrdinalIgnoreCase)))" />
                                 <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Secondary" OnClick="() => ReadEmailBody(child_context.Item)" />
                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => DeleteEmail(child_context.Item)" />
                             </CellTemplate>
