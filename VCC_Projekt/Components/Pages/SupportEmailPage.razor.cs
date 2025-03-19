@@ -56,7 +56,7 @@ namespace VCC_Projekt.Components.Pages
                     {
                         emailGroups[messageId] = new EmailGroup { OriginalEmail = email.Message, Replies = new List<MimeMessage>(), Flags = email.Flags };
                     }
-                    if (email.Message.Subject.StartsWith("RE:"))
+                    if (email.Message.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase) || email.Message.Subject.StartsWith("RE:",StringComparison.OrdinalIgnoreCase))
                     {
                         emailGroups[messageId].Replies.Add(email.Message);
                     }
@@ -93,7 +93,7 @@ namespace VCC_Projekt.Components.Pages
         private async Task OpenEmailDialog(MimeMessage email)
         {
             string curSubject = "";
-            if (!email.Subject.StartsWith("RE", StringComparison.OrdinalIgnoreCase)) curSubject = $"RE: {email.Subject}";
+            if (!email.Subject.StartsWith("AW", StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
             else curSubject = email.Subject;
             var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
             var parameters = new DialogParameters
