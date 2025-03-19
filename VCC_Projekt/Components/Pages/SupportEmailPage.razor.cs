@@ -13,6 +13,7 @@ namespace VCC_Projekt.Components.Pages
         private string _searchString = string.Empty;
         private int activeTabIndex = 0;
         private HashSet<EmailGroup> selectedEmailGroups = new();
+        private readonly SemaphoreSlim _LoadLock = new(1, 1);
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -23,11 +24,25 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task LoadEmails()
         {
-            Snackbar.Add("Emails werden geladen. Bitte warten ...", Severity.Info);
-            supportEmails = await EmailService.GetEmailsAsync("");
-            CategorizeEmails();
-            Snackbar.Clear();
-            Snackbar.Add("Emails erfolgreich geladen.", Severity.Success);
+            if (await _LoadLock.WaitAsync(0))
+            {
+                try
+                {
+                    Snackbar.Add("Emails werden geladen. Bitte warten ...", Severity.Info);
+                    supportEmails = await EmailService.GetEmailsAsync("");
+                    CategorizeEmails();
+                    Snackbar.Clear();
+                    Snackbar.Add("Emails erfolgreich geladen.", Severity.Success);
+                }
+                catch (Exception ex)
+                {
+
+                }
+                finally
+                {
+                    _LoadLock.Release();
+                }
+            }
         }
 
         private void CategorizeEmails()
@@ -92,9 +107,10 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task OpenEmailDialog(MimeMessage email)
         {
-            string curSubject = "";
-            if (!email.Subject.StartsWith("AW", StringComparison.OrdinalIgnoreCase)) curSubject = $"AW: {email.Subject}";
-            else curSubject = email.Subject;
+            string curSubject = (email.Subject.StartsWith("AW", StringComparison.OrdinalIgnoreCase) ||
+                     email.Subject.StartsWith("RE", StringComparison.OrdinalIgnoreCase))
+                    ? email.Subject
+                    : $"AW: {email.Subject}";
             var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
             var parameters = new DialogParameters
             {
