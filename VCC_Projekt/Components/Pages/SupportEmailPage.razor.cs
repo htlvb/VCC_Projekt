@@ -14,6 +14,7 @@ namespace VCC_Projekt.Components.Pages
         private int activeTabIndex = 0;
         private HashSet<EmailGroup> selectedEmailGroups = new();
         private readonly SemaphoreSlim _LoadLock = new(1, 1);
+        List<string> blockedAddresses = new List<string>() { "mailer-daemon@googlemail.com" };
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
@@ -55,6 +56,8 @@ namespace VCC_Projekt.Components.Pages
                 var messageId = email.Message.MessageId;
                 var references = email.Message.References;
 
+                if (email.Message.From.Mailboxes.Any(a => blockedAddresses.Contains(a.Address.ToLower()))) continue;
+
                 // Versuchen, die E-Mail anhand der References-Header zu gruppieren
                 if (references != null && references.Any(refId => emailLookup.ContainsKey(refId)))
                 {
@@ -82,8 +85,21 @@ namespace VCC_Projekt.Components.Pages
                 }
             }
 
-            groupedUnansweredEmails = emailGroups.Values.Where(g => !IsEmailAnswered(g)).ToList();
-            groupedAnsweredEmails = emailGroups.Values.Where(g => IsEmailAnswered(g)).ToList();
+            groupedUnansweredEmails = emailGroups.Values
+                                        .Where(g =>
+                                            !IsEmailAnswered(g) &&
+                                            !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.emailAddress.ToLower()) &&
+                                            !g.OriginalEmail.Subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase) &&
+                                            !g.OriginalEmail.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase))
+                                        .ToList();
+
+            groupedAnsweredEmails = emailGroups.Values
+                                    .Where(g =>
+                                        IsEmailAnswered(g) &&
+                                        !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.emailAddress.ToLower()) &&
+                                        !g.OriginalEmail.Subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase) &&
+                                        !g.OriginalEmail.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase))
+                                    .ToList();
         }
 
         private bool IsEmailAnswered(EmailGroup emailGroup)

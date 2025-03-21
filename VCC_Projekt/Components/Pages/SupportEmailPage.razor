@@ -20,7 +20,8 @@
             <Columns>
                 <HierarchyColumn T="EmailGroup" ButtonDisabledFunc="x => x.Replies.Count == 0" />
                 <SelectColumn T="EmailGroup" />
-                <PropertyColumn Property="x => x.OriginalEmail.From.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => x.OriginalEmail.From.Mailboxes.FirstOrDefault().Address.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => string.Join(',',x.OriginalEmail.To.Mailboxes.Select(s => s.Address))" Title="Empfänger" />
                 <PropertyColumn Property="x => x.OriginalEmail.Subject" Title="Betreff" />
                 <PropertyColumn Property="x => x.OriginalEmail.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                 <TemplateColumn Title="Aktionen">
@@ -34,7 +35,8 @@
             <ChildRowContent>
                 <MudDataGrid T="MimeMessage" Items="context.Item.Replies" MultiSelection="false" SortMode="SortMode.None" Filterable="false">
                     <Columns>
-                        <PropertyColumn Property="x => x.From.ToString()" Title="Absender" />
+                        <PropertyColumn Property="x => x.From.Mailboxes.FirstOrDefault().Address.ToString()" Title="Absender" />
+                        <PropertyColumn Property="x => string.Join(',',x.To.Mailboxes.Select(s => s.Address))" Title="Empfänger" />
                         <PropertyColumn Property="x => x.Subject" Title="Betreff" />
                         <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                         <TemplateColumn Title="Aktionen" Context="child_context">
@@ -66,7 +68,8 @@
             <Columns>
                 <HierarchyColumn T="EmailGroup" ButtonDisabledFunc="x => x.Replies.Count == 0" />
                 <SelectColumn T="EmailGroup" />
-                <PropertyColumn Property="x => x.OriginalEmail.From.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => x.OriginalEmail.From.Mailboxes.FirstOrDefault().Address.ToString()" Title="Absender" />
+                <PropertyColumn Property="x => string.Join(',',x.OriginalEmail.To.Mailboxes.Select(s => s.Address))" Title="Empfänger" />
                 <PropertyColumn Property="x => x.OriginalEmail.Subject" Title="Betreff" />
                 <PropertyColumn Property="x => x.OriginalEmail.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                 <TemplateColumn Title="Aktionen">
@@ -80,7 +83,8 @@
             <ChildRowContent>
                 <MudDataGrid T="MimeMessage" Items="context.Item.Replies" MultiSelection="false" SortMode="SortMode.None" Filterable="false">
                     <Columns>
-                        <PropertyColumn Property="x => x.From.ToString()" Title="Absender" />
+                        <PropertyColumn Property="x => x.From.Mailboxes.FirstOrDefault().Address.ToString()" Title="Absender" />
+                        <PropertyColumn Property="x => string.Join(',',x.To.Mailboxes.Select(s => s.Address))" Title="Empfänger" />
                         <PropertyColumn Property="x => x.Subject" Title="Betreff" />
                         <PropertyColumn Property="x => x.Date.DateTime" Title="Datum" Format="dd.MM.yyyy HH:mm" />
                         <TemplateColumn Title="Aktionen" Context="child_context">
