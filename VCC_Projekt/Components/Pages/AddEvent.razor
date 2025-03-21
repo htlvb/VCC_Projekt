@@ -19,7 +19,7 @@
 <PageTitle>Wettbewerb-Manager</PageTitle>
 
 <div class="text-center">
-    <h1 class="display-4 font-weight-bold" style="color: #134883;">Wettbewerb-Manager</h1>
+    <h1 class="display-4 font-weight-bold" style="color: #134883">Wettbewerb-Manager</h1>
     <p class="lead text-muted">
         Wähle ein Event aus, um dieses zu bearbeiten oder legen ein neues Event an.
     </p>
@@ -34,7 +34,9 @@
                     <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
                 }
             </MudSelect>
+        </MudItem>
 
+        <MudItem xs="12" >
             @if (_selectedEvent.EventID != 0)
             {
                 <MudCard>
@@ -77,7 +79,7 @@
                             {
                                 <div class="text-center">
                                     <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb speichern</MudButton>
-                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton>
+                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton>
                                 </div>
                             }
 
@@ -131,30 +133,6 @@
 </MudContainer>
 
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
 
-    h1, h2, h3 {
-        color: #134883;
-    }
 
-    .btn-success {
-        background-color: #134883;
-        border-color: #134883;
-    }
-
-        .btn-success:hover {
-            background-color: #2f5e91;
-            border-color: #2f5e91;
-        }
-
-    .form-control {
-        border: 2px solid #134883;
-    }
-
-        .form-control:focus {
-            border-color: #2f5e91;
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
-        }
 </style>

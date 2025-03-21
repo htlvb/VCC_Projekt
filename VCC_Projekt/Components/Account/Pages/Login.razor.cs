@@ -67,6 +67,15 @@ namespace VCC_Projekt.Components.Account.Pages
                     return;
                 }
 
+                var memberEntry = await dbContext.EingeladeneUserInGruppe
+                    .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == user.Email);
+
+                if(memberEntry == null)
+                {
+                    errorMessage = "Fehler: Du wurdest möglicherweise aus der Gruppe ausgeladen.";
+                    return;
+                }
+
                 var isAlreadyInGroup = dbContext.UserInGruppe
                     .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
 

@@ -167,6 +167,32 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private async Task CancelInvitation(int groupId, string invitedMemberEmail)
+        {
+            var memberEntry = await dbContext.EingeladeneUserInGruppe
+                .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == invitedMemberEmail);
+
+            if (memberEntry != null)
+            {
+                dbContext.EingeladeneUserInGruppe.Remove(memberEntry);
+                await dbContext.SaveChangesAsync();
+
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Include(g => g.UserInGruppe)
+                    .Include(g => g.EingeladeneUserInGruppe)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                events = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Select(g => g.Event)
+                    .ToListAsync();
+
+                StateHasChanged();
+            }
+        }
+
         private async Task JoinEvent(int eventId)
         {
             NavigationManager.NavigateTo($"/participation/{eventId}");
