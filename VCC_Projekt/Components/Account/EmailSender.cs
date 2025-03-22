@@ -94,7 +94,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         var inbox = _imapClient.Inbox;
         await inbox.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
-
         var messagesWithFlags = new List<(MimeMessage Message, MessageFlags? Flags)>();
 
         try
