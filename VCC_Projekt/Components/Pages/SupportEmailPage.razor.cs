@@ -14,11 +14,10 @@ namespace VCC_Projekt.Components.Pages
         private int activeTabIndex = 0;
         private HashSet<EmailGroup> selectedEmailGroups = new();
         private readonly SemaphoreSlim _LoadLock = new(1, 1);
-        List<string> blockedAddresses = new List<string>() { "mailer-daemon@googlemail.com" };
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            if (!firstRender) return; // Nur beim ersten Rendern und wenn nicht bereits initialisiert
+            if (!firstRender) return;
             await LoadEmails();
             StateHasChanged();
         }
@@ -55,8 +54,6 @@ namespace VCC_Projekt.Components.Pages
             {
                 var messageId = email.Message.MessageId;
                 var references = email.Message.References;
-
-                if (email.Message.From.Mailboxes.Any(a => blockedAddresses.Contains(a.Address.ToLower()))) continue;
 
                 // Versuchen, die E-Mail anhand der References-Header zu gruppieren
                 if (references != null && references.Any(refId => emailLookup.ContainsKey(refId)))
