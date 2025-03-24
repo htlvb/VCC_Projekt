@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -48,7 +47,7 @@ namespace VCC_Projekt.Components.Pages
             {
                 var username = dbContext.Users.Where(u => u.NormalizedEmail == newMember.Normalize()).Select(u => u.NormalizedUserName).FirstOrDefault();
 
-                if(username != null)
+                if (username != null)
                 {
                     var groupIds = dbContext.UserInGruppe
                         .Where(ug => ug.User_UserId.ToUpper() == username)

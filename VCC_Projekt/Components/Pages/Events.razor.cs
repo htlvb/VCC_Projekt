@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-
-namespace VCC_Projekt.Components.Pages
+﻿namespace VCC_Projekt.Components.Pages
 {
     public partial class Events
     {

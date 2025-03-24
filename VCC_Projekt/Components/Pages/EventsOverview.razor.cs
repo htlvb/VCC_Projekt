@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
-using System.ComponentModel.DataAnnotations;
-using System.Text.Encodings.Web;
-using System.Text;
-using System.Text.RegularExpressions;
-using VCC_Projekt.Data;
-using VCC_Projekt.Components.Account.Pages.Manage;
 using MudBlazor;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -170,6 +167,32 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private async Task CancelInvitation(int groupId, string invitedMemberEmail)
+        {
+            var memberEntry = await dbContext.EingeladeneUserInGruppe
+                .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == invitedMemberEmail);
+
+            if (memberEntry != null)
+            {
+                dbContext.EingeladeneUserInGruppe.Remove(memberEntry);
+                await dbContext.SaveChangesAsync();
+
+                userGroups = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Include(g => g.UserInGruppe)
+                    .Include(g => g.EingeladeneUserInGruppe)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                events = await dbContext.Gruppen
+                    .Where(g => g.UserInGruppe.Any(u => u.User_UserId == usernameLoggedInUser))
+                    .Select(g => g.Event)
+                    .ToListAsync();
+
+                StateHasChanged();
+            }
+        }
+
         private async Task JoinEvent(int eventId)
         {
             NavigationManager.NavigateTo($"/participation/{eventId}");
@@ -220,8 +243,8 @@ namespace VCC_Projekt.Components.Pages
                     .ToListAsync();
 
 
-                isAddingMember = false; // Schließen Sie das Eingabefeld nach dem Hinzufügen
-                newMember.Email = string.Empty; // Eingabefeld zurücksetzen
+                isAddingMember = false;
+                newMember.Email = string.Empty;
 
                 StateHasChanged();
             }
@@ -272,9 +295,9 @@ namespace VCC_Projekt.Components.Pages
                     var groupId = dbContext.Gruppen.Where(g => g.Event_EventID == selectedEventId && g.GruppenleiterId == usernameLoggedInUser).Select(g => g.GruppenID).FirstOrDefault();
                     // Eingeladene Mitglieder
                     var invitedMembersInDatabase = dbContext.EingeladeneUserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.Email);
-                    foreach(var invitedMemberInDatabase in invitedMembersInDatabase)
+                    foreach (var invitedMemberInDatabase in invitedMembersInDatabase)
                     {
-                        if(invitedMemberInDatabase.ToLower() == Email.ToLower())
+                        if (invitedMemberInDatabase.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits zur Gruppe eingeladen worden.", new[] { nameof(Email) }));
                             return errors;
@@ -284,9 +307,9 @@ namespace VCC_Projekt.Components.Pages
                     // Mitglieder in der Datenbank
                     var membersInDatabase = dbContext.UserInGruppe.Where(gr => gr.Gruppe_GruppenId == groupId).Select(us => us.User.Email);
 
-                    foreach(var memberInDatabase in membersInDatabase)
+                    foreach (var memberInDatabase in membersInDatabase)
                     {
-                        if(memberInDatabase.ToLower() == Email.ToLower())
+                        if (memberInDatabase.ToLower() == Email.ToLower())
                         {
                             errors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Email) }));
                             return errors;

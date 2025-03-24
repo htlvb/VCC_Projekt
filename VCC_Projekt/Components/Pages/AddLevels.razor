@@ -1,28 +1,32 @@
-﻿@page "/add-levels"
+﻿@page "/levels-manager"
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
 
+<PageTitle>Level-Manager</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883;">Level-Manager</h1>
+    <p class="lead text-muted">
+        Wähle ein Event aus, um neue Levels für das Event anzulegen oder vorhandene zu bearbeiten oder zu löschen.
+    </p>
+</div>
+
 <MudContainer MaxWidth="MaxWidth.False">
-    <MudGrid>
-        <MudItem xs="12">
-            <MudCard>
-                <MudCardContent>
-                    <MudText Typo="Typo.h6">Event auswählen</MudText>
-                    <MudSelect T="Event" Label="Event wählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")">
-                        @foreach (var ev in _events)
-                        {
-                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudCardContent>
-            </MudCard>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
+                @foreach (var ev in _events)
+                {
+                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
 
         <!-- Levels List -->
         @foreach (var level in _levels)
         {
             <!-- Index innerhalb der Schleife speichern -->
-            <MudItem xs="12" sm="6">
+            <MudItem xs="10" sm="6">
                 <MudCard Class="level-card">
                     <MudCardHeader>
                         <MudText Typo="Typo.h6">Level @level.Levelnr</MudText>
@@ -150,22 +154,23 @@
             </MudItem>
         }
         <!-- Add Level Button -->
-        <MudItem xs="12">
+        <MudItem xs="10">
             <MudCard class="mt-3">
                 <MudCardContent>
                     <MudButton OnClick="() => AddLevel()" Color="Color.Primary" Disabled="@(_levels.Count >= 5 || _selectedEvent.EventID == 0 || IsEventInPast)">Neues Level hinzufügen</MudButton>
                 </MudCardContent>
             </MudCard>
         </MudItem>
+
+        <MudItem xs="10">
+            <MudCard class="mt-3">
+                <MudCardContent>
+                    <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
+                    <MudButton Href="@($"/preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
     </MudGrid>
-
-    <MudCard class="mt-3">
-        <MudCardContent>
-            <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
-            <MudButton Href="@($"/preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
-        </MudCardContent>
-    </MudCard>
-
 </MudContainer>
 
 <style>

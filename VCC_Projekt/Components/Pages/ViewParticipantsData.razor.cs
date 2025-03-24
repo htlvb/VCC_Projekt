@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNet.Identity;
-using VCC_Projekt.Data;
-using System.Linq;
-using VCC_Projekt.Components.Account.Pages.Manage;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-namespace VCC_Projekt.Components.Pages
+﻿namespace VCC_Projekt.Components.Pages
 {
     public partial class ViewParticipantsData
     {
