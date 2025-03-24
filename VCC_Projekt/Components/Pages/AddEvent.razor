@@ -26,8 +26,8 @@
 </div>
 
 <MudContainer MaxWidth="MaxWidth.False">
-    <MudGrid>
-        <MudItem xs="12">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
             <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
                 @foreach (var ev in _events)
                 {
@@ -36,7 +36,7 @@
             </MudSelect>
         </MudItem>
 
-        <MudItem xs="12" >
+        <MudItem xs="10" >
             @if (_selectedEvent.EventID != 0)
             {
                 <MudCard>

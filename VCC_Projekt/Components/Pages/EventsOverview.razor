@@ -39,146 +39,147 @@ else if (events.Count == 0)
 else
 {
     <MudContainer MaxWidth="MaxWidth.False">
-        <MudItem xs="12">
-            <div class="text-center">
-                <MudButton OnClick="() => ShowPastEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Vergangene Events</MudButton>
-                <MudButton OnClick="() => ShowUpcomingEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Zukünftige Events</MudButton>
+        <MudGrid Justify="Justify.Center">
 
-                @if (filteredEvents.Count == 0 && isUpcomingEventsActive)
+            <MudItem xs="10">
+                <div class="text-center">
+                    <MudButton OnClick="() => ShowPastEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Vergangene Events</MudButton>
+                    <MudButton OnClick="() => ShowUpcomingEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Zukünftige Events</MudButton>
+
+                    @if (filteredEvents.Count == 0 && isUpcomingEventsActive)
+                    {
+                        <p>Du hast dich für kein zufünftiges Event angemeldet. Entdecke hier kommende Events.</p>
+                    }
+
+                    @if (filteredEvents.Count == 0 && isPastEventsActive)
+                    {
+                        <p>Du hast noch kein Event absolviert.</p>
+                    }
+                </div>
+            </MudItem>
+
+            <MudItem xs="10">
+                @foreach (var eventItem in filteredEvents.OrderBy(e => e.Beginn))
                 {
-                    <p>Du hast dich für kein zufünftiges Event angemeldet. Entdecke hier kommende Events.</p>
-                }
+                    selectedEventId = eventItem.EventID;
+                    var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
+                    if (userGroup == null) continue;
 
-                @if (filteredEvents.Count == 0 && isPastEventsActive)
-                {
-                    <p>Du hast noch kein Event absolviert.</p>
-                }
-            </div>
-        </MudItem>
+                    bool isGroupLeader = userGroup?.GruppenleiterId == usernameLoggedInUser;
+                    bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
+                    bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
 
-        <MudItem xs="12">
-            @foreach (var eventItem in filteredEvents.OrderBy(e => e.Beginn))
-            {
-                selectedEventId = eventItem.EventID;
-                var userGroup = userGroups.FirstOrDefault(g => g.Event_EventID == eventItem.EventID);
-                if (userGroup == null) continue;
+                    var eventEndTime = eventItem.Beginn.AddMinutes(eventItem.Dauer);
+                    bool eventStarted = eventItem.Beginn <= DateTime.Now;
+                    bool isCurrentEvent = eventItem.Beginn <= DateTime.Now && eventEndTime >= DateTime.Now;
 
-                bool isGroupLeader = userGroup?.GruppenleiterId == usernameLoggedInUser;
-                bool canDeleteGroup = isGroupLeader && userGroup.UserInGruppe.Count == 1;
-                bool canAddMember = isGroupLeader && userGroup.UserInGruppe.Count < 4;
+                    <MudCard class="mt-3">
+                        <MudCardHeader>@eventItem.Bezeichnung</MudCardHeader>
+                        <MudCardContent>
+                            <MudText><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</MudText>
 
-                var eventEndTime = eventItem.Beginn.AddMinutes(eventItem.Dauer);
-                bool eventStarted = eventItem.Beginn <= DateTime.Now;
-                bool isCurrentEvent = eventItem.Beginn <= DateTime.Now && eventEndTime >= DateTime.Now;
-
-                <MudCard>
-                    <MudCardHeader>@eventItem.Bezeichnung</MudCardHeader>
-                    <MudCardContent>
-                        <MudText><strong>Teilnahmeart: </strong>@userGroup.Teilnehmertyp</MudText>
-
-                        @if (userGroup.Teilnehmertyp == "Team")
-                        {
-                            <MudText><strong>Teamname: </strong>@userGroup.Gruppenname</MudText>
-                        }
-
-                        @if (userGroup.Teilnehmertyp == "Einzelspieler")
-                        {
-                            <MudText><strong>Benutzername: </strong>@userGroup.GruppenleiterId</MudText>
-                        }
-
-                        <MudText><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</MudText>
-
-                        @if(isCurrentEvent)
-                        {
-                            <MudButton Color="Color.Success" OnClick="() => JoinEvent(eventItem.EventID)">Teilnehmen</MudButton>
-                        }
-
-                        @if(!eventStarted)
-                        {
-                            @if(userGroup.Teilnehmertyp == "Team")
+                            @if (userGroup.Teilnehmertyp == "Team")
                             {
-                                @if(isGroupLeader)
-                                {
-                                    @if (userGroup.UserInGruppe.Count > 1)
-                                    {
-                                        <MudText><strong>Gruppenmitglieder: </strong></MudText>
-                                    }
+                                <MudText><strong>Teamname: </strong>@userGroup.Gruppenname</MudText>
+                            }
 
-                                        @foreach (var member in userGroup.UserInGruppe)
+                            @if (userGroup.Teilnehmertyp == "Einzelspieler")
+                            {
+                                <MudText><strong>Benutzername: </strong>@userGroup.GruppenleiterId</MudText>
+                            }
+
+                            <MudText><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</MudText>
+
+                            @if(isCurrentEvent)
+                            {
+                                <MudButton Color="Color.Success" OnClick="() => JoinEvent(eventItem.EventID)">Teilnehmen</MudButton>
+                            }
+
+                            @if(!eventStarted)
+                            {
+                                @if(userGroup.Teilnehmertyp == "Team")
+                                {
+                                    @if(isGroupLeader)
+                                    {
+                                        @if (userGroup.UserInGruppe.Count > 1)
                                         {
-                                            @if (member.User_UserId != userGroup.GruppenleiterId)
+                                            <MudText><strong>Gruppenmitglieder: </strong></MudText>
+                                        }
+
+                                            @foreach (var member in userGroup.UserInGruppe)
+                                            {
+                                                @if (member.User_UserId != userGroup.GruppenleiterId)
+                                                {
+                                                    <MudText>
+                                                        @member.User_UserId
+                                                        <MudButton Color="Color.Error" OnClick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</MudButton>
+                                                    </MudText>
+                                                }
+                                            }
+
+                                            @foreach (var invitedMember in userGroup.EingeladeneUserInGruppe)
                                             {
                                                 <MudText>
-                                                    @member.User_UserId
-                                                    <MudButton Color="Color.Error" OnClick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</MudButton>
+                                                    @invitedMember.Email - wurde zur Gruppe eingeladen
+                                                    <MudButton Color="Color.Error" OnClick="() => CancelInvitation(userGroup.GruppenID, invitedMember.Email)">Ausladen</MudButton>
                                                 </MudText>
                                             }
-                                        }
 
-                                        @foreach (var invitedMember in userGroup.EingeladeneUserInGruppe)
+                                            @if (isAddingMember)
+                                            {
+
+                                                    <EditForm Model="@newMember" OnValidSubmit="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMember.Email)" class="w-100">
+                                                        <DataAnnotationsValidator />
+                                                        <div class="d-flex justify-content-between w-100">
+                                                            <MudTextField T="string"  @bind="newMember.Email" Label="E-Mail-Adresse" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                                            <MudButton Color="Color.Success" ButtonType="ButtonType.Submit">Hinzufügen</MudButton>
+                                                        </div>
+                                                        <ValidationMessage For="@(() => newMember.Email)" class="text-danger" />
+                                                    </EditForm>
+
+                                            }
+
+
+                                        @if (canAddMember && !((userGroup.UserInGruppe.Count + userGroup.EingeladeneUserInGruppe.Count) > 4))
                                         {
-                                            <MudText>
-                                                @invitedMember.Email - wurde zur Gruppe eingeladen
-                                                <MudButton Color="Color.Error" OnClick="() => CancelInvitation(userGroup.GruppenID, invitedMember.Email)">Ausladen</MudButton>
-                                            </MudText>
+                                            <MudButton Color="Color.Success" OnClick="() => ShowAddMemberInput()" StartIcon="@Icons.Material.Filled.Add">Mitglied hinzufügen</MudButton>
                                         }
 
-                                        @if (isAddingMember)
+                                        @if (canDeleteGroup)
                                         {
-
-                                                <EditForm Model="@newMember" OnValidSubmit="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMember.Email)" class="w-100">
-                                                    <DataAnnotationsValidator />
-                                                    <div class="d-flex justify-content-between w-100">
-                                                        <MudTextField T="string"  @bind="newMember.Email" Label="E-Mail-Adresse" Variant="Variant.Outlined" Required="true"></MudTextField>
-                                                        <MudButton Color="Color.Success" ButtonType="ButtonType.Submit">Hinzufügen</MudButton>
-                                                    </div>
-                                                    <ValidationMessage For="@(() => newMember.Email)" class="text-danger" />
-                                                </EditForm>
-
+                                            <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.Delete">Gruppe löschen</MudButton>
                                         }
-
-
-                                    @if (canAddMember && !((userGroup.UserInGruppe.Count + userGroup.EingeladeneUserInGruppe.Count) > 4))
-                                    {
-                                        <MudButton Color="Color.Success" OnClick="() => ShowAddMemberInput()" StartIcon="@Icons.Material.Filled.Add">Mitglied hinzufügen</MudButton>
                                     }
 
-                                    @if (canDeleteGroup)
+                                    else
                                     {
-                                        <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.Delete">Gruppe löschen</MudButton>
+                                        <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.ExitToApp">Gruppe verlassen</MudButton>
                                     }
                                 }
 
-                                else
+                                else if (userGroup.Teilnehmertyp == "Einzelspieler")
                                 {
-                                    <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.ExitToApp">Gruppe verlassen</MudButton>
+                                    <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.ExitToApp">Abmelden</MudButton>
                                 }
                             }
 
-                            else if (userGroup.Teilnehmertyp == "Einzelspieler")
+                            else
                             {
-                                <MudButton Color="Color.Error" OnClick="() => Unregister(eventItem.EventID)" StartIcon="@Icons.Material.Filled.ExitToApp">Abmelden</MudButton>
+                                var rang = dbContext.Set<RanglisteResult>()
+                                .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", eventItem.EventID))
+                                .ToList()
+                                .Where(g => g.Gruppenname == userGroup.Gruppenname)
+                                .Select(g => g.Rang)
+                                .FirstOrDefault();
+
+                                <MudText><strong>Rang: </strong>@(rang == 0 ? "Leider kein Level absolviert" : rang.ToString())</MudText>
                             }
-                        }
 
-                        else
-                        {
-                            var rang = dbContext.Set<RanglisteResult>()
-                            .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", eventItem.EventID))
-                            .ToList()
-                            .Where(g => g.Gruppenname == userGroup.Gruppenname)
-                            .Select(g => g.Rang)
-                            .FirstOrDefault();
-
-                            <MudText><strong>Rang: </strong>@(rang == 0 ? "Leider kein Level absolviert" : rang.ToString())</MudText>
-                        }
-
-                    </MudCardContent>
-                </MudCard>
-            }
-
-
-        </MudItem>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            </MudItem>
+        </MudGrid>
     </MudContainer>
 
 
