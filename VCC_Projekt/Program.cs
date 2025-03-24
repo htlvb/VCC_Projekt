@@ -19,6 +19,7 @@ builder.Services.AddScoped<EmailSender>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddServerSideBlazor().AddHubOptions(options => { options.MaximumReceiveMessageSize = null; });
 
 builder.Services.AddAuthentication(options =>
     {
