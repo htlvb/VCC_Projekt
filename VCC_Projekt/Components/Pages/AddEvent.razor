@@ -54,19 +54,19 @@
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
                             <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
-                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                            <MudDatePicker @bind-Date="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true" ShowToolbar="false"></MudDatePicker>
                             <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                                        <MudTimePicker Label="Startzeit" @bind-Time="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
                                         <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                                        <MudTimePicker Label="Endzeit" @bind-Time="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
                                         <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
                                 </div>
@@ -104,19 +104,19 @@
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
                             <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
-                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <MudDatePicker @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
                             <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <MudTimePicker Label="Startzeit" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
                                         <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <MudTimePicker Label="Endzeit" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
                                         <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
                                 </div>
