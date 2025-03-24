@@ -40,7 +40,6 @@ else
 {
     <MudContainer MaxWidth="MaxWidth.False">
         <MudGrid Justify="Justify.Center">
-
             <MudItem xs="10">
                 <div class="text-center">
                     <MudButton OnClick="() => ShowPastEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Vergangene Events</MudButton>
@@ -110,7 +109,7 @@ else
                                             {
                                                 @if (member.User_UserId != userGroup.GruppenleiterId)
                                                 {
-                                                    <MudText>
+                                                    <MudText class="list-group-item d-flex justify-content-between align-items-center">
                                                         @member.User_UserId
                                                         <MudButton Color="Color.Error" OnClick="() => RemoveMember(userGroup.GruppenID, member.User_UserId)">Entfernen</MudButton>
                                                     </MudText>
@@ -119,7 +118,7 @@ else
 
                                             @foreach (var invitedMember in userGroup.EingeladeneUserInGruppe)
                                             {
-                                                <MudText>
+                                                <MudText class="list-group-item d-flex justify-content-between align-items-center">
                                                     @invitedMember.Email - wurde zur Gruppe eingeladen
                                                     <MudButton Color="Color.Error" OnClick="() => CancelInvitation(userGroup.GruppenID, invitedMember.Email)">Ausladen</MudButton>
                                                 </MudText>
@@ -127,16 +126,14 @@ else
 
                                             @if (isAddingMember)
                                             {
-
                                                     <EditForm Model="@newMember" OnValidSubmit="() => AddMember(userGroup.GruppenID, userGroup.Event_EventID, newMember.Email)" class="w-100">
                                                         <DataAnnotationsValidator />
-                                                        <div class="d-flex justify-content-between w-100">
+                                                        <div class ="list-group-item d-flex justify-content-between align-items-center">
                                                             <MudTextField T="string"  @bind="newMember.Email" Label="E-Mail-Adresse" Variant="Variant.Outlined" Required="true"></MudTextField>
                                                             <MudButton Color="Color.Success" ButtonType="ButtonType.Submit">Hinzufügen</MudButton>
                                                         </div>
                                                         <ValidationMessage For="@(() => newMember.Email)" class="text-danger" />
                                                     </EditForm>
-
                                             }
 
 
