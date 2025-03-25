@@ -29,8 +29,10 @@ namespace VCC_Projekt.Components.Pages
             TimeSpan timeSpan = dateTime.TimeOfDay;
 
             Input.StartTime = timeSpan;
-            Input.EndTime = Input.StartTime.Add(new TimeSpan(0, _selectedEvent.Dauer, 0));
+            Input.EndTime = Input.StartTime?.Add(new TimeSpan(0, _selectedEvent.Dauer, 0));
             Input.PenaltyMinutes = _selectedEvent.StrafminutenProFehlversuch;
+
+            StateHasChanged();
         }
 
         private void ToggleEditMode()
@@ -41,7 +43,6 @@ namespace VCC_Projekt.Components.Pages
         private async Task OnEventSelected(Event selectedEvent)
         {
             _selectedEvent = selectedEvent;
-            _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
             SetEventData();
             if (isEditing == true) ToggleEditMode();
         }
@@ -87,8 +88,8 @@ namespace VCC_Projekt.Components.Pages
                     if(eventToUpdate != null)
                     {
                         eventToUpdate.Bezeichnung = Input.EventName;
-                        eventToUpdate.Beginn = DateTime.Parse(Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
-                        eventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                        eventToUpdate.Beginn = DateTime.Parse(Input.EventDate?.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
+                        eventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime)?.TotalMinutes;
                         eventToUpdate.StrafminutenProFehlversuch = Input.PenaltyMinutes;
 
                         dbContext.SaveChanges();
@@ -131,9 +132,9 @@ namespace VCC_Projekt.Components.Pages
 
                 Event ev = new Event();
                 ev.Bezeichnung = Input.EventName;
-                ev.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                ev.Dauer = (int)(Input.EndTime - Input.StartTime)?.TotalMinutes;
                 ev.StrafminutenProFehlversuch = Input.PenaltyMinutes;
-                ev.Beginn = Input.EventDate.Date + Input.StartTime;
+                ev.Beginn = Input.EventDate.GetValueOrDefault(DateTime.Today).Date + Input.StartTime.GetValueOrDefault();
 
                 dbContext.Events.Add(ev);
                 dbContext.SaveChanges();
@@ -181,15 +182,15 @@ namespace VCC_Projekt.Components.Pages
 
             [DataType(DataType.DateTime)]
             [Display(Name = "Datum")]
-            public DateTime EventDate { get; set; } = DateTime.Today;
+            public DateTime? EventDate { get; set; } = DateTime.Today;
 
             [DataType(DataType.Time)]
             [Display(Name = "Startzeit")]
-            public TimeSpan StartTime { get; set; }
+            public TimeSpan? StartTime { get; set; }
 
             [DataType(DataType.Time)]
             [Display(Name = "Endzeit")]
-            public TimeSpan EndTime { get; set; }
+            public TimeSpan? EndTime { get; set; }
 
             [Display(Name = "Strafminuten")]
             [Range(0, int.MaxValue, ErrorMessage = "Strafminuten dürfen nicht negativ sein.")]
@@ -211,16 +212,17 @@ namespace VCC_Projekt.Components.Pages
 
                 // Validate Date and Time together
                 var currentTime = DateTime.Now.TimeOfDay;
-                var eventStart = EventDate.Date + StartTime;
-                var eventEnd = EventDate.Date + EndTime;
+                var eventStart = EventDate?.Date + StartTime;
+                var eventEnd = EventDate?.Date + EndTime;
 
                 // Check if date is in the past
-                if (EventDate.Date < DateTime.Today)
+                if (EventDate?.Date < DateTime.Today)
                 {
                     errors.Add(new ValidationResult("Das Datum darf nicht in der Vergangenheit liegen.", new[] { nameof(EventDate) }));
                 }
+
                 // If date is today, check time constraints
-                else if (EventDate.Date == DateTime.Today)
+                else if (EventDate?.Date == DateTime.Today)
                 {
                     if (StartTime < currentTime)
                     {

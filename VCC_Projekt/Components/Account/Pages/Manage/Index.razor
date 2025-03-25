@@ -16,19 +16,19 @@
 
 <div class="row">
     <div class="col-md-6">
-        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
+@*         <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator /> *@
             <div class="form-floating mb-3">
                 <input type="text" value="@currentUserName" class="form-control" placeholder="Aktueller Benutzername" disabled />
                 <label for="username" class="form-label">Aktueller Benutzername</label>
             </div>
-            <div class="form-floating mb-3">
+@*             <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.UserName" class="form-control" placeholder="Bitte gib deinen neuen Benutzernamen ein." />
                 <label for="username" class="form-label">Neuer Benutzername</label>
                 <ValidationMessage For="() => Input.UserName" class="text-danger" />
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Speichern</button>
-        </EditForm>
+        </EditForm> *@
     </div>
 </div>
 
@@ -39,69 +39,73 @@
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
+    // [SupplyParameterFromForm]
+    // private InputModel Input { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         currentUserName = await UserManager.GetUserNameAsync(user);
 
-        Input.UserName ??= currentUserName;
+        // Set username
+        //Input.UserName ??= currentUserName;
     }
 
-    private async Task OnValidSubmitAsync()
-    {
-        if (Input.UserName != currentUserName)
-        {
-            try
-            {
-                int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_aspnetusers SET UserName = '{Input.UserName}', NormalizedUserName = '{Input.UserName.ToUpper()}' WHERE UserName = '{currentUserName}'");
-                if(rowsEffected == 1)
-                {
-                    user.UserName = Input.UserName;
-                    user.NormalizedUserName = Input.UserName.ToUpper();
-                }
-            }
+    // Change username in database
+    // private async Task OnValidSubmitAsync()
+    // {
+    //     if (Input.UserName != currentUserName)
+    //     {
+    //         try
+    //         {
+    //             int rowsEffected = dbContext.Database.ExecuteSqlRaw($"UPDATE vcc_aspnetusers SET UserName = '{Input.UserName}', NormalizedUserName = '{Input.UserName.ToUpper()}' WHERE UserName = '{currentUserName}'");
+    //             if(rowsEffected == 1)
+    //             {
+    //                 user.UserName = Input.UserName;
+    //                 user.NormalizedUserName = Input.UserName.ToUpper();
+    //             }
+    //         }
 
-            catch (Exception ex)
-            {
-                RedirectManager.RedirectToCurrentPageWithStatus($"Fehler: Der Benutzername konnte nicht geändert werden.", HttpContext);
-            }
-        }
+    //         catch (Exception ex)
+    //         {
+    //             RedirectManager.RedirectToCurrentPageWithStatus($"Fehler: Der Benutzername konnte nicht geändert werden.", HttpContext);
+    //         }
+    //     }
 
-        else
-        {
-            RedirectManager.RedirectToCurrentPageWithStatus("Fehler: Der Benutzername ist unverändert.", HttpContext);
-            return;
-        }
+    //     else
+    //     {
+    //         RedirectManager.RedirectToCurrentPageWithStatus("Fehler: Der Benutzername ist unverändert.", HttpContext);
+    //         return;
+    //     }
 
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Dein Benutzername wurde aktualisiert.", HttpContext);
-    }
+    //     await SignInManager.RefreshSignInAsync(user);
+    //     RedirectManager.RedirectToCurrentPageWithStatus("Dein Benutzername wurde aktualisiert.", HttpContext);
+    // }
 
-    private sealed class InputModel
-    {
-        [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
-        [RegularExpression(@"(?i)^(?!.*@htlvb\.at$).+$",
-            ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
-        [DataType(DataType.Text)]
-        [Display(Name = "Benutzername")]
-        [Required(ErrorMessage = "Benutzername ist erforderlich.")]
-        [UniqueUsername(ErrorMessage = "Benutzername existiert bereits.")]
-        public string UserName { get; set; } = "";
-    }
+    // Check input
+    // private sealed class InputModel
+    // {
+    //     [StringLength(100, ErrorMessage = "Der Benutzername muss mind. {2} Zeichen lang sein.", MinimumLength = 3)]
+    //     [RegularExpression(@"(?i)^(?!.*@htlvb\.at$).+$",
+    //         ErrorMessage = "Die Schul-Domain '@htlvb.at' ist im Benutzernamen nicht erlaubt.")]
+    //     [DataType(DataType.Text)]
+    //     [Display(Name = "Benutzername")]
+    //     [Required(ErrorMessage = "Benutzername ist erforderlich.")]
+    //     [UniqueUsername(ErrorMessage = "Benutzername existiert bereits.")]
+    //     public string UserName { get; set; } = "";
+    // }
 
-    public class UniqueUsernameAttribute : ValidationAttribute
-    {
-        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-        {
-            var context = validationContext.GetService<ApplicationDbContext>();
-            if (context.Users.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
-            {
-                return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
-            }
-            return ValidationResult.Success;
-        }
-    }
+    // Check if the username already exists
+    // public class UniqueUsernameAttribute : ValidationAttribute
+    // {
+    //     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    //     {
+    //         var context = validationContext.GetService<ApplicationDbContext>();
+    //         if (context.Users.Any(u => u.NormalizedUserName == value.ToString().ToUpper()))
+    //         {
+    //             return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName });
+    //         }
+    //         return ValidationResult.Success;
+    //     }
+    // }
 }
