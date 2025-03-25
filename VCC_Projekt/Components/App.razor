@@ -3,10 +3,10 @@
 <html lang="en">
 
 <head>
-    
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="@ConfigBasePath" />
+    <base href="@BaseUrl" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" /> 
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="VCC_Projekt.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet @rendermode="RenderModeForPage" />
-    
+
 </head>
 
 <body>
@@ -39,12 +39,6 @@
             ? null
             : InteractiveServer;
 
-    private string ConfigBasePath { get; set; } = "/";
+    private string BaseUrl => $"{_httpContext.Request.PathBase}/";
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        ConfigBasePath = Configuration.GetValue<string>("BasePath") ?? "/";
-    }
-    
 }
