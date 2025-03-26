@@ -2,17 +2,22 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
+    paths: ["VCC_Project/**"]  # Nur bei Änderungen im VCC_Project-Ordner auslösen
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
+    paths: ["VCC_Project/**"]
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - uses: actions/checkout@v4
+
+      - name: Change directory to VCC_Project
+        run: cd VCC_Project
+
+      - name: Build Docker image
+        run: docker build -t my-vcc-image:$(date +%s) .
+        working-directory: ./VCC_Project  # Stellt sicher, dass der Build im richtigen Ordner läuft
