@@ -3,10 +3,10 @@ name: Docker Image CI
 on:
   push:
     branches: ["master"]
-    paths: ["VCC_Project/**"]  # Nur bei Änderungen im VCC_Project-Ordner auslösen
+    paths: ["VCC_Projekt/**"]  # Nur bei Änderungen im VCC_Project-Ordner auslösen
   pull_request:
     branches: ["master"]
-    paths: ["VCC_Project/**"]
+    paths: ["VCC_Projekt/**"]
   workflow_dispatch:  # Erlaubt manuelles Auslösen über die GitHub UI
     inputs:
       tag_suffix:
@@ -21,8 +21,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Change directory to VCC_Project
-        run: cd VCC_Project
+        run: cd VCC_Projekt
 
       - name: Build Docker image
         run: docker build -t my-vcc-image:$(date +%s) .
-        working-directory: ./VCC_Project  # Stellt sicher, dass der Build im richtigen Ordner läuft
+        working-directory: ./VCC_Projekt  # Stellt sicher, dass der Build im richtigen Ordner läuft
