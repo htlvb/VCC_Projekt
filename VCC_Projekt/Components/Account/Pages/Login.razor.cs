@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Account.Pages
 {
     public partial class Login
     {
         private string? errorMessage;
-        
+
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -41,7 +39,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
         public async Task LoginUser()
         {
-            var user = await Usermanager.FindByEmailAsync(Input.EmailOrUsername) 
+            var user = await Usermanager.FindByEmailAsync(Input.EmailOrUsername)
                 ?? await Usermanager.FindByNameAsync(Input.EmailOrUsername);
 
             if (user == null)
@@ -69,6 +67,15 @@ namespace VCC_Projekt.Components.Account.Pages
                     return;
                 }
 
+                var memberEntry = await dbContext.EingeladeneUserInGruppe
+                    .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == user.Email);
+
+                if(memberEntry == null)
+                {
+                    errorMessage = "Fehler: Du wurdest möglicherweise aus der Gruppe ausgeladen.";
+                    return;
+                }
+
                 var isAlreadyInGroup = dbContext.UserInGruppe
                     .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
 
@@ -87,7 +94,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 case { Succeeded: true }:
                     Logger.LogInformation("User logged in.");
 
-                    if(groupId != 0)
+                    if (groupId != 0)
                     {
                         UserInGruppe gruppe = new UserInGruppe(userName, groupId);
                         dbContext.UserInGruppe.Add(gruppe);

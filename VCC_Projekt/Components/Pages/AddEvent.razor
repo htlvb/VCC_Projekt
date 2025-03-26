@@ -1,4 +1,4 @@
-@page "/add-event"
+@page "/events-manager"
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
@@ -16,109 +16,123 @@
 @using System;
 @using MudBlazor
 
-<PageTitle>Wettbewerb anlegen</PageTitle>
+<PageTitle>Wettbewerb-Manager</PageTitle>
+
+<div class="text-center">
+    <h1 class="display-4 font-weight-bold" style="color: #134883">Wettbewerb-Manager</h1>
+    <p class="lead text-muted">
+        Wähle ein Event aus, um dieses zu bearbeiten oder legen ein neues Event an.
+    </p>
+</div>
+
 <MudContainer MaxWidth="MaxWidth.False">
-    <MudGrid>
-        <MudItem xs="12">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
             <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
                 @foreach (var ev in _events)
                 {
-                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                    <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
                 }
             </MudSelect>
+        </MudItem>
+
+        <MudItem xs="10" >
+            @if (_selectedEvent.EventID != 0)
+            {
+                <MudCard>
+                    <MudCardContent>
+                        @if (_selectedEvent.Beginn > DateTime.Now)
+                        {
+                            <div class="text-end">
+                                <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="@ToggleEditMode">Wettbewerb bearbeiten</MudButton>
+                            </div>
+                        }
+
+                        <EditForm EditContext="@editContext" OnValidSubmit="@UpdateEvent" method="post" FormName="eventRegistration">
+                            <DataAnnotationsValidator />
+
+                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+
+                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+
+                            @if (_selectedEvent.Beginn > DateTime.Now)
+                            {
+                                <div class="text-center">
+                                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb speichern</MudButton>
+                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton>
+                                </div>
+                            }
+
+                        </EditForm>
+                    </MudCardContent>
+                </MudCard>
+            }
+
+            else
+            {
+                <MudCard>
+                    <MudCardContent>
+                        <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
+                            <DataAnnotationsValidator />
+
+                            <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
+
+                            <MudTextField T="DateTime" Format="yyyy-MM-dd" InputType="InputType.Date" @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
+
+                            <div class="row mb-3">
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Startzeit" InputType="InputType.Time" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
+                                    </div>
+                                </div>
+                                <div class="col">
+                                    <div class="form-floating">
+                                        <MudTextField T="TimeSpan" Label="Endzeit" InputType="InputType.Time" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTextField>
+                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Required="true"></MudTextField>
+                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
+
+                            <div class="text-center">
+                                <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">Wettbewerb anlegen</MudButton>
+                            </div>
+
+                        </EditForm>
+                    </MudCardContent>
+                </MudCard>
+            }
+
         </MudItem>
     </MudGrid>
 </MudContainer>
 
-
-<div class="container mt-5">
-    <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Wettbewerb anlegen</h1>
-        <p class="lead text-muted">
-            Fülle die folgenden Informationen aus, um einen neuen Wettbewerb zu erstellen.
-        </p>
-    </div>
-
-    <div class="mt-4">
-        <EditForm EditContext="@editContext" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
-            <DataAnnotationsValidator />
-
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.EventName" class="form-control"/>
-                <label for="eventname">Wettbewerbsname</label>
-                <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
-            </div>
-
-            <div class="form-floating mb-3">
-                <InputDate @bind-Value="Input.EventDate" class="form-control" TValue="DateTime" />
-                <label for="eventdate">Datum</label>
-                <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
-            </div>
-
-            <div class="row mb-3">
-                <div class="col">
-                    <div class="form-floating">
-                        <input type="time"
-                               value="@Input.StartTime.ToString(@"hh\:mm")"
-                               @onchange="@(e => UpdateStartTime(e.Value.ToString()))"
-                               class="form-control" />
-                        <label for="starttime">Startzeit</label>
-                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="form-floating">
-                        <input type="time"
-                               value="@Input.EndTime.ToString(@"hh\:mm")"
-                               @onchange="@(e => UpdateEndTime(e.Value.ToString()))"
-                               class="form-control" />
-                        <label for="endtime">Endzeit</label>
-                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input type="number" class="form-control" min="0" @bind="Input.PenaltyMinutes" />
-                <label for="penaltyminutes">Strafminuten pro Fehlerversuch</label>
-                <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
-            </div>
-
-
-            <div class="text-center mt-5">
-                <button type="submit" class="w-25 btn btn-lg btn-success">Wettbewerb anlegen</button>
-                <p></p>
-            </div>
-        </EditForm>
-    </div>
-</div>
-
-
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
 
-    h1, h2, h3 {
-        color: #134883;
-    }
 
-    .btn-success {
-        background-color: #134883;
-        border-color: #134883;
-    }
-
-        .btn-success:hover {
-            background-color: #2f5e91;
-            border-color: #2f5e91;
-        }
-
-    .form-control {
-        border: 2px solid #134883;
-    }
-
-        .form-control:focus {
-            border-color: #2f5e91;
-            box-shadow: 0 0 5px rgba(47, 94, 145, 0.5);
-        }
 </style>

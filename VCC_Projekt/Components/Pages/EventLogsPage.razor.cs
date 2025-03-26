@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using MudBlazor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace VCC_Projekt.Components.Pages
+﻿namespace VCC_Projekt.Components.Pages
 {
     public partial class EventLogsPage
     {

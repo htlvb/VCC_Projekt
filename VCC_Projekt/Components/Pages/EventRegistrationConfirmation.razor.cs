@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
-using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
