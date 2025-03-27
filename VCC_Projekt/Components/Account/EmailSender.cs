@@ -1,6 +1,7 @@
 ﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using System.Net;
@@ -10,43 +11,110 @@ using System.Text;
 public class EmailSender : IEmailSender<ApplicationUser>
 {
     private readonly MailOptions _options;
-    public string emailAddress;
-    public string domain;
     private ImapClient _imapClient;
     private SmtpClient _smtpClient;
-    private int _operationCount = 0;
-    private const int MaxOperations = 100;
+    private AccessTokenModel _currentToken;
+    private DateTime _tokenExpiryTime;
+    private readonly SemaphoreSlim _tokenLock = new SemaphoreSlim(1, 1);
+    public string EmailAddress => _options.Email;
 
     public EmailSender(IOptions<MailOptions> mailOptions)
     {
         _options = mailOptions.Value;
-        emailAddress = _options.Email;
-        domain = emailAddress.Split("@", 2)[1];
     }
 
     private async Task EnsureImapConnectedAsync()
     {
-        if (_imapClient == null || !_imapClient.IsConnected)
+        if (_imapClient != null && _imapClient.IsConnected) return;
+
+        try
         {
+            var token = await GetOrRefreshTokenAsync();
+
+            if (_imapClient != null)
+            {
+                await _imapClient.DisconnectAsync(true);
+                _imapClient.Dispose();
+            }
+
             _imapClient = new ImapClient();
-            await _imapClient.ConnectAsync($"imap.{domain.ToLower()}", 993, true).ConfigureAwait(false);
-            await _imapClient.AuthenticateAsync(_options.Email, _options.Password).ConfigureAwait(false);
-            _operationCount = 0;
+            await _imapClient.ConnectAsync(_options.ImapServer, 993, SecureSocketOptions.SslOnConnect)
+                            .ConfigureAwait(false);
+
+            var oauth2 = new SaslMechanismOAuth2(_options.Email, token.access_token);
+            await _imapClient.AuthenticateAsync(oauth2).ConfigureAwait(false);
         }
-        else if (_operationCount >= MaxOperations)
+        catch (AuthenticationException)
         {
-            await _imapClient.DisconnectAsync(true).ConfigureAwait(false);
-            await _imapClient.ConnectAsync($"imap.{domain.ToLower()}", 993, true).ConfigureAwait(false);
-            await _imapClient.AuthenticateAsync(_options.Email, _options.Password).ConfigureAwait(false);
-            _operationCount = 0;
+            // Bei Auth-Fehlern mit frischem Token versuchen
+            var freshToken = await GetOrRefreshTokenAsync(forceRefresh: true);
+            var oauth2 = new SaslMechanismOAuth2(_options.Email, freshToken.access_token);
+            await _imapClient.AuthenticateAsync(oauth2).ConfigureAwait(false);
         }
+        catch (ImapCommandException ex) when (ex.ResponseText?.Contains("AUTHENTICATE failed") == true)
+        {
+            // Spezifische Behandlung von IMAP Auth-Fehlern
+            var freshToken = await GetOrRefreshTokenAsync(forceRefresh: true);
+            await _imapClient.DisconnectAsync(true);
+            await _imapClient.ConnectAsync(_options.ImapServer, 993, SecureSocketOptions.SslOnConnect);
+            await _imapClient.AuthenticateAsync(new SaslMechanismOAuth2(_options.Email, freshToken.access_token));
+        }
+    }
+
+    private async Task<AccessTokenModel> GetOrRefreshTokenAsync(bool forceRefresh = false)
+    {
+        // Wenn Token noch gültig (mit 2 Minuten Puffer)
+        if (!forceRefresh && _currentToken != null && DateTime.UtcNow < _tokenExpiryTime)
+        {
+            return _currentToken;
+        }
+
+        await _tokenLock.WaitAsync();
+        try
+        {
+            // Double-Check nach Lock
+            if (!forceRefresh && _currentToken != null && DateTime.UtcNow < _tokenExpiryTime)
+            {
+                return _currentToken;
+            }
+
+            var newToken = await GetAccessTokenAsync();
+            _currentToken = newToken;
+
+            // Verwende den kürzeren der beiden Expiry-Werte mit Puffer
+            var expiresIn = Math.Min(newToken.expires_in, newToken.ext_expires_in) - 120;
+            _tokenExpiryTime = DateTime.UtcNow.AddSeconds(expiresIn);
+
+            return _currentToken;
+        }
+        finally
+        {
+            _tokenLock.Release();
+        }
+    }
+
+    public async Task<AccessTokenModel> GetAccessTokenAsync()
+    {
+        string url = $"https://login.microsoftonline.com/{_options.TenantId}/oauth2/v2.0/token";
+
+        var data = new Dictionary<string, string>
+        {
+            {"grant_type", "client_credentials"},
+            {"scope", "https://outlook.office365.com/.default"},
+            {"client_id",  _options.ClientId},
+            {"client_secret", _options.ClientSecret}
+        };
+
+        using HttpClient client = new();
+        var response = await client.PostAsync(url, new FormUrlEncodedContent(data));
+        return await response.Content.ReadFromJsonAsync<AccessTokenModel>();
     }
 
     private void EnsureSmtpConnected()
     {
         if (_smtpClient == null)
         {
-            _smtpClient = new SmtpClient($"smtp.{domain}", 587)
+            _smtpClient = new SmtpClient(_options.SmptServer, 587)
             {
                 Credentials = new NetworkCredential(_options.Email, _options.Password),
                 EnableSsl = true
@@ -123,7 +191,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
             Console.WriteLine($"Fehler beim Abrufen der E-Mails: {ex.Message}");
         }
 
-        _operationCount++;
         return messagesWithFlags;
     }
 
@@ -139,7 +206,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         await DeleteEmailsInFolderAsync(sentFolder, messageIds).ConfigureAwait(false);
 
-        _operationCount++;
     }
 
     private async Task DeleteEmailsInFolderAsync(IMailFolder folder, List<string> messageIds)
@@ -183,7 +249,6 @@ public class EmailSender : IEmailSender<ApplicationUser>
             throw new Exception("Keine E-Mail mit der angegebenen MessageId gefunden.");
         }
 
-        _operationCount++;
     }
 
     public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
