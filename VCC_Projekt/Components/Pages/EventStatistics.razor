@@ -1,4 +1,5 @@
 ﻿@page "/event-statistics"
+@page "/event-statistics/{eventId:int}"
 
 <PageTitle>Event Statistiken</PageTitle>
 
@@ -6,7 +7,7 @@
     <MudText Typo="Typo.h3" GutterBottom="true">Event Statistics</MudText>
 
     <!-- Dropdown zur Auswahl des Events -->
-    <MudSelect T="Event" Label="Event auswählen" Variant="Variant.Outlined" ValueChanged="e => OnEventSelected(e)">
+    <MudSelect T="Event" Label="Event auswählen" Variant="Variant.Outlined" ValueChanged="e => OnEventSelected(e)" Value="SelectedEvent">
         @foreach (var eventItem in Events)
         {
             <MudSelectItem Value="eventItem">@eventItem.Bezeichnung (@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
