@@ -1,6 +1,9 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
+@using Microsoft.AspNetCore.Authorization
 @inject IDialogService DialogService
+
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Rollen ändern</PageTitle>
 

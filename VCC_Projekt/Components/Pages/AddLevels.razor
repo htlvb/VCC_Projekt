@@ -1,6 +1,9 @@
 ﻿@page "/levels-manager"
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
+
+@attribute [Authorize(Roles = "Admin,Editor")]
 
 <PageTitle>Level-Manager</PageTitle>
 

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -67,7 +66,7 @@ namespace VCC_Projekt.Components.Pages
                 try
                 {
                     var eventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
-                    if(eventToUpdate != null)
+                    if (eventToUpdate != null)
                     {
                         eventToUpdate.Bezeichnung = Input.EventName;
                         eventToUpdate.Beginn = DateTime.Parse(Input.EventDate?.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
@@ -76,7 +75,7 @@ namespace VCC_Projekt.Components.Pages
 
                         dbContext.SaveChanges();
                     }
-                    
+
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
                     ToggleEditMode();
                 }
@@ -197,7 +196,7 @@ namespace VCC_Projekt.Components.Pages
                 var eventEnd = EventDate?.Date + EndTime;
 
                 if (EventDate?.Date == null) errors.Add(new ValidationResult("Bitte ein Datum angeben.", new[] { nameof(EventDate) }));
-                if(eventStart == null) errors.Add(new ValidationResult("Bitte eine Startzeit angeben.", new[] { nameof(StartTime) }));
+                if (eventStart == null) errors.Add(new ValidationResult("Bitte eine Startzeit angeben.", new[] { nameof(StartTime) }));
                 if (eventEnd == null) errors.Add(new ValidationResult("Bitte eine Endzeit angeben.", new[] { nameof(EndTime) }));
 
 
