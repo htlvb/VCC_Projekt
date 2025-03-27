@@ -27,7 +27,7 @@
         {
             <!-- Index innerhalb der Schleife speichern -->
             <MudItem xs="10" sm="6">
-                <MudCard Class="level-card">
+                <MudCard Class="level-card" Outlined="true">
                     <MudCardHeader>
                         <MudText Typo="Typo.h6">Level @level.Levelnr</MudText>
                         <MudSpacer />
@@ -155,7 +155,7 @@
         }
         <!-- Add Level Button -->
         <MudItem xs="10">
-            <MudCard class="mt-3">
+            <MudCard class="mt-3" Outlined="true">
                 <MudCardContent>
                     <MudButton OnClick="() => AddLevel()" Color="Color.Primary" Disabled="@(_levels.Count >= 5 || _selectedEvent.EventID == 0 || IsEventInPast)">Neues Level hinzufügen</MudButton>
                 </MudCardContent>
@@ -163,7 +163,7 @@
         </MudItem>
 
         <MudItem xs="10">
-            <MudCard class="mt-3">
+            <MudCard class="mt-3" Outlined="true">
                 <MudCardContent>
                     <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
                     <MudButton Href="@($"/preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>

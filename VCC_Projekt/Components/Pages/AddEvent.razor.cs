@@ -47,24 +47,6 @@ namespace VCC_Projekt.Components.Pages
             if (isEditing == true) ToggleEditMode();
         }
 
-        //private void UpdateStartTime(string value)
-        //{
-        //    if (TimeSpan.TryParse(value, out TimeSpan time))
-        //    {
-        //        Input.StartTime = time;
-        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.StartTime));
-        //    }
-        //}
-
-        //private void UpdateEndTime(string value)
-        //{
-        //    if (TimeSpan.TryParse(value, out TimeSpan time))
-        //    {
-        //        Input.EndTime = time;
-        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.EndTime));
-        //    }
-        //}
-
         private async Task UpdateEvent()
         {
             try
@@ -97,8 +79,6 @@ namespace VCC_Projekt.Components.Pages
                     
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
                     ToggleEditMode();
-
-                    //Input = new InputModel();
                 }
 
                 catch (Exception ex)
@@ -125,6 +105,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     foreach (var validationResult in validationResults)
                     {
+                        ShowSnackbar(validationResult.ErrorMessage, Severity.Error);
                         Console.WriteLine($"Validation Error: {validationResult.ErrorMessage}");
                     }
                     return;
@@ -182,7 +163,7 @@ namespace VCC_Projekt.Components.Pages
 
             [DataType(DataType.DateTime)]
             [Display(Name = "Datum")]
-            public DateTime? EventDate { get; set; } = DateTime.Today;
+            public DateTime? EventDate { get; set; }
 
             [DataType(DataType.Time)]
             [Display(Name = "Startzeit")]
@@ -214,6 +195,11 @@ namespace VCC_Projekt.Components.Pages
                 var currentTime = DateTime.Now.TimeOfDay;
                 var eventStart = EventDate?.Date + StartTime;
                 var eventEnd = EventDate?.Date + EndTime;
+
+                if (EventDate?.Date == null) errors.Add(new ValidationResult("Bitte ein Datum angeben.", new[] { nameof(EventDate) }));
+                if(eventStart == null) errors.Add(new ValidationResult("Bitte eine Startzeit angeben.", new[] { nameof(StartTime) }));
+                if (eventEnd == null) errors.Add(new ValidationResult("Bitte eine Endzeit angeben.", new[] { nameof(EndTime) }));
+
 
                 // Check if date is in the past
                 if (EventDate?.Date < DateTime.Today)
