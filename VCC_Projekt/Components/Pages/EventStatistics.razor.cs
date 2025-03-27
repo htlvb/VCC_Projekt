@@ -11,12 +11,16 @@ using ChartJs.Blazor.Interop;
 using ChartJs.Blazor.LineChart;
 using ChartJs.Blazor.PieChart;
 using ChartJs.Blazor.Util;
+using Microsoft.AspNetCore.Components;
 using MySqlConnector;
 
 namespace VCC_Projekt.Components.Pages
 {
     public partial class EventStatistics
     {
+        [Parameter]
+        public int EventId { get; set; }
+
         private List<Event> Events = new();
         private Event SelectedEvent;
         private Event? _selectedEventStatistiks;
@@ -46,16 +50,29 @@ namespace VCC_Projekt.Components.Pages
                     Scales = new BarScales
                     {
                         XAxes = new List<CartesianAxis>
-                        {
-                            new CategoryAxis
-                            {
-                                Ticks = new CategoryTicks
-                                {
-                                    FontSize = 12,
-                                    FontColor = "#000",
-                                }
-                            }
-                        }
+                                    {
+                                        new CategoryAxis
+                                        {
+                                            Ticks = new CategoryTicks
+                                            {
+                                                FontSize = 12,
+                                                FontColor = "#000",
+                                            }
+                                        }
+                                    },
+                                    YAxes = new List<CartesianAxis>
+                                    {
+                                        new LinearCartesianAxis
+                                        {
+                                            Ticks = new LinearCartesianTicks
+                                            {
+                                                FontSize = 12,
+                                                FontColor = "#000",
+                                                Precision = 0, // Keine Nachkommastellen
+                                                StepSize = 1   // Nur ganze Zahlen (1er-Schritte)
+                                            }
+                                        }
+                                    }
                     },
                     Tooltips = new Tooltips
                     {
@@ -109,6 +126,13 @@ namespace VCC_Projekt.Components.Pages
                     }
                 }
             };
+
+            if (EventId != null)
+            {
+                Event ev = Events.FirstOrDefault(e => e.EventID == EventId);
+                if (ev == null) return;
+                OnEventSelected(ev);
+            }
         }
 
         // Event-Handler für die Auswahl eines Events
@@ -175,15 +199,15 @@ namespace VCC_Projekt.Components.Pages
             }
             var barDataset = new BarDataset<int>
             {
-                Label = "Completed Levels", // Set the dataset label
+                Label = "Abgeschlossene Levels", // Set the dataset label
                 BackgroundColor = new[]
                 {
-            ColorUtil.ColorHexString(255, 99, 132),  // Rot
-            ColorUtil.ColorHexString(54, 162, 235),  // Blau
-            ColorUtil.ColorHexString(255, 206, 86),  // Gelb
-            ColorUtil.ColorHexString(75, 192, 192),  // Türkis
-            ColorUtil.ColorHexString(153, 102, 255)  // Lila
-        }
+                    ColorUtil.ColorHexString(255, 99, 132),  // Rot
+                    ColorUtil.ColorHexString(54, 162, 235),  // Blau
+                    ColorUtil.ColorHexString(255, 206, 86),  // Gelb
+                    ColorUtil.ColorHexString(75, 192, 192),  // Türkis
+                    ColorUtil.ColorHexString(153, 102, 255)  // Lila
+                }
             };
             foreach (var data in _selectedEventStatistiks.Levels.Select(l => (int)l.Absolviert.Count(a => a.BenoetigteZeit != null)))
             {
@@ -200,12 +224,12 @@ namespace VCC_Projekt.Components.Pages
             {
                 BackgroundColor = new[]
                 {
-            ColorUtil.ColorHexString(255, 99, 132),  // Rot
-            ColorUtil.ColorHexString(54, 162, 235),  // Blau
-            ColorUtil.ColorHexString(255, 206, 86),  // Gelb
-            ColorUtil.ColorHexString(75, 192, 192),  // Türkis
-            ColorUtil.ColorHexString(153, 102, 255)  // Lila
-        }
+                    ColorUtil.ColorHexString(255, 99, 132),  // Rot
+                    ColorUtil.ColorHexString(54, 162, 235),  // Blau
+                    ColorUtil.ColorHexString(255, 206, 86),  // Gelb
+                    ColorUtil.ColorHexString(75, 192, 192),  // Türkis
+                    ColorUtil.ColorHexString(153, 102, 255)  // Lila
+                }
             };
             foreach (var data in _selectedEventStatistiks.Levels.Select(l => (int)(l.Absolviert?.Sum(a => a.Fehlversuche) ?? 0)))
             {
@@ -225,7 +249,8 @@ namespace VCC_Projekt.Components.Pages
             {
                 Label = "Zeit", // Set the dataset label
                 BackgroundColor = ColorUtil.ColorHexString(75, 192, 192),
-                BorderColor = ColorUtil.ColorHexString(75, 192, 192)
+                BorderColor = ColorUtil.ColorHexString(75, 192, 192),
+                Fill = false
             };
             foreach (var data in _selectedEventStatistiks.Levels.Select(l =>
             {
