@@ -56,8 +56,8 @@
                                 else if (!level.IsNew)
                                 {
                                     <div class="file-preview">
-                                        <a href="/api/files/@level.LevelId" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr + 1}.pdf")" class="download-link">PDF herunterladen</a>
-                                        <iframe src="/api/files/@level.LevelId" class="pdf-preview"></iframe>
+                                        <a href="api/files/@level.LevelId" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr + 1}.pdf")" class="download-link">PDF herunterladen</a>
+                                        <iframe src="api/files/@level.LevelId" class="pdf-preview"></iframe>
                                     </div>
                                 }
                             }
@@ -101,7 +101,7 @@
                                                                 .Select(au => au.Input_TXT)
                                                                 .FirstOrDefault();
                                                                 <div class="file-preview">
-                                                                    <a href="/api/files/@level.LevelId/@aufgabe.AufgabenId/input" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr}_Input{aufgabe.Aufgabennr}.txt")" class="download-link">Input.txt herunterladen</a>
+                                                                    <a href="api/files/@level.LevelId/@aufgabe.AufgabenId/input" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr}_Input{aufgabe.Aufgabennr}.txt")" class="download-link">Input.txt herunterladen</a>
                                                                     <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(aufgabeData))</pre>
                                                                 </div>
                                                             }
@@ -133,7 +133,7 @@
                                                                 .FirstOrDefault();
 
                                                                 <div class="file-preview">
-                                                                    <a href="/api/files/@level.LevelId/@aufgabe.AufgabenId/result" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr}_Result{aufgabe.Aufgabennr}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
+                                                                    <a href="api/files/@level.LevelId/@aufgabe.AufgabenId/result" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr}_Result{aufgabe.Aufgabennr}.txt")" class="download-link">Ergebnis.txt herunterladen</a>
                                                                     <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(aufgabeData)</pre>
                                                                 </div>
                                                             }
@@ -166,7 +166,7 @@
             <MudCard class="mt-3">
                 <MudCardContent>
                     <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
-                    <MudButton Href="@($"/preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
+                    <MudButton Href="@($"preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
                 </MudCardContent>
             </MudCard>
         </MudItem>
