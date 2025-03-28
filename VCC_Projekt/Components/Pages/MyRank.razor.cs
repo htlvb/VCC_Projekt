@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -86,12 +87,57 @@ namespace VCC_Projekt.Components.Pages
             try
             {
                 // Fetch complete ranking data for the event
-                var completeRanking = dbContext.Set<RanglisteResult>()
+                var rankingData = dbContext.Set<RanglisteResult>()
                     .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", EventId))
                     .ToList();
+                var groups = dbContext.Gruppen
+                    .Where(g => g.Event_EventID == EventId)
+                    .Select(g => new RanglisteResult
+                    {
+                        GruppenID = g.GruppenID,
+                        Gruppenname = g.Gruppenname,
+                        GruppenleiterId = g.GruppenleiterId,
+                        Teilnehmertyp = g.Teilnehmertyp,
+                        AbgeschlosseneLevel = "", // Default to 0 for participants who haven't completed any levels
+                        AnzahlLevel = 0, // Default to 0
+                        GesamtFehlversuche = 0, // Default to 0
+                        MaxBenötigteZeit = null, // No time data
+                        GebrauchteZeit = null // No time data
+                    })
+                    .ToList();
+
+                var individualUsers = dbContext.UserInGruppe
+                    .Where(u => u.Gruppe.Event_EventID == EventId && u.Gruppe.Teilnehmertyp == "Einzelspieler")
+                    .Select(u => new RanglisteResult
+                    {
+                        GruppenID = u.Gruppe.GruppenID,
+                        Gruppenname = null, // Individual players have no group name
+                        GruppenleiterId = u.User.Id,
+                        Teilnehmertyp = "Einzelspieler",
+                        AbgeschlosseneLevel = "", // Default to 0
+                        AnzahlLevel = 0, // Default to 0
+                        GesamtFehlversuche = 0, // Default to 0
+                        MaxBenötigteZeit = null, // No time data
+                        GebrauchteZeit = null // No time data
+                    })
+                    .ToList();
+
+                // Combine all participants
+                var allParticipants = groups.Concat(individualUsers).ToList();
+
+                var unrankedParticipants = allParticipants
+                    .Where(participant => !rankingData.Any(ranking => ranking.GruppenID == participant.GruppenID))
+                    .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString()) // Sort alphabetically
+                    .ToList();
+
+                int lastRank = rankingData.Count;
+                for (int i = 0; i < unrankedParticipants.Count(); i++)
+                {
+                    unrankedParticipants[i].Rang = lastRank + i + 1;
+                }
 
                 // Get top 10 entries
-                _topRankingList = completeRanking.ToList();
+                _topRankingList = GetFirst10WithFallback(rankingData, unrankedParticipants);
 
                 // Find user's group ID(s)
                 //var userGroupIds = dbContext.UserInGruppe
@@ -118,6 +164,22 @@ namespace VCC_Projekt.Components.Pages
                 return false;
 
             return entry.GruppenID == _userRankingEntry.GruppenID;
+        }
+
+        private static List<T> GetFirst10WithFallback<T>(List<T> primary, List<T> secondary)
+        {
+            // Take up to 10 from primary
+            var result = primary.Take(10).ToList();
+
+            // If we need more, take from secondary
+            if (result.Count < 10)
+            {
+                int needed = 10 - result.Count;
+                result.AddRange(secondary.Take(needed));
+            }
+
+            // Ensure we return exactly 10 items (if secondary has enough)
+            return result.Take(10).ToList();
         }
     }
 }
