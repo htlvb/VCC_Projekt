@@ -7,10 +7,12 @@ using MySqlConnector;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using Microsoft.Extensions.Logging;
+using System.Timers;
+using System.Threading.Tasks;
 
 namespace VCC_Projekt.Components.Pages
 {
-    public partial class MyRank
+    public partial class MyRank : IDisposable
     {
         [Inject]
         private NavigationManager NavigationManager { get; set; }
@@ -28,6 +30,7 @@ namespace VCC_Projekt.Components.Pages
         private bool accessDenied;
         private string accessDeniedMessage = "";
         private string _userId;
+        private System.Timers.Timer _refreshTimer;
 
         protected override async Task OnInitializedAsync()
         {
@@ -65,6 +68,12 @@ namespace VCC_Projekt.Components.Pages
 
                 // Load the ranking and user position
                 LoadRankingAndUserPosition();
+
+                // Initialize refresh timer if access is not denied
+                if (!accessDenied)
+                {
+                    InitializeRefreshTimer();
+                }
             }
             catch (Exception ex)
             {
@@ -79,6 +88,55 @@ namespace VCC_Projekt.Components.Pages
             {
                 // Reload when the event ID changes
                 _ = OnInitializedAsync();
+            }
+        }
+
+        private void InitializeRefreshTimer()
+        {
+            // Clean up any existing timer
+            _refreshTimer?.Dispose();
+
+            // Create new timer with 5 second interval (same as Dashboard)
+            _refreshTimer = new System.Timers.Timer(5000);
+            _refreshTimer.Elapsed += async (sender, e) => await RefreshRanking();
+            _refreshTimer.AutoReset = true;
+            _refreshTimer.Enabled = true;
+        }
+
+        private async Task RefreshRanking()
+        {
+            // Only refresh if not in access denied state
+            if (!accessDenied && _event != null)
+            {
+                await InvokeAsync(() =>
+                {
+                    try
+                    {
+                        LoadRankingAndUserPosition();
+                        StateHasChanged();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error refreshing ranking: {ex.Message}");
+                        accessDenied = true;
+                        accessDeniedMessage = $"Fehler beim Aktualisieren: {ex.Message}";
+                        StopTimer();
+                        StateHasChanged();
+                    }
+                });
+            }
+            else
+            {
+                // If we're in access denied state, stop refreshing
+                StopTimer();
+            }
+        }
+
+        private void StopTimer()
+        {
+            if (_refreshTimer != null)
+            {
+                _refreshTimer.Enabled = false;
             }
         }
 
@@ -140,21 +198,38 @@ namespace VCC_Projekt.Components.Pages
                 _topRankingList = GetFirst10WithFallback(rankingData, unrankedParticipants);
 
                 // Find user's group ID(s)
-                //var userGroupIds = dbContext.UserInGruppe
-                //    .Where(uig => uig.User.Id == _userId && uig.Gruppe.Event_EventID == EventId)
-                //    .Select(uig => uig.Gruppe.GruppenID)
-                //    .ToList();
+                var memberGroupIds = dbContext.UserInGruppe
+                    .Where(uig => uig.User_UserId == _userId)
+                    .Select(uig => uig.Gruppe_GruppenId)
+                    .Distinct()
+                    .ToList();
 
-                // Find user's ranking entry
-                //_userRankingEntry = completeRanking.FirstOrDefault(r => userGroupIds.Contains(r.GruppenID));
+                // 2. Get groups where user is the LEADER
+                var leaderGroupIds = dbContext.Gruppen
+                    .Where(g => g.GruppenleiterId == _userId && g.Event_EventID == EventId)
+                    .Select(g => g.GruppenID)
+                    .ToList();
 
-                //// Check if user entry exists and if it's not already in top 10
-                showUserEntry = false; /* _userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID);*/
+                // 3. Combine both lists
+                var allUserGroupIds = memberGroupIds.Concat(leaderGroupIds).Distinct().ToList();
+
+                // Find user's ranking entry in either ranked or unranked participants
+                _userRankingEntry = allParticipants
+                    .FirstOrDefault(r => allUserGroupIds.Contains(r.GruppenID));
+
+                // Check if user entry exists and if it's not already in top 10
+                showUserEntry = _userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID);
+
+                if(showUserEntry)
+                {
+                    _topRankingList.Add(_userRankingEntry);
+                }
             }
             catch (Exception ex)
             {
                 accessDenied = true;
                 accessDeniedMessage = $"Fehler beim Laden der Rangliste: {ex.Message}";
+                StopTimer();
             }
         }
 
@@ -180,6 +255,17 @@ namespace VCC_Projekt.Components.Pages
 
             // Ensure we return exactly 10 items (if secondary has enough)
             return result.Take(10).ToList();
+        }
+
+        public void Dispose()
+        {
+            // Dispose of the timer when the component is disposed
+            if (_refreshTimer != null)
+            {
+                _refreshTimer.Enabled = false;
+                _refreshTimer.Dispose();
+                _refreshTimer = null;
+            }
         }
     }
 }
