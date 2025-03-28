@@ -34,12 +34,6 @@
                         </button>
                     </form>
                 </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="my-events">
-                        <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Meine Events
-                    </NavLink>
-                </div>
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
@@ -66,6 +60,11 @@
                     <MudIcon Icon="@Icons.Material.Outlined.EventNote" class="me-1" /> Wettbewerb-Manager
                 </NavLink>
             </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="support-emails">
+                    <MudIcon Icon="@Icons.Material.Outlined.Email" class="me-1" /> Support Emails
+                </NavLink>
+            </div>
         </AuthorizeView>
         <AuthorizeView Roles="Admin,Editor">
             <div class="nav-item px-3">
@@ -78,6 +77,15 @@
                     <MudIcon Icon="@Icons.Material.Outlined.StackedLineChart" class="me-1" /> Level-Manager
                 </NavLink>
             </div>
+        </AuthorizeView>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="my-events">
+                        <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Meine Events
+                    </NavLink>
+                </div>
+            </Authorized>
         </AuthorizeView>
 
         <div class="nav-item px-3">
