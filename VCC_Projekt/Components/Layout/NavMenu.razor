@@ -57,38 +57,38 @@
         </AuthorizeView>
         <AuthorizeView Roles="Admin">
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="events-manager">
-                    <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Wettbewerb-Manager
+                <NavLink class="nav-link" href="change-roles">
+                    <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" class="me-1" /> Rollen verändern
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="change-roles">
-                    <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Rollen verändern
+                <NavLink class="nav-link" href="events-manager">
+                    <MudIcon Icon="@Icons.Material.Outlined.EventNote" class="me-1" /> Wettbewerb-Manager
                 </NavLink>
             </div>
         </AuthorizeView>
         <AuthorizeView Roles="Admin,Editor">
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="levels-manager">
-                    <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Level-Manager
+                <NavLink class="nav-link" href="event-statistics">
+                    <MudIcon Icon="@Icons.Material.Outlined.PieChartOutline" class="me-1" /> Event Statistiken
                 </NavLink>
             </div>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="event-statistics">
-                    <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Event Statistiken
+                <NavLink class="nav-link" href="levels-manager">
+                    <MudIcon Icon="@Icons.Material.Outlined.StackedLineChart" class="me-1" /> Level-Manager
                 </NavLink>
             </div>
         </AuthorizeView>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="events">
-                <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Events
+                <MudIcon Icon="@Icons.Material.Outlined.Event" class="me-1" /> Events
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="info">
-                <span class="bi bi-info-square-nav-menu" aria-hidden="true"></span> Info
+                <MudIcon Icon="@Icons.Material.Outlined.Info" class="me-1" /> Info
             </NavLink>
         </div>
     </nav>
