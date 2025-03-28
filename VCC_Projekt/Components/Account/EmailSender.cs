@@ -159,39 +159,55 @@ public class EmailSender : IEmailSender<ApplicationUser>
     public async Task<List<(MimeMessage Message, MessageFlags? Flags)>> GetEmailsAsync(string filter = "")
     {
         await EnsureImapConnectedAsync().ConfigureAwait(false);
-
-        var inbox = _imapClient.Inbox;
-        await inbox.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
         var messagesWithFlags = new List<(MimeMessage Message, MessageFlags? Flags)>();
 
         try
         {
-            IList<UniqueId> uids;
-            if (string.IsNullOrEmpty(filter))
+            // Posteingang durchsuchen
+            var inbox = _imapClient.Inbox;
+            await inbox.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
+            await SearchAndAddMessagesAsync(inbox, filter, messagesWithFlags).ConfigureAwait(false);
+
+            // Gesendete E-Mails durchsuchen
+            var sentFolder = _imapClient.GetFolder("Gesendete Elemente");
+
+            if (sentFolder != null)
             {
-                uids = await inbox.SearchAsync(SearchQuery.All).ConfigureAwait(false);
+                await sentFolder.OpenAsync(FolderAccess.ReadOnly).ConfigureAwait(false);
+                await SearchAndAddMessagesAsync(sentFolder, filter, messagesWithFlags).ConfigureAwait(false);
             }
             else
             {
-                var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
-                uids = await inbox.SearchAsync(query).ConfigureAwait(false);
-            }
-
-            var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
-
-            foreach (var summary in summaries)
-            {
-                var message = await inbox.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
-                messagesWithFlags.Add((message, summary.Flags));
+                Console.WriteLine("Gesendete Elemente nicht gefunden!");
             }
         }
         catch (Exception ex)
         {
-            // Fehlerbehandlung
             Console.WriteLine($"Fehler beim Abrufen der E-Mails: {ex.Message}");
         }
 
-        return messagesWithFlags;
+        return messagesWithFlags.OrderBy(e => e.Message.Date).ToList();
+    }
+    private async Task SearchAndAddMessagesAsync(IMailFolder folder, string filter, List<(MimeMessage Message, MessageFlags? Flags)> messagesWithFlags)
+    {
+        IList<UniqueId> uids;
+        if (string.IsNullOrEmpty(filter))
+        {
+            uids = await folder.SearchAsync(SearchQuery.All).ConfigureAwait(false);
+        }
+        else
+        {
+            var query = SearchQuery.SubjectContains(filter).Or(SearchQuery.BodyContains(filter));
+            uids = await folder.SearchAsync(query).ConfigureAwait(false);
+        }
+
+        var summaries = await folder.FetchAsync(uids, MessageSummaryItems.Flags | MessageSummaryItems.UniqueId).ConfigureAwait(false);
+
+        foreach (var summary in summaries)
+        {
+            var message = await folder.GetMessageAsync(summary.UniqueId).ConfigureAwait(false);
+            messagesWithFlags.Add((message, summary.Flags));
+        }
     }
 
     public async Task DeleteEmailsAsync(List<string> messageIds)
@@ -202,7 +218,7 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
         await DeleteEmailsInFolderAsync(inboxFolder, messageIds).ConfigureAwait(false);
 
-        var sentFolder = _imapClient.GetFolder(SpecialFolder.Sent);
+        var sentFolder = _imapClient.GetFolder("Gesendete Elemente");
 
         await DeleteEmailsInFolderAsync(sentFolder, messageIds).ConfigureAwait(false);
 
