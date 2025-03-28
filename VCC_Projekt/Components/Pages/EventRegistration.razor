@@ -10,129 +10,125 @@
 
 <PageTitle>Event-Anmeldung</PageTitle>
 
-<div class="container mt-5">
-    <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Anmeldung für @dbContext.Events.Where(e => e.EventID == eventId).First().Bezeichnung</h1>
-        <p class="lead text-muted">
-            Wähle deine Teilnahmeart und registriere dich für das Event.
-        </p>
-    </div>
-
-    <div class="mt-4">
-        <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
-            <DataAnnotationsValidator />
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeTeam">
-                        <div class="card-body text-center">
-                            <h3 class="card-title">#Team</h3>
-                            <p class="card-text">Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeSingle">
-                        <div class="card-body text-center">
-                            <h3 class="card-title">#Single</h3>
-                            <p class="card-text">Melde dich alleine an und zeig, was du drauf hast.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
-
-
-            @if (Input.ParticipationType == ParticipationTypeTeam)
-            {
-                <div class="mt-4">
-                    <h3 class="card-title" style="color: #134883">#Team</h3>
-                    <p class="mt-4">
-                        Um als Team am Event teilzunehmen, erstellst du eine Gruppe mit einem Teamnamen und wirst dadurch Gruppenmanager. Anschließend fügst du die E-Mail-Adressen der Teammitglieder hinzu. <br />
-                        Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist sie offiziell Teil des Teams.
-                    </p>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
-                    <label for="teamname">Gruppenmanager</label>
-                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.TeamName" class="form-control" />
-                    <label for="teamname">Teamname</label>
-                    <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
-                </div>
-
-                <div class="mb-3">
-                    <h5>Teammitglieder hinzufügen (@Input.TeamMembers.Count/4)</h5>
-                    @if (Input.TeamMembers.Count < 4)
-                    {
-                        foreach (var email in Input.TeamMembers)
-                        {
-                            <div class="input-group mb-2">
-                                <input type="email" class="form-control" value="@email" readonly />
-                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
-                            </div>
-                        }
-
-                        <div class="input-group">
-                            <InputText @bind-Value="Input.NewMemberEmail" placeholder="E-Mail-Adresse hinzufügen" class="form-control"/>
-                            <button type="button" class="btn btn-success" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</button>
-                        </div>
-                        @if (addMemberErrors.Any())
-                        {
-                            <div class="text-danger">
-                                @foreach (var error in addMemberErrors)
-                                {
-                                    <p>@error.ErrorMessage</p>
-                                }
-                            </div>
-                        }
-                        <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
-                    }
-                    else
-                    {
-                        foreach (var email in Input.TeamMembers)
-                        {
-                            <div class="input-group mb-2">
-                                <input type="email" class="form-control" value="@email" readonly />
-                                <button type="button" class="btn btn-success" @onclick="() => RemoveMember(email)">Entfernen</button>
-                            </div>
-                        }
-
-                        <p>Maximale Anzahl von Teammitgliedern erreicht.</p>
-                    }
-                </div>
-            }
-
-            @if (Input.ParticipationType == ParticipationTypeSingle)
-            {
-                <div class="mt-4">
-                    <h3 class="card-title" style="color: #134883">#Single</h3>
-                    <p class="mt-4">
-                        Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst und bestätige deine Teilnahme.
-                    </p>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Username" class="form-control" disabled />
-                    <label for="teamname">Benutzername</label>
-                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
-                </div>
-            }
-
-            <div class="text-center mt-5">
-                <button type="submit" class="w-25 btn btn-lg btn-success">Anmelden</button>
-            </div>
-        </EditForm>
-    </div>
-
-    <div class="text-center mt-4">
-        <a class="btn btn-link" href="/events">Zurück zu den Events</a>
-    </div>
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883;">Anmeldung für @dbContext.Events.Where(e => e.EventID == eventId).First().Bezeichnung</MudText>
+    <MudText Typo="Typo.subtitle1">Wähle deine Teilnahmeart und registriere dich für das Event.</MudText> <br />
 </div>
+
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <EditForm Model="@Input" OnValidSubmit="@HandleSubmit" method="post" FormName="eventRegistration">
+                <DataAnnotationsValidator />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeTeam">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">#Team</h3>
+                                <MudText class="card-text">Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.</MudText>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card participation-card" @onclick="() => Input.ParticipationType = ParticipationTypeSingle">
+                            <div class="card-body text-center">
+                                <h3 class="card-title">#Single</h3>
+                                <MudText class="card-text">Melde dich alleine an und zeig, was du drauf hast.</MudText>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
+
+
+                @if (Input.ParticipationType == ParticipationTypeTeam)
+                {
+                    <div class="mt-4">
+                        <MudText Typo="Typo.h6" style="color: #134883">#Team</MudText>
+                        <MudText Typo="Typo.subtitle2">
+                            Um als Team am Event teilzunehmen, erstellst du eine Gruppe mit einem Teamnamen und wirst dadurch Gruppenmanager. Anschließend fügst du die E-Mail-Adressen der Teammitglieder hinzu. <br />
+                            Jede hinzugefügte Person erhält automatisch eine Einladung per E-Mail. Sobald diese bestätigt wird, ist er/sie offiziell Teil des Teams.
+                        </MudText> <br />
+                    </div>
+
+                    <MudTextField @bind-Value="Input.Username" Label="Gruppenmanager" Disabled="true" Variant="Variant.Outlined"></MudTextField>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
+
+                    <MudTextField @bind-Value="Input.TeamName" Label="Teamname" Variant="Variant.Outlined"></MudTextField>
+                    <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
+
+
+                    <div class="mb-3">
+                        <MudText Typo="Typo.subtitle1">Teammitglieder hinzufügen (@Input.TeamMembers.Count/4)</MudText>
+                        @if (Input.TeamMembers.Count < 4)
+                        {
+                            foreach (var email in Input.TeamMembers)
+                            {
+                                <div class="input-group mb-2">
+                                    <MudTextField T="string" Value="@email" Variant="Variant.Outlined" Disabled />
+                                    <MudButton Color="Color.Error" type="button" @onclick="() => RemoveMember(email)">Entfernen</MudButton>
+                                </div>
+                            }
+
+                            <div class="input-group">
+                                <MudTextField @bind-Value="Input.NewMemberEmail" Label="E-Mail-Adresse hinzufügen" Variant="Variant.Outlined" />
+                                <MudButton Color="Color.Success" type="button" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</MudButton>
+                            </div>
+
+                            @if (addMemberErrors.Any())
+                            {
+                                <div class="text-danger">
+                                    @foreach (var error in addMemberErrors)
+                                    {
+                                        <MudText>@error.ErrorMessage</MudText>
+                                    }
+                                </div>
+                            }
+                            <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
+                        }
+
+                        else
+                        {
+                            foreach (var email in Input.TeamMembers)
+                            {
+                                <div class="input-group mb-2">
+                                    <MudTextField T="string" Value="@email" Variant="Variant.Outlined" Disabled />
+                                    <MudButton Color="Color.Error" type="button" @onclick="() => RemoveMember(email)">Entfernen</MudButton>
+                                </div>
+                            }
+
+                            <MudText>Maximale Anzahl von Teammitgliedern erreicht.</MudText>
+                        }
+                    </div>
+                }
+
+                @if (Input.ParticipationType == ParticipationTypeSingle)
+                {
+                    <div class="mt-4">
+                        <MudText Typo="Typo.h6" style="color: #134883">#Single</MudText>
+                        <MudText Typo="Typo.subtitle2">
+                            Um als Einzelkämpfer am Event teilzunehmen, überprüfe deinen Benutzernamen, um sicherzugehen, unter welchem Namen du antrittst und bestätige deine Teilnahme.
+                        </MudText> <br />
+                    </div>
+
+                    <MudTextField @bind-Value="Input.Username" Label="Benutzername" Disabled="true" Variant="Variant.Outlined"></MudTextField>
+                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
+                }
+
+                <div class="text-center mt-5">
+                    <MudButton ButtonType="ButtonType.Submit" Color="Color.Success" Variant="Variant.Filled">Anmelden</MudButton>
+                </div>
+            </EditForm>
+        </MudItem>
+
+        <MudItem xs="10">
+            <div class="text-center">
+                <a class="btn btn-link" href="/events">Zurück zu den Events</a>
+            </div>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 <style>
     body {
@@ -171,7 +167,7 @@
             transform: scale(1.05);
         }
 
-        .card:selected{
+        .card:selected {
             transform: scale(1.05);
         }
 
