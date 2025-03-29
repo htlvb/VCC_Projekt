@@ -39,7 +39,7 @@
         <MudItem xs="10" >
             @if (_selectedEvent.EventID != 0)
             {
-                <MudCard>
+                <MudCard Outlined="true">
                     <MudCardContent>
                         @if (_selectedEvent.Beginn > DateTime.Now)
                         {
@@ -76,15 +76,24 @@
                             <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
 
                             <div class="text-center">
+                                @* Event noch nicht gestartet (Wettbewerb kann bearbeitet und gelöscht werden) *@
                                 @if (_selectedEvent.Beginn > DateTime.Now)
                                 {
                                     <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(!isEditing)">Wettbewerb speichern</MudButton>
-                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton>
+                                    <MudButton OnClick="() => DeleteEvent()" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete" Disabled="@(!isEditing)">Wettbewerb löschen</MudButton> <br />
                                 }
 
+                                @* Event läuft (Dashboard sollte angezeigt werden) *@
+                                else if (_selectedEvent.Beginn <= DateTime.Now && _selectedEvent.Beginn.AddMinutes(_selectedEvent.Dauer) >= DateTime.Now)
+                                {
+                                    <MudButton Href="@($"dashboard/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">Dashboard anzeigen</MudButton>
+                                    <MudButton Href="@($"event-statistics/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
+                                }
+
+                                @* Event vorbei (Statistik sollte angezeigt werden) *@
                                 else
                                 {
-                                    <MudButton Href="/event-statistics" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
+                                    <MudButton Href="@($"event-statistics/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
                                 }
 
                                 <MudButton Href="/" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat">Alle Teilnehmer benachrichtigen</MudButton>
@@ -96,7 +105,7 @@
 
             else
             {
-                <MudCard>
+                <MudCard Outlined="true">
                     <MudCardContent>
                         <EditForm EditContext="@editContext" OnValidSubmit="@CreateEvent" method="post" FormName="eventRegistration">
                             <DataAnnotationsValidator />
