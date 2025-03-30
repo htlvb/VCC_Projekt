@@ -21,19 +21,20 @@
 <PageTitle>Meine Events</PageTitle>
 
 <div class="text-center">
-    <h1 class="display-4 font-weight-bold" style="color: #134883">Meine Events</h1>
+    <MudText Typo=Typo.h2 style="color: #134883">Meine Events</MudText>
 </div>
 
 @if (events == null)
 {
     <div class="text-center">
-        <p>Lade Events...</p>
+        <MudText Typo="Typo.subtitle1">Lade Events...</MudText>
     </div>
 }
 else if (events.Count == 0)
 {
     <div class="text-center">
-        <p>Du hast dich für keine Events angemeldet.</p>
+        <MudText Typo="Typo.subtitle1">Du hast dich für keine Events angemeldet.</MudText>
+        <a class="btn btn-link" href="events">Kommende Events</a>
     </div>
 }
 else
@@ -42,17 +43,20 @@ else
         <MudGrid Justify="Justify.Center">
             <MudItem xs="10">
                 <div class="text-center">
+                    <br />
                     <MudButton OnClick="() => ShowPastEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Vergangene Events</MudButton>
                     <MudButton OnClick="() => ShowUpcomingEvents()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.AccessTime">Zukünftige Events</MudButton>
 
                     @if (filteredEvents.Count == 0 && isUpcomingEventsActive)
                     {
-                        <p>Du hast dich für kein zufünftiges Event angemeldet. Entdecke hier kommende Events.</p>
+                        <MudText Typo="Typo.subtitle1">Du hast dich für kein zufünftiges Event angemeldet. </MudText>
+                        <a class="btn btn-link" href="events">Kommende Events</a>
+
                     }
 
                     @if (filteredEvents.Count == 0 && isPastEventsActive)
                     {
-                        <p>Du hast noch kein Event absolviert.</p>
+                        <MudText Typo="Typo.subtitle1">Du hast noch kein Event absolviert.</MudText>
                     }
                 </div>
             </MudItem>
