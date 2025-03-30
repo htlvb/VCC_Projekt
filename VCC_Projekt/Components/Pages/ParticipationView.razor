@@ -1,6 +1,5 @@
 ﻿@page "/participation/{eventId:int}"
 @using Microsoft.AspNetCore.Authorization
-@inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
 @attribute [Authorize(Roles = "Benutzer")]
