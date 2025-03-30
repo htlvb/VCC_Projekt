@@ -2,6 +2,7 @@
 .top-navbar {
     background-color: #052767; /* Dunkelblaue Farbe aus dem Logo */
     width: 100%;
+    height: 4.0rem;
     position: fixed;
     top: 0;
     left: 0;
@@ -84,7 +85,7 @@
         background: none;
         border: none;
         border-radius: 6px;
-        height: 3.5rem;
+        height: 3.0rem;
         display: flex;
         align-items: center;
         padding: 0 1rem;
