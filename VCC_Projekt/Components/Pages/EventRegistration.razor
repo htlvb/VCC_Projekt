@@ -7,6 +7,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationDbContext dbContext
+@inject ISnackbar Snackbar
 
 <PageTitle>Event-Anmeldung</PageTitle>
 
@@ -39,7 +40,6 @@
                         </div>
                     </div>
                 </div>
-                <ValidationMessage For="@(() => Input.ParticipationType)" class="text-danger" />
 
 
                 @if (Input.ParticipationType == ParticipationTypeTeam)
@@ -53,13 +53,12 @@
                     </div>
 
                     <MudTextField @bind-Value="Input.Username" Label="Gruppenmanager" Disabled="true" Variant="Variant.Outlined"></MudTextField>
-                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
 
                     <MudTextField @bind-Value="Input.TeamName" Label="Teamname" Variant="Variant.Outlined"></MudTextField>
-                    <ValidationMessage For="@(() => Input.TeamName)" class="text-danger" />
 
 
                     <div class="mb-3">
+                        <br />
                         <MudText Typo="Typo.subtitle1">Teammitglieder hinzufügen (@Input.TeamMembers.Count/4)</MudText>
                         @if (Input.TeamMembers.Count < 4)
                         {
@@ -75,17 +74,6 @@
                                 <MudTextField @bind-Value="Input.NewMemberEmail" Label="E-Mail-Adresse hinzufügen" Variant="Variant.Outlined" />
                                 <MudButton Color="Color.Success" type="button" @onclick="AddMember" disabled="@(!CanAddMember())">Hinzufügen</MudButton>
                             </div>
-
-                            @if (addMemberErrors.Any())
-                            {
-                                <div class="text-danger">
-                                    @foreach (var error in addMemberErrors)
-                                    {
-                                        <MudText>@error.ErrorMessage</MudText>
-                                    }
-                                </div>
-                            }
-                            <ValidationMessage For="@(() => Input.NewMemberEmail)" class="text-danger" />
                         }
 
                         else
@@ -113,7 +101,6 @@
                     </div>
 
                     <MudTextField @bind-Value="Input.Username" Label="Benutzername" Disabled="true" Variant="Variant.Outlined"></MudTextField>
-                    <ValidationMessage For="@(() => Input.Username)" class="text-danger" />
                 }
 
                 <div class="text-center mt-5">
