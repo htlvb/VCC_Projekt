@@ -1,5 +1,5 @@
 .top-navbar {
-    background-color: rgba(0,0,0,0.9);
+    background-color: #052767; /* Dark blue color from the logo */
     width: 100%;
     position: fixed;
     top: 0;
@@ -25,6 +25,13 @@
     text-decoration: none;
     font-weight: 600;
     letter-spacing: 0.5px;
+}
+
+.navbar-logo {
+    height: 3rem; /* Adjust the height to fit within the navbar */
+    width: auto; /* Maintain aspect ratio */
+    margin-right: 0.5rem; /* Space between the logo and the text */
+    background: transparent !important;
 }
 
 /* Custom Scrollbar for Nav */
@@ -171,8 +178,9 @@
         overflow-y: auto;
         transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
     .top-navbar {
-        position: absolute;
+        position: fixed;
     }
 
     .navbar-toggler:not(:checked) ~ .nav-scrollable {
