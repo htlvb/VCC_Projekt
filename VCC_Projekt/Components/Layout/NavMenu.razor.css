@@ -25,7 +25,6 @@
     font-weight: 600;
     letter-spacing: 0.5px;
 }
-
 /* Custom Scrollbar for Nav */
 .nav-scrollable::-webkit-scrollbar {
     width: 8px;
@@ -89,7 +88,6 @@
         color: white;
         transform: translateX(3px);
     }
-
 /* Toggle Button */
 .navbar-toggler-container {
     display: flex;
@@ -116,18 +114,10 @@
     padding: 0.5rem;
     transition: all 0.3s ease;
 }
-
 /* Desktop View */
-@media (min-width: 768px) {
-    .top-navbar {
-        flex-direction: row;
-        align-items: center;
-        padding: 0 1.5rem;
-    }
-
-    .navbar-brand-container {
-        width: auto;
-        padding: 0;
+@media (min-width: 641px) {
+    .navbar-toggler {
+        display: none;
     }
 
     .nav-scrollable {
@@ -158,9 +148,8 @@
         display: none;
     }
 }
-
 /* Mobile View */
-@media (max-width: 767.98px) {
+@media (max-width: 640px) {
     .nav-scrollable {
         position: fixed;
         top: 3.5rem;
