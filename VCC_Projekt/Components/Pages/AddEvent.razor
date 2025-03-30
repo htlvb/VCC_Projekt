@@ -1,12 +1,9 @@
 @page "/events-manager"
-@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
 @inject EmailSender EmailSender
-@inject IdentityRedirectManager RedirectManager
 @inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ISnackbar Snachbar
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
@@ -15,14 +12,15 @@
 @using Microsoft.AspNetCore.Components.Forms;
 @using System;
 @using MudBlazor
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Wettbewerb-Manager</PageTitle>
 
 <div class="text-center">
-    <h1 class="display-4 font-weight-bold" style="color: #134883">Wettbewerb-Manager</h1>
-    <p class="lead text-muted">
-        Wähle ein Event aus, um dieses zu bearbeiten oder legen ein neues Event an.
-    </p>
+    <MudText Typo="Typo.h2" style="color: #134883">Wettbewerb-Manager</MudText>
+    <MudText Typo="Typo.subtitle1">Wähle ein Event aus, um dieses zu bearbeiten oder legen ein neues Event an.</MudText> <br />
 </div>
 
 <MudContainer MaxWidth="MaxWidth.False">
@@ -52,28 +50,23 @@
                             <DataAnnotationsValidator />
 
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
-                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
                             <MudDatePicker @bind-Date="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true" ShowToolbar="false"></MudDatePicker>
-                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
                                         <MudTimePicker Label="Startzeit" @bind-Time="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
-                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
                                         <MudTimePicker Label="Endzeit" @bind-Time="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
-                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
                                 </div>
                             </div>
 
                             <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
-                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
 
                             <div class="text-center">
                                 @* Event noch nicht gestartet (Wettbewerb kann bearbeitet und gelöscht werden) *@
@@ -111,28 +104,23 @@
                             <DataAnnotationsValidator />
 
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
-                            <ValidationMessage For="@(() => Input.EventName)" class="text-danger" />
 
                             <MudDatePicker @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
-                            <ValidationMessage For="@(() => Input.EventDate)" class="text-danger" />
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
                                         <MudTimePicker Label="Startzeit" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
-                                        <ValidationMessage For="@(() => Input.StartTime)" class="text-danger" />
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
                                         <MudTimePicker Label="Endzeit" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
-                                        <ValidationMessage For="@(() => Input.EndTime)" class="text-danger" />
                                     </div>
                                 </div>
                             </div>
 
                             <MudTextField @bind-Value="Input.PenaltyMinutes" Label="Strafminuten pro Fehlversuch" Variant="Variant.Outlined" Required="true"></MudTextField>
-                            <ValidationMessage For="@(() => Input.PenaltyMinutes)" class="text-danger" />
 
                             <div class="text-center">
                                 <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save">Wettbewerb anlegen</MudButton>
@@ -146,8 +134,3 @@
         </MudItem>
     </MudGrid>
 </MudContainer>
-
-<style>
-
-
-</style>

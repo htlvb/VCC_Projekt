@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -18,6 +17,7 @@ namespace VCC_Projekt.Components.Pages
             _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
             Input = new();
             editContext = new EditContext(Input);
+            Input.Snackbar = Snackbar;
         }
 
         private void SetEventData()
@@ -67,7 +67,7 @@ namespace VCC_Projekt.Components.Pages
                 try
                 {
                     var eventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
-                    if(eventToUpdate != null)
+                    if (eventToUpdate != null)
                     {
                         eventToUpdate.Bezeichnung = Input.EventName;
                         eventToUpdate.Beginn = DateTime.Parse(Input.EventDate?.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
@@ -76,7 +76,7 @@ namespace VCC_Projekt.Components.Pages
 
                         dbContext.SaveChanges();
                     }
-                    
+
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
                     ToggleEditMode();
                 }
@@ -177,18 +177,23 @@ namespace VCC_Projekt.Components.Pages
             [Range(0, int.MaxValue, ErrorMessage = "Strafminuten dürfen nicht negativ sein.")]
             public int PenaltyMinutes { get; set; } = 0;
 
+            public ISnackbar Snackbar {  get; set; }
+
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
+                bool isValid = true;
 
                 // Validate EventName
                 if (string.IsNullOrWhiteSpace(EventName))
                 {
-                    errors.Add(new ValidationResult("Bitte den Wettbewerbsnamen angeben.", new[] { nameof(EventName) }));
+                    Snackbar?.Add("Bitte den Wettbewerbsnamen angeben.", Severity.Error);
+                    isValid = false;
                 }
                 else if (EventName.Length < 3)
                 {
-                    errors.Add(new ValidationResult("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.", new[] { nameof(EventName) }));
+                    Snackbar?.Add("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.", Severity.Error);
+                    isValid = false;
                 }
 
                 // Validate Date and Time together
@@ -196,15 +201,29 @@ namespace VCC_Projekt.Components.Pages
                 var eventStart = EventDate?.Date + StartTime;
                 var eventEnd = EventDate?.Date + EndTime;
 
-                if (EventDate?.Date == null) errors.Add(new ValidationResult("Bitte ein Datum angeben.", new[] { nameof(EventDate) }));
-                if(eventStart == null) errors.Add(new ValidationResult("Bitte eine Startzeit angeben.", new[] { nameof(StartTime) }));
-                if (eventEnd == null) errors.Add(new ValidationResult("Bitte eine Endzeit angeben.", new[] { nameof(EndTime) }));
+                if (EventDate?.Date == null)
+                {
+                    Snackbar?.Add("Bitte ein Datum angeben.", Severity.Error);
+                    isValid = false;
+                }
+
+                if (eventStart == null)
+                {
+                    Snackbar?.Add("Bitte eine Startzeit angeben.", Severity.Error);
+                    isValid = false;
+                }
+                if (eventEnd == null)
+                {
+                    Snackbar?.Add("Bitte eine Endzeit angeben.", Severity.Error);
+                    isValid = false;
+                }
 
 
                 // Check if date is in the past
                 if (EventDate?.Date < DateTime.Today)
                 {
-                    errors.Add(new ValidationResult("Das Datum darf nicht in der Vergangenheit liegen.", new[] { nameof(EventDate) }));
+                    Snackbar?.Add("Das Datum darf nicht in der Vergangenheit liegen.", Severity.Error);
+                    isValid = false;
                 }
 
                 // If date is today, check time constraints
@@ -212,14 +231,21 @@ namespace VCC_Projekt.Components.Pages
                 {
                     if (StartTime < currentTime)
                     {
-                        errors.Add(new ValidationResult("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", new[] { nameof(StartTime) }));
+                        Snackbar?.Add("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", Severity.Error); 
+                        isValid = false;
                     }
                 }
 
                 // Validate End Time is after Start Time
                 if (eventEnd <= eventStart)
                 {
-                    errors.Add(new ValidationResult("Die Endzeit muss nach der Startzeit liegen.", new[] { nameof(EndTime) }));
+                    Snackbar?.Add("Die Endzeit muss nach der Startzeit liegen.", Severity.Error);
+                    isValid = false;
+                }
+
+                if (!isValid)
+                {
+                    errors.Add(new ValidationResult("Snackbar-Fehler wurden angezeigt."));
                 }
 
                 return errors;

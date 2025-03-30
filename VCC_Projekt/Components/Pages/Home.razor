@@ -6,22 +6,23 @@
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Willkommen!</h1>
-        <p class="lead text-muted">
+        <MudText Typo="Typo.h2" style="color: #134883;">Willkommen!</MudText>
+        <MudText Typo="Typo.subtitle1" >
             Herzlich Willkommen beim Coding Contest der HTL Vöcklabruck!
-        </p>
+        </MudText>
+        <br />
     </div>
 
     <div class="mt-4">
-        <h2>Was erwartet dich?</h2>
-        <p>
+        <MudText Typo="Typo.h4" style="color: #134883;">Was erwartet dich?</MudText>
+        <MudText>
             Der Coding Contest der HTL Vöcklabruck ist eine einzigartige Gelegenheit, dein Programmierkönnen unter Beweis zu stellen,
             spannende Herausforderungen zu meistern und dich mit anderen zu messen.
-        </p>
+        </MudText>
     </div>
 
     <div class="mt-4">
-        <h2 >Highlights:</h2>
+        <MudText Typo="Typo.h4" style="color: #134883;">Highlights:</MudText>
         <ul class="list-unstyled">
             <li><strong>Spannende Coding-Challenges</strong> – Zeig dein Können!</li>
             <li><strong>Preise für die Besten</strong> – Gewinne attraktive Preise!</li>
@@ -30,14 +31,14 @@
     </div>
 
     <div class="mt-4">
-        <h2>Nächstes Event:</h2>
+        <MudText Typo="Typo.h4" style="color: #134883;">Nächstes Event:</MudText>
         <div class="col-md-6 d-flex">
             <div class="card mx-auto" style="flex: 1; border-color: #134883;">
                 <div class="card-body d-flex flex-column">
                     <h3 class="card-title">@dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().Bezeichnung</h3>
-                    <p class="card-text flex-grow-1">
+                    <MudText class="card-text flex-grow-1">
                         <strong>Datum:</strong> @dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).Select(e => e.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))).First()<br>
-                    </p>
+                    </MudText>
                     <div class="text-center mt-auto">
                         <a href="@GetEventLink(dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().EventID)" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
                     </div>
@@ -52,7 +53,7 @@
         <div class="text-center mt-auto">
             <a href="info" class="w-25 btn btn-lg btn-success">Mehr erfahren</a>
         </div>
-        <p></p>
+        <br />
     </div>
 </div>
 

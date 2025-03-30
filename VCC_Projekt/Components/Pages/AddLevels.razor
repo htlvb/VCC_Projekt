@@ -1,14 +1,17 @@
 ﻿@page "/levels-manager"
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
+
+@attribute [Authorize(Roles = "Admin,Editor")]
 
 <PageTitle>Level-Manager</PageTitle>
 
 <div class="text-center">
-    <h1 class="display-4 font-weight-bold" style="color: #134883;">Level-Manager</h1>
-    <p class="lead text-muted">
+    <MudText Typo="Typo.h2" style="color: #134883;">Level-Manager</MudText>
+    <MudText Typo="Typo.subtitle1">
         Wähle ein Event aus, um neue Levels für das Event anzulegen oder vorhandene zu bearbeiten oder zu löschen.
-    </p>
+    </MudText> <br />
 </div>
 
 <MudContainer MaxWidth="MaxWidth.False">
