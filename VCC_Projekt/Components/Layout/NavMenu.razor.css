@@ -71,6 +71,7 @@
     flex-direction: row; /* Ändere die Richtung zu Reihe */
     gap: 0.5rem;
     justify-content: center; /* Zentriere die Navigationselemente */
+    flex-grow: 1; /* Lasse die Navigationselemente wachsen */
 }
 
 .nav-item {
