@@ -133,6 +133,7 @@
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        Snackbar.Clear();
         StateHasChanged();
     }
 
