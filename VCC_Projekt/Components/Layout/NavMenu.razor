@@ -16,62 +16,27 @@
                 <div class="nav-item">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                         <MudIcon Icon="@Icons.Material.Filled.Home" Class="me-1" />
-                        Home
+                        <span>Home</span>
                     </NavLink>
                 </div>
-
-                <AuthorizeView>
-                    <Authorized>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Manage">
-                                <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-1" />
-                                @context.User.Identity?.Name
-                            </NavLink>
-                        </div>
-                        <div class="nav-item">
-                            <form action="Account/Logout" method="post">
-                                <AntiforgeryToken />
-                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                <button type="submit" class="nav-link">
-                                    <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-1" />
-                                    Logout
-                                </button>
-                            </form>
-                        </div>
-                    </Authorized>
-                    <NotAuthorized>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Register">
-                                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="me-1" />
-                                Register
-                            </NavLink>
-                        </div>
-                        <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Login">
-                                <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-1" />
-                                Login
-                            </NavLink>
-                        </div>
-                    </NotAuthorized>
-                </AuthorizeView>
 
                 <AuthorizeView Roles="Admin">
                     <div class="nav-item">
                         <NavLink class="nav-link" href="change-roles">
                             <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="me-1" />
-                            Rollen verändern
+                            <span>Rollen verändern</span>
                         </NavLink>
                     </div>
                     <div class="nav-item">
                         <NavLink class="nav-link" href="events-manager">
                             <MudIcon Icon="@Icons.Material.Filled.EventNote" Class="me-1" />
-                            Wettbewerb-Manager
+                            <span>Wettbewerb-Manager</span>
                         </NavLink>
                     </div>
                     <div class="nav-item">
                         <NavLink class="nav-link" href="support-emails">
                             <MudIcon Icon="@Icons.Material.Filled.Email" Class="me-1" />
-                            Support Emails
+                            <span>Support Emails</span>
                         </NavLink>
                     </div>
                 </AuthorizeView>
@@ -80,13 +45,13 @@
                     <div class="nav-item">
                         <NavLink class="nav-link" href="event-statistics">
                             <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="me-1" />
-                            Event Statistiken
+                            <span>Event Statistiken</span>
                         </NavLink>
                     </div>
                     <div class="nav-item">
                         <NavLink class="nav-link" href="levels-manager">
                             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-1" />
-                            Level-Manager
+                            <span>Level-Manager</span>
                         </NavLink>
                     </div>
                 </AuthorizeView>
@@ -96,7 +61,7 @@
                         <div class="nav-item">
                             <NavLink class="nav-link" href="my-events">
                                 <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="me-1" />
-                                Meine Events
+                                <span>Meine Events</span>
                             </NavLink>
                         </div>
                     </Authorized>
@@ -105,14 +70,14 @@
                 <div class="nav-item">
                     <NavLink class="nav-link" href="events">
                         <MudIcon Icon="@Icons.Material.Filled.Event" Class="me-1" />
-                        Events
+                        <span>Events</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
                     <NavLink class="nav-link" href="info">
                         <MudIcon Icon="@Icons.Material.Filled.Info" Class="me-1" />
-                        Info
+                        <span>Info</span>
                     </NavLink>
                 </div>
             </div>
@@ -122,7 +87,7 @@
                         <div class="nav-item">
                             <NavLink class="nav-link" href="Account/Manage">
                                 <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-1" />
-                                @context.User.Identity?.Name
+                                <span>@context.User.Identity?.Name</span>
                             </NavLink>
                         </div>
                         <div class="nav-item">
@@ -131,7 +96,7 @@
                                 <input type="hidden" name="ReturnUrl" value="@currentUrl" />
                                 <button type="submit" class="nav-link">
                                     <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-1" />
-                                    Logout
+                                    <span>Logout</span>
                                 </button>
                             </form>
                         </div>
@@ -140,13 +105,13 @@
                         <div class="nav-item">
                             <NavLink class="nav-link" href="Account/Register">
                                 <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="me-1" />
-                                Register
+                                <span>Register</span>
                             </NavLink>
                         </div>
                         <div class="nav-item">
                             <NavLink class="nav-link" href="Account/Login">
                                 <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-1" />
-                                Login
+                                <span>Login</span>
                             </NavLink>
                         </div>
                     </NotAuthorized>

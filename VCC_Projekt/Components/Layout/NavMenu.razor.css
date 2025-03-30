@@ -200,4 +200,12 @@
         max-height: 0;
         overflow: hidden;
     }
+
+    .nav-item ::deep .nav-link span {
+        display: none; /* Verstecke den Text */
+    }
+
+    .nav-item ::deep .nav-link {
+        justify-content: center; /* Zentriere die Icons */
+    }
 }

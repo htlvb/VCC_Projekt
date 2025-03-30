@@ -44,11 +44,5 @@ public class GruppeAbsolviertLevelConfiguration : IEntityTypeConfiguration<Grupp
               .WithMany(g => g.Absolviert)
               .HasForeignKey(gcl => gcl.Level_LevelID)
               .HasPrincipalKey(l => l.LevelID);
-        
-
     }
 }
-
-
-
-

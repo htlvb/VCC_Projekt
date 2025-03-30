@@ -14,25 +14,12 @@ html, body {
     overflow: hidden;
 }
 
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    height: 3.5rem; /* Fixed height for the navbar */
-    display: flex;
-    align-items: center;
-    padding: 0 1rem;
-    position: fixed; /* Keeps the navbar fixed */
-    top: 0;
-    width: 100%;
-    z-index: 1000;
-}
-
 .main-content {
     flex: 1;
     overflow-y: hidden; /* Enables scrolling for the main content */
     display: flex;
     flex-direction: column;
-    padding-top: 3.5rem; /* Adds top padding for the main content */
+    padding-top: 1.5rem; /* Adds top padding for the main content */
 }
 
 .content {
@@ -74,11 +61,6 @@ html, body {
 @media (min-width: 768px) {
     .page {
         flex-direction: row;
-    }
-
-    .main-content {
-        margin-top: 0;
-        padding-top: 0;
     }
 
     .top-row {
