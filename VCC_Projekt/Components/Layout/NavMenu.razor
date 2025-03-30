@@ -5,7 +5,7 @@
     <div class="navbar-brand-container">
         <a class="navbar-brand" href=""><img src="images/htlvb_logo.jpg" alt="Coding Contest Logo" class="navbar-logo" />Coding Contest</a>
         <label class="navbar-toggler-container">
-            <input type="checkbox" class="navbar-toggler" id="navbar-toggler"  />
+            <input type="checkbox" class="navbar-toggler" id="navbar-toggler" />
             <MudIcon Icon="@Icons.Material.Filled.Menu" Class="toggler-icon" />
         </label>
     </div>
@@ -115,6 +115,42 @@
                         Info
                     </NavLink>
                 </div>
+            </div>
+            <div class="nav-item last-child">
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Manage">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-1" />
+                                @context.User.Identity?.Name
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <form action="Account/Logout" method="post">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <button type="submit" class="nav-link">
+                                    <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-1" />
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Register">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="me-1" />
+                                Register
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Login">
+                                <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-1" />
+                                Login
+                            </NavLink>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
         </nav>
     </div>

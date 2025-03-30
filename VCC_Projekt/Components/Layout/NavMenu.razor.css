@@ -1,19 +1,21 @@
 .top-navbar {
-    background-color: #052767; /* Dark blue color from the logo */
+    background-color: #052767; /* Dunkelblaue Farbe aus dem Logo */
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
     display: flex;
-    flex-direction: column;
+    flex-direction: row; /* Ändere die Richtung zu Reihe */
+    justify-content: space-between; /* Verteile die Elemente */
+    align-items: center;
     box-shadow: 0 2px 15px rgba(0,0,0,0.3);
     overflow: hidden;
 }
 
 .navbar-brand-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Links ausrichten */
     align-items: center;
     height: 3.5rem;
     padding: 0 1.5rem;
@@ -28,13 +30,13 @@
 }
 
 .navbar-logo {
-    height: 3rem; /* Adjust the height to fit within the navbar */
-    width: auto; /* Maintain aspect ratio */
-    margin-right: 0.5rem; /* Space between the logo and the text */
+    height: 3rem; /* Höhe anpassen, um innerhalb der Navbar zu passen */
+    width: auto; /* Seitenverhältnis beibehalten */
+    margin-right: 0.5rem; /* Abstand zwischen Logo und Text */
     background: transparent !important;
 }
 
-/* Custom Scrollbar for Nav */
+/* Benutzerdefinierte Scrollleiste für Nav */
 .nav-scrollable::-webkit-scrollbar {
     width: 8px;
 }
@@ -49,6 +51,7 @@
     width: 100%;
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.3) transparent;
+    position: center;
 }
 
 .navbar-toggler:checked ~ .nav-scrollable {
@@ -58,13 +61,16 @@
 .nav-container {
     width: 100%;
     padding: 0.5rem 0;
+    display: flex;
+    justify-content: space-between; /* Verteile die Elemente */
+    align-items: center;
 }
 
 .nav-items {
     display: flex;
-    flex-direction: column;
-    padding: 0 1rem;
-    gap: 0.25rem;
+    flex-direction: row; /* Ändere die Richtung zu Reihe */
+    gap: 0.5rem;
+    justify-content: center; /* Zentriere die Navigationselemente */
 }
 
 .nav-item {
@@ -148,7 +154,7 @@
 
     .nav-items {
         flex-direction: row;
-        justify-content: flex-end;
+        justify-content: center; /* Zentriere die Navigationselemente */
         gap: 0.5rem;
         padding: 0;
     }
@@ -164,6 +170,12 @@
 
     .navbar-toggler-container {
         display: none;
+    }
+
+    .nav-item.last-child {
+        display: flex;
+        gap: 0.5rem; /* Abstand zwischen Register und Login */
+        margin-left: auto; /* Letztes Kind ganz rechts ausrichten */
     }
 }
 
