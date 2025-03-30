@@ -4,104 +4,120 @@
 <div class="top-navbar">
     <div class="navbar-brand-container">
         <a class="navbar-brand" href="">Coding Contest</a>
-        <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+        <label class="navbar-toggler-container">
+            <input type="checkbox" class="navbar-toggler" />
+            <MudIcon Icon="@Icons.Material.Filled.Menu" Class="toggler-icon" />
+        </label>
     </div>
 
-    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <div class="nav-scrollable">
         <nav class="nav-container">
             <div class="nav-items">
                 <div class="nav-item">
                     <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                        <MudIcon Icon="@Icons.Material.Filled.Home" Class="me-1" />
+                        Home
                     </NavLink>
                 </div>
 
-            <AuthorizeView>
-                <Authorized>
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Manage">
+                                <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-1" />
+                                @context.User.Identity?.Name
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <form action="Account/Logout" method="post">
+                                <AntiforgeryToken />
+                                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                <button type="submit" class="nav-link">
+                                    <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-1" />
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Register">
+                                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="me-1" />
+                                Register
+                            </NavLink>
+                        </div>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="Account/Login">
+                                <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-1" />
+                                Login
+                            </NavLink>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="Admin">
                     <div class="nav-item">
-                        <NavLink class="nav-link" href="Account/Manage">
-                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <NavLink class="nav-link" href="change-roles">
+                            <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="me-1" />
+                            Rollen verändern
                         </NavLink>
                     </div>
                     <div class="nav-item">
-                        <form action="Account/Logout" method="post">
-                            <AntiforgeryToken />
-                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                            <button type="submit" class="nav-link">
-                                <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                            </button>
-                        </form>
-                    </div>
-                </Authorized>
-                <NotAuthorized>
-                    <div class="nav-item">
-                        <NavLink class="nav-link" href="Account/Register">
-                            <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <NavLink class="nav-link" href="events-manager">
+                            <MudIcon Icon="@Icons.Material.Filled.EventNote" Class="me-1" />
+                            Wettbewerb-Manager
                         </NavLink>
                     </div>
                     <div class="nav-item">
-                        <NavLink class="nav-link" href="Account/Login">
-                            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <NavLink class="nav-link" href="support-emails">
+                            <MudIcon Icon="@Icons.Material.Filled.Email" Class="me-1" />
+                            Support Emails
                         </NavLink>
                     </div>
-                </NotAuthorized>
-            </AuthorizeView>
+                </AuthorizeView>
 
-            <AuthorizeView Roles="Admin">
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="change-roles">
-                        <MudIcon Icon="@Icons.Material.Outlined.AdminPanelSettings" class="me-1" /> Rollen verändern
-                    </NavLink>
-                </div>
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="events-manager">
-                        <MudIcon Icon="@Icons.Material.Outlined.EventNote" class="me-1" /> Wettbewerb-Manager
-                    </NavLink>
-                </div>
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="support-emails">
-                        <MudIcon Icon="@Icons.Material.Outlined.Email" class="me-1" /> Support Emails
-                    </NavLink>
-                </div>
-            </AuthorizeView>
-
-            <AuthorizeView Roles="Admin,Editor">
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="event-statistics">
-                        <MudIcon Icon="@Icons.Material.Outlined.PieChartOutline" class="me-1" /> Event Statistiken
-                    </NavLink>
-                </div>
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="levels-manager">
-                        <MudIcon Icon="@Icons.Material.Outlined.StackedLineChart" class="me-1" /> Level-Manager
-                    </NavLink>
-                </div>
-            </AuthorizeView>
-
-            <AuthorizeView>
-                <Authorized>
+                <AuthorizeView Roles="Admin,Editor">
                     <div class="nav-item">
-                        <NavLink class="nav-link" href="my-events">
-                            <span class="bi bi-calendar-event-nav-menu" aria-hidden="true"></span> Meine Events
+                        <NavLink class="nav-link" href="event-statistics">
+                            <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="me-1" />
+                            Event Statistiken
                         </NavLink>
                     </div>
-                </Authorized>
-            </AuthorizeView>
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="levels-manager">
+                            <MudIcon Icon="@Icons.Material.Filled.TrendingUp" Class="me-1" />
+                            Level-Manager
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
 
-            <div class="nav-item">
-                <NavLink class="nav-link" href="events">
-                    <MudIcon Icon="@Icons.Material.Outlined.Event" class="me-1" /> Events
-                </NavLink>
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="nav-item">
+                            <NavLink class="nav-link" href="my-events">
+                                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="me-1" />
+                                Meine Events
+                            </NavLink>
+                        </div>
+                    </Authorized>
+                </AuthorizeView>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="events">
+                        <MudIcon Icon="@Icons.Material.Filled.Event" Class="me-1" />
+                        Events
+                    </NavLink>
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="info">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Class="me-1" />
+                        Info
+                    </NavLink>
+                </div>
             </div>
-
-            <div class="nav-item">
-                <NavLink class="nav-link" href="info">
-                    <MudIcon Icon="@Icons.Material.Outlined.Info" class="me-1" /> Info
-                </NavLink>
-            </div>
-        </div>
-    </nav>
-</div>
+        </nav>
+    </div>
 </div>
 
 @code {
