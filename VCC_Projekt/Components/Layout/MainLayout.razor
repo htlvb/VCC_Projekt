@@ -18,3 +18,25 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+<script>
+    function adjustContentPadding() {
+        const navbar = document.querySelector('.top-navbar');
+        const mainContent = document.querySelector('.main-content');
+        if (navbar && mainContent) {
+            const navbarHeight = navbar.offsetHeight;
+            if (navbarHeight > 60) { // Assuming 60px is the height of a single-line navbar
+                mainContent.style.paddingTop = `${navbarHeight + 16}px`; // Add 1.0rem (16px) if navbar is double-lined
+            } else {
+                mainContent.style.paddingTop = `${navbarHeight}px`; // Use the navbar height if single-lined
+            }
+        }
+    }
+
+    // Adjust padding on window resize and initial load
+    window.addEventListener('resize', adjustContentPadding);
+    document.addEventListener('DOMContentLoaded', adjustContentPadding);
+
+    // Call the function immediately to adjust padding on the first load
+    adjustContentPadding();
+</script>
