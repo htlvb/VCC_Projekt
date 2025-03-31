@@ -192,7 +192,7 @@ namespace VCC_Projekt.Components.Pages
             [Range(0, int.MaxValue, ErrorMessage = "Strafminuten dürfen nicht negativ sein.")]
             public int PenaltyMinutes { get; set; } = 0;
 
-            public ISnackbar Snackbar {  get; set; }
+            public ISnackbar Snackbar { get; set; }
 
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
@@ -246,7 +246,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     if (StartTime < currentTime)
                     {
-                        Snackbar?.Add("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", Severity.Error); 
+                        Snackbar?.Add("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", Severity.Error);
                         isValid = false;
                     }
                 }
@@ -266,7 +266,7 @@ namespace VCC_Projekt.Components.Pages
                 return errors;
             }
 
-            
+
         }
 
     }

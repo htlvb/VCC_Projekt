@@ -47,9 +47,9 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
                   .HasMaxLength(256);
 
         builder.HasMany(u => u.UserInGruppe)
-           .WithOne(g => g.User)           
-           .HasForeignKey(g => g.User_UserId)   
-           .HasPrincipalKey(u => u.UserName)    
+           .WithOne(g => g.User)
+           .HasForeignKey(g => g.User_UserId)
+           .HasPrincipalKey(u => u.UserName)
            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasMany(u => u.GruppenleiterNavigation)

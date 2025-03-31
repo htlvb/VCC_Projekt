@@ -8,7 +8,7 @@ namespace VCC_Projekt.Data
         {
 
         }
-        
+
         public RanglisteResult(int rang, int gruppenID, string? gruppenname, string? gruppenleiterId, string teilnehmertyp, string abgeschlosseneLevel, int anzahlLevel, int gesamtFehlversuche, TimeSpan? maxBenötigteZeit, TimeSpan? gebrauchteZeit)
         {
             Rang = rang;

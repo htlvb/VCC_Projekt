@@ -9,7 +9,7 @@ public class EventLog
 {
     public EventLog()
     {
-        
+
     }
 
     public EventLog(string tabellenname, string beschreibung, int logKategorie_KatID)

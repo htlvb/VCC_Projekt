@@ -71,7 +71,7 @@ namespace VCC_Projekt.Components.Pages
                     {
                         emailGroups[messageId] = new EmailGroup { OriginalEmail = email.Message, Replies = new List<MimeMessage>(), Flags = email.Flags };
                     }
-                    if (email.Message.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase) || email.Message.Subject.StartsWith("RE:",StringComparison.OrdinalIgnoreCase))
+                    if (email.Message.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase) || email.Message.Subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase))
                     {
                         emailGroups[messageId].Replies.Add(email.Message);
                     }

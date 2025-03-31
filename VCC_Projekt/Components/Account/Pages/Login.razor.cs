@@ -70,7 +70,7 @@ namespace VCC_Projekt.Components.Account.Pages
                 var memberEntry = await dbContext.EingeladeneUserInGruppe
                     .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == user.Email);
 
-                if(memberEntry == null)
+                if (memberEntry == null)
                 {
                     errorMessage = "Fehler: Du wurdest möglicherweise aus der Gruppe ausgeladen.";
                     return;

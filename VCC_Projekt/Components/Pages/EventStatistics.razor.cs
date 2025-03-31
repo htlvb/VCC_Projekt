@@ -60,7 +60,7 @@ namespace VCC_Projekt.Components.Pages
                                             }
                                         }
                                     },
-                                    YAxes = new List<CartesianAxis>
+                        YAxes = new List<CartesianAxis>
                                     {
                                         new LinearCartesianAxis
                                         {
@@ -215,7 +215,7 @@ namespace VCC_Projekt.Components.Pages
             }
             _barConfig.Data.Datasets.Add(barDataset);
 
-            
+
             for (int i = 0; i < labels.Count; i++)
             {
                 _pieConfig.Data.Labels.Add(labels[i]);
@@ -238,7 +238,7 @@ namespace VCC_Projekt.Components.Pages
             _pieConfig.Data.Datasets.Add(pieDataset);
 
             // Konfiguration für das Liniendiagramm
-            
+
             _lineConfig.Data.Labels.Clear();
             for (int i = 0; i < labels.Count; i++)
             {
