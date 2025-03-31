@@ -1,13 +1,13 @@
-﻿@page "/event-statistics"
+@page "/event-statistics"
 @page "/event-statistics/{eventId:int}"
 
 <PageTitle>Event Statistiken</PageTitle>
+
 
 <div class="text-center">
     <MudText Typo="Typo.h2" style="color: #134883">Event Statistics</MudText>
     <br />
 </div>
-
 
 <MudContainer MaxWidth="MaxWidth.False" Class="vh-100">
     <!-- Dropdown zur Auswahl des Events -->
@@ -23,55 +23,29 @@
     <!-- Diagramme anzeigen, wenn ein Event ausgewählt ist -->
     @if (_selectedEventStatistiks != null)
     {
-        <MudGrid>
-            <!-- Balkendiagramm: Gruppen, die Levels abgeschlossen haben -->
-            <MudItem xs="12" md="6">
-                <MudCard>
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h5" GutterBottom="true">Anzahl der Gruppen, die das Level abgeschlossen haben</MudText>
-                        <MudSpacer />
-                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("bar"))" />
-                    </MudCardHeader>
-                    <MudCollapse Expanded="@barChartExpanded">
-                        <MudCardContent>
-                            <Chart Config="_barConfig"></Chart>
-                        </MudCardContent>
-                    </MudCollapse>
-                </MudCard>
-            </MudItem>
+        <MudSelectItem Value="eventItem">@eventItem.Bezeichnung (@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
+    }
+</MudSelect>
 
-            <!-- Tortendiagramm: Fehlversuche pro Level -->
-            <MudItem xs="12" md="6">
-                <MudCard>
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h5" GutterBottom="true">Fehlversuche pro Level</MudText>
-                        <MudSpacer />
-                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("pie"))" />
-                    </MudCardHeader>
-                    <MudCollapse Expanded="@pieChartExpanded">
-                        <MudCardContent>
-                            <Chart Config="_pieConfig"></Chart>
-                        </MudCardContent>
-                    </MudCollapse>
-                </MudCard>
-            </MudItem>
-
-            <!-- Liniendiagramm: Zeit pro Level -->
-            <MudItem xs="12" md="6">
-                <MudCard>
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h5" GutterBottom="true">Durschschnittlich verbrachte Minuten pro Level (ohne Strafminuten)</MudText>
-                        <MudSpacer />
-                        <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("line"))" />
-                    </MudCardHeader>
-                    <MudCollapse Expanded="@lineChartExpanded">
-                        <MudCardContent>
-                            <Chart Config="_lineConfig"></Chart>
-                        </MudCardContent>
-                    </MudCollapse>
-                </MudCard>
-            </MudItem>
-        </MudGrid>
+<!-- Diagramme anzeigen, wenn ein Event ausgewählt ist -->
+@if (_selectedEventStatistiks != null)
+{
+    <MudGrid>
+        <!-- Balkendiagramm: Gruppen, die Levels abgeschlossen haben -->
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5" GutterBottom="true">Anzahl der Gruppen, die das Level abgeschlossen haben</MudText>
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("bar"))" />
+                </MudCardHeader>
+                <MudCollapse Expanded="@barChartExpanded">
+                    <MudCardContent>
+                        <Chart Config="_barConfig"></Chart>
+                    </MudCardContent>
+                </MudCollapse>
+            </MudCard>
+        </MudItem>
 
         <br />
 
@@ -105,16 +79,46 @@
     }
 </MudContainer>
 
-<style>
-    .container {
-        height: 100vh;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    }
+        <!-- Liniendiagramm: Zeit pro Level -->
+        <MudItem xs="12" md="6">
+            <MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5" GutterBottom="true">Durschschnittlich verbrachte Minuten pro Level (ohne Strafminuten)</MudText>
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("line"))" />
+                </MudCardHeader>
+                <MudCollapse Expanded="@lineChartExpanded">
+                    <MudCardContent>
+                        <Chart Config="_lineConfig"></Chart>
+                    </MudCardContent>
+                </MudCollapse>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
 
-    .content {
-        flex: 1;
-        overflow: auto;
-    }
-</style>
+    <!-- Rangliste -->
+    <MudCard Class="mt-4">
+        <MudCardHeader>
+            <MudText Typo="Typo.h5" GutterBottom="true">Rangliste</MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.ExpandMore" OnClick="@(() => ToggleChart("ranking"))" />
+        </MudCardHeader>
+        <MudCollapse Expanded="@rankingExpanded">
+            <MudDataGrid T="RanglisteResult" Items="@Rangliste"
+                         SortMode="SortMode.Multiple" Filterable="true" RowsPerPage="20">
+                <Columns>
+                    <PropertyColumn Property="r => r.Rang" Title="Rang" />
+                    <PropertyColumn Property="r => r.Gruppenname ?? r.GruppenleiterId" Title="Gruppenname/Einzelspielername" />
+                    <PropertyColumn Property="r => r.Teilnehmertyp" Title="Teilnehmertyp" />
+                    <PropertyColumn Property="r => r.AbgeschlosseneLevel" Title="Abgeschlossene Level" />
+                    <PropertyColumn Property="r => r.GesamtFehlversuche" Title="Gesamt Fehlversuche" />
+                    <PropertyColumn Property="r => r.MaxBenötigteZeit" Title="Gesamt Benötigte Zeit" />
+                    <PropertyColumn Property="r => r.GebrauchteZeit" Title="Gebrauchte Zeit inkl. Strafminuten" />
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager T="RanglisteResult" />
+                </PagerContent>
+            </MudDataGrid>
+        </MudCollapse>
+    </MudCard>
+}
