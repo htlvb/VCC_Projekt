@@ -52,17 +52,17 @@
 
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTextField>
 
-                            <MudDatePicker @bind-Date="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true" ShowToolbar="false"></MudDatePicker>
+                            <MudDatePicker Date="Input.EventDate" DateChanged="(date) => Input.EventDate = date.HasValue ? date.Value : (DateTime?)null" Label="Datum" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true" ShowToolbar="false"></MudDatePicker>
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTimePicker Label="Startzeit" @bind-Time="Input.StartTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
+                                        <MudTimePicker Label="Startzeit" Time="Input.StartTime" TimeChanged="(time) => Input.StartTime = time.HasValue ? time.Value: (TimeSpan?)null" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTimePicker Label="Endzeit" @bind-Time="Input.EndTime" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
+                                        <MudTimePicker Label="Endzeit" Time="Input.EndTime" TimeChanged="(time) => Input.EndTime = time.HasValue ? time.Value: (TimeSpan?)null" Variant="Variant.Outlined" Disabled="@(!isEditing)" Required="true"></MudTimePicker>
                                     </div>
                                 </div>
                             </div>
@@ -92,7 +92,7 @@
                                 }
 
                                 <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat" OnClick="() => OpenEmailDialog()">Alle Teilnehmer benachrichtigen</MudButton>
-                                <MudButton Href="view-participantsData" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
+                                <MudButton Href="@($"view-participantsData/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
                             </div>
                         </EditForm>
                     </MudCardContent>
@@ -108,17 +108,17 @@
 
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
 
-                            <MudDatePicker @bind-Value="Input.EventDate" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
+                            <MudDatePicker Date="Input.EventDate" DateChanged="(date) => Input.EventDate = date.HasValue ? date.Value : (DateTime?)null" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
 
                             <div class="row mb-3">
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTimePicker Label="Startzeit" @bind-Value="Input.StartTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
+                                        <MudTimePicker Label="Startzeit" Time="Input.StartTime" TimeChanged="(time) => Input.StartTime = time.HasValue ? time.Value: (TimeSpan?)null" Variant="Variant.Outlined" Required="true"></MudTimePicker>
                                     </div>
                                 </div>
                                 <div class="col">
                                     <div class="form-floating">
-                                        <MudTimePicker Label="Endzeit" @bind-Value="Input.EndTime" Variant="Variant.Outlined" Required="true"></MudTimePicker>
+                                        <MudTimePicker Label="Endzeit" Time="Input.EndTime" TimeChanged="(time) => Input.EndTime = time.HasValue ? time.Value: (TimeSpan?)null" Variant="Variant.Outlined" Required="true"></MudTimePicker>
                                     </div>
                                 </div>
                             </div>

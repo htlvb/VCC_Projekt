@@ -60,9 +60,10 @@ public class GruppeConfiguration : IEntityTypeConfiguration<Gruppe>
               .HasMaxLength(255);
 
         builder.HasOne(g => g.Event)
-                              .WithMany(e => e.Gruppen)
-                              .HasForeignKey(g => g.Event_EventID)
-                              .HasPrincipalKey(e => e.EventID);
+                .WithMany(e => e.Gruppen)
+                .HasForeignKey(g => g.Event_EventID)
+                .HasPrincipalKey(e => e.EventID)
+                .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(g => g.UserInGruppe)
                .WithOne(ug => ug.Gruppe)

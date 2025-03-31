@@ -125,6 +125,8 @@ namespace VCC_Projekt.Components.Pages
                 ShowSnackbar("Wettbewerb wurde erfolgreich angelegt.", Severity.Success);
 
                 Input = new InputModel();
+                OnInitialized();
+                StateHasChanged();
             }
             catch (Exception ex)
             {
@@ -145,6 +147,8 @@ namespace VCC_Projekt.Components.Pages
 
                     ShowSnackbar("Wettbewerb wurde erfolgreich gelöscht.", Severity.Success);
                 }
+                OnInitialized();
+                StateHasChanged();
             }
 
             catch (Exception ex)
