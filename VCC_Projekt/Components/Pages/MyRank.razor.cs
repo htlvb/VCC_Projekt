@@ -148,6 +148,7 @@ namespace VCC_Projekt.Components.Pages
                 var rankingData = dbContext.Set<RanglisteResult>()
                     .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", EventId))
                     .ToList();
+
                 var groups = dbContext.Gruppen
                     .Where(g => g.Event_EventID == EventId)
                     .Select(g => new RanglisteResult
@@ -156,11 +157,11 @@ namespace VCC_Projekt.Components.Pages
                         Gruppenname = g.Gruppenname,
                         GruppenleiterId = g.GruppenleiterId,
                         Teilnehmertyp = g.Teilnehmertyp,
-                        AbgeschlosseneLevel = "", // Default to 0 for participants who haven't completed any levels
-                        AnzahlLevel = 0, // Default to 0
-                        GesamtFehlversuche = 0, // Default to 0
-                        MaxBenötigteZeit = null, // No time data
-                        GebrauchteZeit = null // No time data
+                        AbgeschlosseneLevel = "",
+                        AnzahlLevel = 0,
+                        GesamtFehlversuche = 0,
+                        MaxBenötigteZeit = null,
+                        GebrauchteZeit = null
                     })
                     .ToList();
 
@@ -169,14 +170,14 @@ namespace VCC_Projekt.Components.Pages
                     .Select(u => new RanglisteResult
                     {
                         GruppenID = u.Gruppe.GruppenID,
-                        Gruppenname = null, // Individual players have no group name
+                        Gruppenname = null,
                         GruppenleiterId = u.User.Id,
                         Teilnehmertyp = "Einzelspieler",
-                        AbgeschlosseneLevel = "", // Default to 0
-                        AnzahlLevel = 0, // Default to 0
-                        GesamtFehlversuche = 0, // Default to 0
-                        MaxBenötigteZeit = null, // No time data
-                        GebrauchteZeit = null // No time data
+                        AbgeschlosseneLevel = "",
+                        AnzahlLevel = 0,
+                        GesamtFehlversuche = 0,
+                        MaxBenötigteZeit = null,
+                        GebrauchteZeit = null
                     })
                     .ToList();
 
@@ -185,7 +186,7 @@ namespace VCC_Projekt.Components.Pages
 
                 var unrankedParticipants = allParticipants
                     .Where(participant => !rankingData.Any(ranking => ranking.GruppenID == participant.GruppenID))
-                    .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString()) // Sort alphabetically
+                    .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString())
                     .ToList();
 
                 int lastRank = rankingData.Count;
@@ -194,8 +195,8 @@ namespace VCC_Projekt.Components.Pages
                     unrankedParticipants[i].Rang = lastRank + i + 1;
                 }
 
-                // Get top 10 entries
-                _topRankingList = GetFirst10WithFallback(rankingData, unrankedParticipants);
+                // Combine ranked and unranked participants
+                var combinedRanking = rankingData.Concat(unrankedParticipants).ToList();
 
                 // Find user's group ID(s)
                 var memberGroupIds = dbContext.UserInGruppe
@@ -204,23 +205,22 @@ namespace VCC_Projekt.Components.Pages
                     .Distinct()
                     .ToList();
 
-                // 2. Get groups where user is the LEADER
                 var leaderGroupIds = dbContext.Gruppen
                     .Where(g => g.GruppenleiterId == _userId && g.Event_EventID == EventId)
                     .Select(g => g.GruppenID)
                     .ToList();
 
-                // 3. Combine both lists
                 var allUserGroupIds = memberGroupIds.Concat(leaderGroupIds).Distinct().ToList();
 
-                // Find user's ranking entry in either ranked or unranked participants
-                _userRankingEntry = allParticipants
+                // Find user's ranking entry
+                _userRankingEntry = combinedRanking
                     .FirstOrDefault(r => allUserGroupIds.Contains(r.GruppenID));
 
-                // Check if user entry exists and if it's not already in top 10
-                showUserEntry = _userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID);
+                // Get top 10 entries
+                _topRankingList = combinedRanking.Take(10).ToList();
 
-                if(showUserEntry)
+                // If user is not in top 10, add them as the 11th entry
+                if (_userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID))
                 {
                     _topRankingList.Add(_userRankingEntry);
                 }
