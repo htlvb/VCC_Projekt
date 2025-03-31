@@ -118,6 +118,17 @@ namespace VCC_Projekt.Components.Pages
                     var rolesToRemove = currentRoles.Except(item.Roles).ToList();
                     var rolesToAdd = item.Roles.Except(currentRoles).ToList();
 
+                    if (rolesToRemove.Contains("Admin"))
+                    {
+                        int adminCount = await CountAdminsAsync();
+                        if (adminCount <= 1)
+                        {
+                            Snackbar.Add("Es muss mindestens ein Admin im System vorhanden sein!", Severity.Error);
+                            await InvokeAsync(StateHasChanged);
+                            return;
+                        }
+                    }
+
                     if (rolesToRemove.Any())
                     {
                         await Usermanager.RemoveFromRolesAsync(user, rolesToRemove.ToArray());
@@ -155,6 +166,13 @@ namespace VCC_Projekt.Components.Pages
                 }
             }).ConfigureAwait(false);
         }
+
+        private async Task<int> CountAdminsAsync()
+        {
+            return await dbContext.UserRoles.CountAsync(u => u.RoleId.Contains("Admin"));
+        }
+
+
 
 
         private Func<EditRoleUser, bool> _quickFilter => x =>
