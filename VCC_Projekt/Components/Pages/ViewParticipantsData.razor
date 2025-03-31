@@ -1,10 +1,17 @@
 ﻿@page "/view-participantsData"
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
+
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883">Wettbewerbsteilnehmer einsehen</MudText>
+    <MudText Typo="Typo.subtitle1">Wähle ein Event aus, um die Kontaktdaten der Teilnehmer anzuzeigen.</MudText> <br />
+</div>
+
+
 <MudContainer MaxWidth="MaxWidth.False">
-    <MudGrid>
+    <MudGrid  Justify="Justify.Center">
         <!-- Dropdown for Event Selection -->
-        <MudItem xs="12">
+        <MudItem xs="10">
             <MudCard>
                 <MudCardContent>
                     <MudText Typo="Typo.h6">Event auswählen</MudText>
@@ -18,11 +25,11 @@
             </MudCard>
         </MudItem>
         <!-- Space between Dropdown and DataGrid -->
-        <MudItem xs="12" Class="mt-4">
+        <MudItem xs="10" Class="mt-4">
             <!-- Empty space -->
         </MudItem>
         <!-- DataGrid for Participants -->
-        <MudItem xs="12">
+        <MudItem xs="10">
             <div class="datagrid @(_selectedEvent.EventID == 0 ? "disabled" : "")" aria-disabled="@(_selectedEvent.EventID == 0)">
                 @if (_isLoading)
                 {

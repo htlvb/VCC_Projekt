@@ -1,14 +1,17 @@
 ﻿@page "/levels-manager"
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
+
+@attribute [Authorize(Roles = "Admin,Editor")]
 
 <PageTitle>Level-Manager</PageTitle>
 
 <div class="text-center">
-    <h1 class="display-4 font-weight-bold" style="color: #134883;">Level-Manager</h1>
-    <p class="lead text-muted">
+    <MudText Typo="Typo.h2" style="color: #134883;">Level-Manager</MudText>
+    <MudText Typo="Typo.subtitle1">
         Wähle ein Event aus, um neue Levels für das Event anzulegen oder vorhandene zu bearbeiten oder zu löschen.
-    </p>
+    </MudText> <br />
 </div>
 
 <MudContainer MaxWidth="MaxWidth.False">
@@ -167,6 +170,16 @@
                 <MudCardContent>
                     <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
                     <MudButton Href="@($"preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
+
+                    @if (_selectedEvent.Beginn <= DateTime.Now && _selectedEvent.Beginn.AddMinutes(_selectedEvent.Dauer) >= DateTime.Now)
+                    {
+                        <MudButton Href="@($"dashboard/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">Dashboard anzeigen</MudButton>
+                        <MudButton Href="@($"event-statistics/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
+                    }
+
+                    <MudButton Href="/" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat">Alle Teilnehmer benachrichtigen</MudButton>
+                    <MudButton Href="view-participantsData" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
+
                 </MudCardContent>
             </MudCard>
         </MudItem>

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using MudBlazor;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using VCC_Projekt.Components.Account.Pages.Manage;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -18,11 +20,9 @@ namespace VCC_Projekt.Components.Pages
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        private List<ValidationResult> addMemberErrors = new List<ValidationResult>();
-
         private static int eventId;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             var uri = new Uri(NavigationManager.Uri);
             var queryParams = QueryHelpers.ParseQuery(uri.Query);
@@ -30,6 +30,16 @@ namespace VCC_Projekt.Components.Pages
             if (queryParams.TryGetValue("eventId", out var eventIdValue) && int.TryParse(eventIdValue, out int parsedEventId))
             {
                 eventId = parsedEventId;
+            }
+
+            Input.Snackbar = Snackbar;
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                Input.Username = user.Identity.Name;
             }
         }
 
@@ -40,7 +50,6 @@ namespace VCC_Projekt.Components.Pages
 
         private void AddMember()
         {
-            addMemberErrors.Clear();
             var newMember = Input.NewMemberEmail;
 
             if (!string.IsNullOrWhiteSpace(newMember))
@@ -61,35 +70,37 @@ namespace VCC_Projekt.Components.Pages
 
                         if (eventIdExists)
                         {
-                            addMemberErrors.Add(new ValidationResult("Diese Person nimmt bereits am Event teil. Um sie/ihn trotzdem ins Team zu holen, muss sie/er sich zuerst wieder abmelden.", new[] { nameof(Input.NewMemberEmail) }));
+                            ShowSnackbar("Diese Person nimmt bereits am Event teil. Um sie/ihn trotzdem ins Team zu holen, muss sie/er sich zuerst wieder abmelden.", Severity.Error);
+                            return;
                         }
                     }
                 }
 
-
                 if (newMember == dbContext.Users.Where(u => u.UserName == Input.Username).Select(u => u.Email).First())
                 {
-                    addMemberErrors.Add(new ValidationResult("Du bist bereits Mitglieder der Gruppe.", new[] { nameof(Input.NewMemberEmail) }));
+                    ShowSnackbar("Du bist bereits Mitglieder der Gruppe.", Severity.Error);
+                    return;
                 }
                 else if (!Regex.IsMatch(newMember, @"(?i)^.+@htlvb\.at$"))
                 {
-                    addMemberErrors.Add(new ValidationResult("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", new[] { nameof(Input.NewMemberEmail) }));
+                    ShowSnackbar("Bitte eine gültige @htlvb.at E-Mail-Adresse eingeben.", Severity.Error);
+                    return;
                 }
                 else if (Input.TeamMembers.Contains(newMember))
                 {
-                    addMemberErrors.Add(new ValidationResult("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", new[] { nameof(Input.NewMemberEmail) }));
+                    ShowSnackbar("Diese E-Mail-Adresse ist bereits der Gruppe hinzugefügt.", Severity.Error);
+                    return;
                 }
                 else if (Input.TeamMembers.Count >= 4)
                 {
-                    addMemberErrors.Add(new ValidationResult("Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.", new[] { nameof(Input.NewMemberEmail) }));
+                    ShowSnackbar("Die maximale Gruppengröße von 4 Teilnehmern wurde bereits erreicht.", Severity.Error);
+                    return;
                 }
             }
 
-            if (addMemberErrors.Count == 0)
-            {
-                Input.TeamMembers.Add(newMember);
-                Input.NewMemberEmail = string.Empty;
-            }
+            Input.TeamMembers.Add(newMember);
+            ShowSnackbar($"{newMember} wurde erfolgreich zur Gruppe hinzugefügt.", Severity.Success);
+            Input.NewMemberEmail = string.Empty;
 
             StateHasChanged();
         }
@@ -97,6 +108,7 @@ namespace VCC_Projekt.Components.Pages
         private void RemoveMember(string email)
         {
             Input.TeamMembers.Remove(email);
+            ShowSnackbar($"{email} wurde erfolgreich aus der Gruppe entfernt.", Severity.Success);
         }
 
         private async void HandleSubmit()
@@ -179,10 +191,14 @@ namespace VCC_Projekt.Components.Pages
                             dbContext.SaveChanges();
                         }
 
-                        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamName}&eventId={eventId}");
+                        var eventName = dbContext.Events.Where(e => e.EventID == eventId).Select(e => e.Bezeichnung).FirstOrDefault();
+
+                        ShowSnackbar($"Du hast dich erfolgreich für den Wettbewerb '{eventName}' in der Gruppe '{teamName}' angemeldet.", Severity.Success);
                     }
                     catch (Exception ex)
                     {
+                        ShowSnackbar($"Fehler beim Anmelden für den Wettbewerb.", Severity.Error);
+
                         Console.WriteLine($"Error in Team Registration: {ex.Message}");
                     }
                 }
@@ -211,33 +227,33 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.UserInGruppe.Add(gruppe);
                         dbContext.SaveChanges();
 
-                        NavigationManager.NavigateTo($"/signup-event-confirmation?eventId={eventId}");
+                        var eventName = dbContext.Events.Where(e => e.EventID == eventId).Select(e => e.Bezeichnung).FirstOrDefault();
+
+                        ShowSnackbar($"Du hast dich erfolgreich für den Wettbewerb '{eventName}' angemeldet.", Severity.Success);
                     }
                     catch (Exception ex)
                     {
+                        ShowSnackbar($"Fehler beim Anmelden für den Wettbewerb.", Severity.Error);
+
                         Console.WriteLine($"Error in Single Registration: {ex.Message}");
                     }
                 }
             }
             catch (Exception ex)
             {
+                ShowSnackbar($"Fehler beim Anmelden für den Wettbewerb.", Severity.Error);
+
                 Console.WriteLine($"Error during submission: {ex.Message}");
             }
         }
 
-        protected override async Task OnInitializedAsync()
-        {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
 
-            if (user.Identity is not null && user.Identity.IsAuthenticated)
-            {
-                Input.Username = user.Identity.Name;
-            }
-        }
+        public void ShowSnackbar(string message, Severity severity)
+                => Snackbar.Add(message, severity);
 
         private partial class InputModel : IValidatableObject
         {
+
             [DataType(DataType.Text)]
             public string ParticipationType { get; set; }
 
@@ -258,10 +274,14 @@ namespace VCC_Projekt.Components.Pages
 
             public ApplicationDbContext dbContext { get; set; }
 
+            public ISnackbar Snackbar { get; set; }
+
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
                 var context = validationContext.GetService<ApplicationDbContext>();
+
+                bool isValid = true;
 
                 if (dbContext == null)
                 {
@@ -271,7 +291,8 @@ namespace VCC_Projekt.Components.Pages
 
                 if (ParticipationType != ParticipationTypeSingle && ParticipationType != ParticipationTypeTeam)
                 {
-                    errors.Add(new ValidationResult("Bitte eine Teilnahmeart eingeben.", new[] { nameof(ParticipationType) }));
+                    Snackbar?.Add("Bitte eine Teilnahmeart auswählen.", Severity.Error);
+                    isValid = false;    
                 }
 
                 // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt
@@ -288,7 +309,8 @@ namespace VCC_Projekt.Components.Pages
 
                     if (eventIdExists)
                     {
-                        errors.Add(new ValidationResult("Du nimmst bereits an diesem Event teil.", new[] { nameof(Username) }));
+                        Snackbar?.Add("Du nimmst bereits an diesem Event teil.", Severity.Error);
+                        isValid = false;
                     }
                 }
 
@@ -296,18 +318,26 @@ namespace VCC_Projekt.Components.Pages
                 {
                     if (string.IsNullOrWhiteSpace(TeamName))
                     {
-                        errors.Add(new ValidationResult("Bitte einen Gruppenname vergeben.", new[] { nameof(TeamName) }));
+                        Snackbar?.Add("Bitte einen Gruppenname vergeben.", Severity.Error);
+                        isValid = false;
                     }
 
                     else if (dbContext.Gruppen.Where(g => g.Event_EventID == eventId).Any(u => u.Gruppenname.ToUpper() == TeamName.ToString().ToUpper()))
                     {
-                        errors.Add(new ValidationResult("Dieser Gruppenname ist bereits vergeben.", new[] { nameof(TeamName) }));
+                        Snackbar?.Add("Dieser Gruppenname ist bereits vergeben.", Severity.Error);
+                        isValid = false;
                     }
 
                     if (TeamMembers.Count == 0)
                     {
-                        errors.Add(new ValidationResult("Bitte mindestens ein Gruppenmitglied hinzufügen.", new[] { nameof(NewMemberEmail) }));
+                        Snackbar?.Add("Bitte mindestens ein Gruppenmitglied hinzufügen.", Severity.Error);
+                        isValid = false;
                     }
+                }
+
+                if (!isValid)
+                {
+                    errors.Add(new ValidationResult("Snackbar-Fehler wurden angezeigt."));
                 }
 
                 return errors;
