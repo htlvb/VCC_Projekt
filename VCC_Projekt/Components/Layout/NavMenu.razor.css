@@ -69,10 +69,11 @@
 
 .nav-items {
     display: flex;
-    flex-direction: row; /* Ändere die Richtung zu Reihe */
+    flex-direction: row;
     gap: 0.5rem;
-    justify-content: center; /* Zentriere die Navigationselemente */
-    flex-grow: 1; /* Lasse die Navigationselemente wachsen */
+    justify-content: center;
+    flex-grow: 1;
+    flex-wrap: wrap; /* Add this line to enable wrapping */
 }
 
 .nav-item {
