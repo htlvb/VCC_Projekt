@@ -7,7 +7,7 @@ namespace VCC_Projekt.Components.Pages
         [Parameter]
         public int EventId { get; set; }
 
-        private Event? _selectedEvent = new() {EventID = 0 };
+        private Event? _selectedEvent = new() { EventID = 0 };
         private List<Event> _events = new();
         private List<Participants> _participants = new();
         private string _searchString;
@@ -18,7 +18,7 @@ namespace VCC_Projekt.Components.Pages
             try
             {
                 _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
-                if(EventId != 0)
+                if (EventId != 0)
                 {
                     _selectedEvent = _events.FirstOrDefault(ev => ev.EventID == EventId) ?? new Event { EventID = 0 };
                     StateHasChanged();
