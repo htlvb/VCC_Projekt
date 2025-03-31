@@ -1,8 +1,13 @@
-﻿namespace VCC_Projekt.Components.Pages
+﻿using Microsoft.AspNetCore.Components;
+
+namespace VCC_Projekt.Components.Pages
 {
     public partial class ViewParticipantsData
     {
-        private Event _selectedEvent = new() { EventID = 0 };
+        [Parameter]
+        public int EventId { get; set; }
+
+        private Event? _selectedEvent = new() {EventID = 0 };
         private List<Event> _events = new();
         private List<Participants> _participants = new();
         private string _searchString;
@@ -13,6 +18,11 @@
             try
             {
                 _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
+                if(EventId != 0)
+                {
+                    _selectedEvent = _events.FirstOrDefault(ev => ev.EventID == EventId) ?? new Event { EventID = 0 };
+                    StateHasChanged();
+                }
             }
             catch (Exception ex)
             {

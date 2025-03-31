@@ -92,7 +92,7 @@
                                 }
 
                                 <MudButton Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat" OnClick="() => OpenEmailDialog()">Alle Teilnehmer benachrichtigen</MudButton>
-                                <MudButton Href="view-participantsData" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
+                                <MudButton Href="@($"view-participantsData/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
                             </div>
                         </EditForm>
                     </MudCardContent>
