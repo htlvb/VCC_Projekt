@@ -7,7 +7,7 @@ namespace VCC_Projekt.Controllers
     [EnableCors("AllowSpecificOrigin")]
     [Route("api/files")]
     [ApiController]
-    [Authorize(Roles ="Admin,Editor,Benutzer")]
+    [Authorize(Roles = "Admin,Editor,Benutzer")]
     public class FileController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;
@@ -95,7 +95,7 @@ namespace VCC_Projekt.Controllers
 
             using (var memoryStream = new MemoryStream())
             {
-                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true,System.Text.Encoding.UTF8))
+                using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, true, System.Text.Encoding.UTF8))
                 {
                     foreach (var file in files)
                     {

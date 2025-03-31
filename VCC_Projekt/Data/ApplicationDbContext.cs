@@ -33,7 +33,7 @@ namespace VCC_Projekt.Data
         public DbSet<UserInGruppe> UserInGruppe { get; set; }
 
         public DbSet<LogKat> LogKats { get; set; }
-        
+
         public DbSet<EventLog> EventLogs { get; set; }
 
         public DbSet<RanglisteResult> Rangliste { get; set; }

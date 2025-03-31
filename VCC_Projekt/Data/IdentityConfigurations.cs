@@ -8,21 +8,21 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<IdentityUserRole<s
 {
     void IEntityTypeConfiguration<IdentityUserRole<string>>.Configure(EntityTypeBuilder<IdentityUserRole<string>> builder)
     {
-            builder.ToTable("vcc_AspNetUserRoles");
+        builder.ToTable("vcc_AspNetUserRoles");
 
-            builder.HasKey(ur => new { ur.UserId, ur.RoleId });
+        builder.HasKey(ur => new { ur.UserId, ur.RoleId });
 
-            builder.HasOne<ApplicationUser>()
-                  .WithMany()
-                  .HasForeignKey(ur => ur.UserId)
-                  .HasPrincipalKey("UserName")
-                  .IsRequired();
+        builder.HasOne<ApplicationUser>()
+              .WithMany()
+              .HasForeignKey(ur => ur.UserId)
+              .HasPrincipalKey("UserName")
+              .IsRequired();
 
-            builder.HasOne<ApplicationRole>()
-                  .WithMany()
-                  .HasForeignKey(ur => ur.RoleId)
-                  .HasPrincipalKey("Name")
-                  .IsRequired();
+        builder.HasOne<ApplicationRole>()
+              .WithMany()
+              .HasForeignKey(ur => ur.RoleId)
+              .HasPrincipalKey("Name")
+              .IsRequired();
     }
 }
 

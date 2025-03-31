@@ -292,7 +292,7 @@ namespace VCC_Projekt.Components.Pages
                 if (ParticipationType != ParticipationTypeSingle && ParticipationType != ParticipationTypeTeam)
                 {
                     Snackbar?.Add("Bitte eine Teilnahmeart auswählen.", Severity.Error);
-                    isValid = false;    
+                    isValid = false;
                 }
 
                 // Abfrage, ob der Gruppenmanager bereits am Event teilnimmt

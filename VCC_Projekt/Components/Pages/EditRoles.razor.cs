@@ -198,7 +198,7 @@ namespace VCC_Projekt.Components.Pages
 
         private async void OpenEmailDialog(string email)
         {
-            selectedEmails = new List<string>() {email };
+            selectedEmails = new List<string>() { email };
             var parameters = new DialogParameters
                                 {
                                     { "SelectedEmails", selectedEmails },
