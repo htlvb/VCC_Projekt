@@ -23,6 +23,12 @@
                         <MudText class="card-text flex-grow-1">
                             <strong>Datum:</strong> @eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))<br>
                         </MudText>
+                       <MudText class="card-text flex-grow-1">
+                            <strong>Beginn:</strong> @eventItem.Beginn.ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                        </MudText>
+                        <MudText class="card-text flex-grow-1">
+                            <strong>Ende:</strong> @eventItem.Beginn.AddMinutes(eventItem.Dauer).ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                        </MudText>
                         <br />
                         <div class="text-center mt-auto">
                             <MudButton Variant="Variant.Outlined" style="color: #134883" Href="@GetEventLink(eventItem.EventID)">Jetzt anmelden</MudButton>

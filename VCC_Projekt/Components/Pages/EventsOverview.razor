@@ -96,6 +96,12 @@ else
                             }
 
                             <MudText><strong>Datum: </strong>@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))</MudText>
+                            <MudText>
+                                <strong>Beginn:</strong> @eventItem.Beginn.ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                            </MudText>
+                            <MudText>
+                                <strong>Ende:</strong> @eventItem.Beginn.AddMinutes(eventItem.Dauer).ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                            </MudText>
 
                             @if(isCurrentEvent)
                             {
