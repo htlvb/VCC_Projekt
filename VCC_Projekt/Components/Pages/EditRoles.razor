@@ -1,15 +1,19 @@
 ﻿@page "/change-roles"
 @using System.Collections.Generic
+@using Microsoft.AspNetCore.Authorization
 @inject IDialogService DialogService
+
+@attribute [Authorize(Roles = "Admin")]
 
 <PageTitle>Rollen ändern</PageTitle>
 
 <div class="container mt-5">
     <div class="text-center">
-        <h1 class="display-4 font-weight-bold" style="color: #134883;">Rollen ändern</h1>
-        <p class="lead text-muted">
+        <MudText Typo="Typo.h2" style="color: #134883;">Rollen ändern</MudText>
+        <MudText Typo="Typo.subtitle1">
             Um die Rollen einer Person oder Gruppe zu verändern, bitte die Person oder Gruppe suchen und dann die Rollen bearbeiten.
-        </p>
+        </MudText>
+        <br />
     </div>
 
     <!-- DataGrid -->
@@ -107,9 +111,6 @@
         </MudDataGrid>
     </div>
 </div>
-
-<EmailSendDialog SelectedEmails="@selectedEmails" 
-    Emails="@users.Where(em => !string.IsNullOrEmpty(em.Email)).Select(us => us.Email).ToList()" ReadOnly="false" UseDropdown="true"/>
 
 <style>
     body {

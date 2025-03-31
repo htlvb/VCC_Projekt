@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -18,6 +17,7 @@ namespace VCC_Projekt.Components.Pages
             _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
             Input = new();
             editContext = new EditContext(Input);
+            Input.Snackbar = Snackbar;
         }
 
         private void SetEventData()
@@ -29,8 +29,10 @@ namespace VCC_Projekt.Components.Pages
             TimeSpan timeSpan = dateTime.TimeOfDay;
 
             Input.StartTime = timeSpan;
-            Input.EndTime = Input.StartTime.Add(new TimeSpan(0, _selectedEvent.Dauer, 0));
+            Input.EndTime = Input.StartTime?.Add(new TimeSpan(0, _selectedEvent.Dauer, 0));
             Input.PenaltyMinutes = _selectedEvent.StrafminutenProFehlversuch;
+
+            StateHasChanged();
         }
 
         private void ToggleEditMode()
@@ -41,28 +43,9 @@ namespace VCC_Projekt.Components.Pages
         private async Task OnEventSelected(Event selectedEvent)
         {
             _selectedEvent = selectedEvent;
-            _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
             SetEventData();
             if (isEditing == true) ToggleEditMode();
         }
-
-        //private void UpdateStartTime(string value)
-        //{
-        //    if (TimeSpan.TryParse(value, out TimeSpan time))
-        //    {
-        //        Input.StartTime = time;
-        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.StartTime));
-        //    }
-        //}
-
-        //private void UpdateEndTime(string value)
-        //{
-        //    if (TimeSpan.TryParse(value, out TimeSpan time))
-        //    {
-        //        Input.EndTime = time;
-        //        editContext.NotifyFieldChanged(FieldIdentifier.Create(() => Input.EndTime));
-        //    }
-        //}
 
         private async Task UpdateEvent()
         {
@@ -84,20 +67,18 @@ namespace VCC_Projekt.Components.Pages
                 try
                 {
                     var eventToUpdate = dbContext.Events.Find(_selectedEvent.EventID);
-                    if(eventToUpdate != null)
+                    if (eventToUpdate != null)
                     {
                         eventToUpdate.Bezeichnung = Input.EventName;
-                        eventToUpdate.Beginn = DateTime.Parse(Input.EventDate.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
-                        eventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                        eventToUpdate.Beginn = DateTime.Parse(Input.EventDate?.Date.ToString("yyyy-MM-dd") + " " + Input.StartTime);
+                        eventToUpdate.Dauer = (int)(Input.EndTime - Input.StartTime)?.TotalMinutes;
                         eventToUpdate.StrafminutenProFehlversuch = Input.PenaltyMinutes;
 
                         dbContext.SaveChanges();
                     }
-                    
+
                     ShowSnackbar("Wettbewerb wurde erfolgreich bearbeitet.", Severity.Success);
                     ToggleEditMode();
-
-                    //Input = new InputModel();
                 }
 
                 catch (Exception ex)
@@ -124,6 +105,7 @@ namespace VCC_Projekt.Components.Pages
                 {
                     foreach (var validationResult in validationResults)
                     {
+                        ShowSnackbar(validationResult.ErrorMessage, Severity.Error);
                         Console.WriteLine($"Validation Error: {validationResult.ErrorMessage}");
                     }
                     return;
@@ -131,9 +113,9 @@ namespace VCC_Projekt.Components.Pages
 
                 Event ev = new Event();
                 ev.Bezeichnung = Input.EventName;
-                ev.Dauer = (int)(Input.EndTime - Input.StartTime).TotalMinutes;
+                ev.Dauer = (int)(Input.EndTime - Input.StartTime)?.TotalMinutes;
                 ev.StrafminutenProFehlversuch = Input.PenaltyMinutes;
-                ev.Beginn = Input.EventDate.Date + Input.StartTime;
+                ev.Beginn = Input.EventDate.GetValueOrDefault(DateTime.Today).Date + Input.StartTime.GetValueOrDefault();
 
                 dbContext.Events.Add(ev);
                 dbContext.SaveChanges();
@@ -181,57 +163,89 @@ namespace VCC_Projekt.Components.Pages
 
             [DataType(DataType.DateTime)]
             [Display(Name = "Datum")]
-            public DateTime EventDate { get; set; } = DateTime.Today;
+            public DateTime? EventDate { get; set; }
 
             [DataType(DataType.Time)]
             [Display(Name = "Startzeit")]
-            public TimeSpan StartTime { get; set; }
+            public TimeSpan? StartTime { get; set; }
 
             [DataType(DataType.Time)]
             [Display(Name = "Endzeit")]
-            public TimeSpan EndTime { get; set; }
+            public TimeSpan? EndTime { get; set; }
 
             [Display(Name = "Strafminuten")]
             [Range(0, int.MaxValue, ErrorMessage = "Strafminuten dürfen nicht negativ sein.")]
             public int PenaltyMinutes { get; set; } = 0;
 
+            public ISnackbar Snackbar {  get; set; }
+
             public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
             {
                 var errors = new List<ValidationResult>();
+                bool isValid = true;
 
                 // Validate EventName
                 if (string.IsNullOrWhiteSpace(EventName))
                 {
-                    errors.Add(new ValidationResult("Bitte den Wettbewerbsnamen angeben.", new[] { nameof(EventName) }));
+                    Snackbar?.Add("Bitte den Wettbewerbsnamen angeben.", Severity.Error);
+                    isValid = false;
                 }
                 else if (EventName.Length < 3)
                 {
-                    errors.Add(new ValidationResult("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.", new[] { nameof(EventName) }));
+                    Snackbar?.Add("Der Wettbewerbsname muss mindestens 3 Zeichen lang sein.", Severity.Error);
+                    isValid = false;
                 }
 
                 // Validate Date and Time together
                 var currentTime = DateTime.Now.TimeOfDay;
-                var eventStart = EventDate.Date + StartTime;
-                var eventEnd = EventDate.Date + EndTime;
+                var eventStart = EventDate?.Date + StartTime;
+                var eventEnd = EventDate?.Date + EndTime;
+
+                if (EventDate?.Date == null)
+                {
+                    Snackbar?.Add("Bitte ein Datum angeben.", Severity.Error);
+                    isValid = false;
+                }
+
+                if (eventStart == null)
+                {
+                    Snackbar?.Add("Bitte eine Startzeit angeben.", Severity.Error);
+                    isValid = false;
+                }
+                if (eventEnd == null)
+                {
+                    Snackbar?.Add("Bitte eine Endzeit angeben.", Severity.Error);
+                    isValid = false;
+                }
+
 
                 // Check if date is in the past
-                if (EventDate.Date < DateTime.Today)
+                if (EventDate?.Date < DateTime.Today)
                 {
-                    errors.Add(new ValidationResult("Das Datum darf nicht in der Vergangenheit liegen.", new[] { nameof(EventDate) }));
+                    Snackbar?.Add("Das Datum darf nicht in der Vergangenheit liegen.", Severity.Error);
+                    isValid = false;
                 }
+
                 // If date is today, check time constraints
-                else if (EventDate.Date == DateTime.Today)
+                else if (EventDate?.Date == DateTime.Today)
                 {
                     if (StartTime < currentTime)
                     {
-                        errors.Add(new ValidationResult("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", new[] { nameof(StartTime) }));
+                        Snackbar?.Add("Die Startzeit muss in der Zukunft liegen, wenn das Event heute stattfindet.", Severity.Error); 
+                        isValid = false;
                     }
                 }
 
                 // Validate End Time is after Start Time
                 if (eventEnd <= eventStart)
                 {
-                    errors.Add(new ValidationResult("Die Endzeit muss nach der Startzeit liegen.", new[] { nameof(EndTime) }));
+                    Snackbar?.Add("Die Endzeit muss nach der Startzeit liegen.", Severity.Error);
+                    isValid = false;
+                }
+
+                if (!isValid)
+                {
+                    errors.Add(new ValidationResult("Snackbar-Fehler wurden angezeigt."));
                 }
 
                 return errors;
