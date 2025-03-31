@@ -19,7 +19,7 @@ html, body {
     overflow-y: hidden; /* Enables scrolling for the main content */
     display: flex;
     flex-direction: column;
-    padding-top: 1.5rem; /* Adds top padding for the main content */
+    padding-top: 0rem; /* Adds top padding for the main content */
 }
 
 .content {
