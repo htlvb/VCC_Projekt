@@ -205,25 +205,6 @@ namespace VCC_Projekt.Components.Pages
                     })
                     .ToList();
 
-                var individualUsers = dbContext.UserInGruppe
-                    .Where(u => u.Gruppe.Event_EventID == eventId && u.Gruppe.Teilnehmertyp == "Einzelspieler")
-                    .Select(u => new RanglisteResult
-                    {
-                        GruppenID = u.Gruppe.GruppenID,
-                        Gruppenname = null, // Individual players have no group name
-                        GruppenleiterId = u.User.Id,
-                        Teilnehmertyp = "Einzelspieler",
-                        AbgeschlosseneLevel = "", // Default to 0
-                        AnzahlLevel = 0, // Default to 0
-                        GesamtFehlversuche = 0, // Default to 0
-                        MaxBenötigteZeit = null, // No time data
-                        GebrauchteZeit = null // No time data
-                    })
-                    .ToList();
-
-                // Combine all participants
-                var allParticipants = groups.Concat(individualUsers).ToList();
-
                 // Merge ranking data with all participants
                 var rankedParticipants = rankingData
                     .Select(ranking => new RanglisteResult
@@ -242,7 +223,7 @@ namespace VCC_Projekt.Components.Pages
                     .ToList();
 
                 // Find participants who haven't completed any levels
-                var unrankedParticipants = allParticipants
+                var unrankedParticipants = groups
                     .Where(participant => !rankingData.Any(ranking => ranking.GruppenID == participant.GruppenID))
                     .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString()) // Sort alphabetically
                     .ToList();
