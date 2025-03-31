@@ -85,7 +85,7 @@ namespace VCC_Projekt.Components.Pages
             groupedUnansweredEmails = emailGroups.Values
                                         .Where(g =>
                                             !IsEmailAnswered(g) &&
-                                            !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.emailAddress.ToLower()) &&
+                                            !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.EmailAddress.ToLower()) &&
                                             !g.OriginalEmail.Subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase) &&
                                             !g.OriginalEmail.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase))
                                         .ToList();
@@ -93,7 +93,7 @@ namespace VCC_Projekt.Components.Pages
             groupedAnsweredEmails = emailGroups.Values
                                     .Where(g =>
                                         IsEmailAnswered(g) &&
-                                        !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.emailAddress.ToLower()) &&
+                                        !g.OriginalEmail.From.Mailboxes.Any(m => m.Address.ToLower() == EmailService.EmailAddress.ToLower()) &&
                                         !g.OriginalEmail.Subject.StartsWith("RE:", StringComparison.OrdinalIgnoreCase) &&
                                         !g.OriginalEmail.Subject.StartsWith("AW:", StringComparison.OrdinalIgnoreCase))
                                     .ToList();
@@ -109,7 +109,7 @@ namespace VCC_Projekt.Components.Pages
         private bool IsEmailAnswered(MimeMessage email, MessageFlags? flags)
         {
             // Ihre E-Mail-Adresse (z. B. "ihre-email@example.com")
-            string yourEmail = EmailService.emailAddress;
+            string yourEmail = EmailService.EmailAddress;
             // Überprüfen, ob die E-Mail von Ihnen stammt (d. h. Sie haben geantwortet)
             bool isFromYou = email.From.Mailboxes.Any(m => m.Address.Equals(yourEmail, StringComparison.OrdinalIgnoreCase));
             // Überprüfen, ob die E-Mail als beantwortet markiert ist
