@@ -3,9 +3,13 @@
 
 <PageTitle>Event Statistiken</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.False" Class="vh-100">
-    <MudText Typo="Typo.h3" GutterBottom="true">Event Statistics</MudText>
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883">Event Statistics</MudText>
+    <br />
+</div>
 
+
+<MudContainer MaxWidth="MaxWidth.False" Class="vh-100">
     <!-- Dropdown zur Auswahl des Events -->
     <MudSelect T="Event" Label="Event auswählen" Variant="Variant.Outlined" ValueChanged="e => OnEventSelected(e)" Value="SelectedEvent">
         @foreach (var eventItem in Events)
@@ -13,6 +17,8 @@
             <MudSelectItem Value="eventItem">@eventItem.Bezeichnung (@eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
         }
     </MudSelect>
+
+    <br />
 
     <!-- Diagramme anzeigen, wenn ein Event ausgewählt ist -->
     @if (_selectedEventStatistiks != null)
@@ -67,6 +73,8 @@
             </MudItem>
         </MudGrid>
 
+        <br />
+
         <!-- Rangliste -->
         <MudCard Class="mt-4">
             <MudCardHeader>
@@ -92,6 +100,8 @@
                 </MudDataGrid>
             </MudCollapse>
         </MudCard>
+
+        <br />
     }
 </MudContainer>
 
@@ -101,10 +111,5 @@
         width: 100%;
         display: flex;
         flex-direction: column;
-    }
-
-    .content {
-        flex: 1;
-        overflow: auto;
     }
 </style>

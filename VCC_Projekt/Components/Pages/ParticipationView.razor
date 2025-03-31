@@ -1,6 +1,5 @@
 ﻿@page "/participation/{eventId:int}"
 @using Microsoft.AspNetCore.Authorization
-@inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject IJSRuntime JS
 @attribute [Authorize(Roles = "Benutzer")]
@@ -32,7 +31,7 @@ else
             <MudItem xs="12" Style="text-align: center;">
                 <MudPaper Elevation="3" Class="pa-2">
                     <MudText Typo="Typo.h5" Class="font-bold">
-                        ⏳ Zeit: <span id="timer">@((DateTime.Now - Event.Beginn).ToString("hh\\:mm\\:ss"))</span> ❌Fehlversuche: @Fehlversuche 🏅Platzierung: @Platzeriung
+                        ⏳ Zeit: <span id="timer">@((DateTime.Now - Event.Beginn).ToString("hh\\:mm\\:ss"))</span> ❌Fehlversuche: @Fehlversuche 🏅Platzierung: @Platzierung
                     </MudText>
                 </MudPaper>
             </MudItem>
@@ -95,11 +94,11 @@ else
                 <MudCard Elevation="3">
                     <MudCardContent>
                         <MudText Typo="Typo.h6">📥 Downloads</MudText>
-                        <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}")" download="@($"Level {CurrentLevel.Levelnr}.pdf")">
+                        <MudLink Href="@($"api/files/{CurrentLevel.LevelID.ToString()}")" download="@($"Level {CurrentLevel.Levelnr}.pdf")">
                             <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" /> Level Description PDF
                         </MudLink>
                         <br />
-                        <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}/input/zip")" download="@($"level{CurrentLevel.Levelnr}.zip")" Target="_blank">
+                        <MudLink Href="@($"api/files/{CurrentLevel.LevelID.ToString()}/input/zip")" download="@($"level{CurrentLevel.Levelnr}.zip")" Target="_blank">
                             <MudIcon Icon="@Icons.Material.Filled.FolderZip" /> Inputs (ZIP)
                         </MudLink>
 
@@ -114,7 +113,7 @@ else
                                     <MudGrid Justify="Justify.FlexStart" AlignItems="AlignItems.Center" Wrap="NoWrap" Spacing="3">
                                         <!-- Download Link -->
                                         <MudItem>
-                                            <MudLink Href="@($"/api/files/{CurrentLevel.LevelID.ToString()}/{aufgabe.AufgabenID}/input")" download="@($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt")">
+                                            <MudLink Href="@($"api/files/{CurrentLevel.LevelID.ToString()}/{aufgabe.AufgabenID}/input")" download="@($"level{CurrentLevel.Levelnr}_{aufgabe.Aufgabennr}.txt")">
                                                 <MudIcon Icon="@Icons.Material.Filled.Download" /> level@(CurrentLevel.Levelnr)_@aufgabe.Aufgabennr
                                             </MudLink>
                                         </MudItem>

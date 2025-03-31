@@ -24,7 +24,7 @@ namespace VCC_Projekt.Components.Pages
         private bool accessDenied = false;
         private string accessDeniedMessage = "";
         private int Fehlversuche;
-        private int Platzeriung;
+        private int Platzierung;
         private List<RanglisteResult> Rangliste { get; set; } = new();
 
         protected override async void OnInitialized()
@@ -85,7 +85,7 @@ namespace VCC_Projekt.Components.Pages
 
                 // Berechne die Platzierung der aktuellen Gruppe
                 var gruppeRang = Rangliste.FirstOrDefault(r => r.GruppenID == Group.GruppenID);
-                Platzeriung = gruppeRang?.Rang ?? 0;
+                Platzierung = gruppeRang?.Rang ?? 0;
 
                 // Lade das aktuelle Level
                 CurrentLevel = dbContext.Levels
@@ -108,7 +108,7 @@ namespace VCC_Projekt.Components.Pages
 
                 if (CurrentLevel == null)
                 {
-                    if (Platzeriung != 0) throw new ArgumentException("Alle Levels abgeschlossen");
+                    if (Platzierung != 0) throw new ArgumentException("Alle Levels abgeschlossen");
                     else
                     {
                         throw new ArgumentException("Kein Level gefunden");

@@ -1,11 +1,12 @@
-﻿<!DOCTYPE html>
+﻿@inject IConfiguration Configuration
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <base href="/" />
+    <base href="@BasePath" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" /> 
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
@@ -13,7 +14,7 @@
     <link rel="stylesheet" href="VCC_Projekt.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <HeadOutlet @rendermode="RenderModeForPage" />
-    
+
 </head>
 
 <body>
@@ -32,8 +33,17 @@
     [CascadingParameter]
     public HttpContext? _httpContext { get; set; }
 
+
     private IComponentRenderMode? RenderModeForPage =>
         _httpContext.Request.Path.StartsWithSegments("/account", StringComparison.OrdinalIgnoreCase)
             ? null
             : InteractiveServer;
+    private string BasePath { get; set; } = "/";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BasePath = Configuration.GetValue<string>("BasePath") ?? "/";
+    }
+
 }
