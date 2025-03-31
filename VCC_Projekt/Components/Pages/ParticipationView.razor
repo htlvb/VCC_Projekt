@@ -6,14 +6,21 @@
 
 @if (accessDenied)
 {
-    <PageTitle>Zugriff verweigert</PageTitle>
     <header>
-        <h1 class="text-danger">Zugriff verweigert</h1>
-        <p class="text-danger">@accessDeniedMessage</p>
-        @if (accessDeniedMessage == "Das Event ist bereits beendet." || accessDeniedMessage == "Alle Levels abgeschlossen")
+        @if (accessDeniedMessage == "Alle Levels abgeschlossen")
         {
-            <MudLink Href="@($"{Dashboardlink}{Event.EventID}")">Hier kommen Sie zum Dashboard des Events</MudLink>
+            <PageTitle>Glückwunsch</PageTitle>
+            <h1>Herzlichen Glückwunsch!</h1>
+            <p>Sie haben alle Levels abgeschlossen und das Event ist für Sie beendet. Danke fürs Mitmachen 😉</p>
         }
+        else
+        {
+            <PageTitle>Zugriff verweigert</PageTitle>
+            <h1 class="text-danger">Zugriff verweigert</h1>
+            <p class="text-danger">@accessDeniedMessage</p>
+        }
+        <MudLink Href="@($"{Dashboardlink}{Event.EventID}")">Hier kommen Sie zum Dashboard des Events</MudLink>
+
     </header>
 }
 else
