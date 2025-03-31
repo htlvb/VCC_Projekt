@@ -25,11 +25,7 @@
         const mainContent = document.querySelector('.main-content');
         if (navbar && mainContent) {
             const navbarHeight = navbar.offsetHeight;
-            if (navbarHeight > 60) { // Assuming 60px is the height of a single-line navbar
-                mainContent.style.paddingTop = `${navbarHeight + 16}px`; // Add 1.0rem (16px) if navbar is double-lined
-            } else {
-                mainContent.style.paddingTop = `${navbarHeight}px`; // Use the navbar height if single-lined
-            }
+            mainContent.style.paddingTop = `${navbarHeight}px`; // Always use the navbar height
         }
     }
 

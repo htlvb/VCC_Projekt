@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <div class="top-navbar">
     <div class="navbar-brand-container">
@@ -81,7 +82,7 @@
                 <AuthorizeView>
                     <Authorized>
                         <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Manage">
+                            <NavLink class="nav-link" href="Account/Manage" onclick="adjustContentPadding()">
                                 <MudIcon Icon="@Icons.Material.Filled.Person" Class="me-1" />
                                 <span>@context.User.Identity?.Name</span>
                             </NavLink>
@@ -90,7 +91,7 @@
                             <form action="Account/Logout" method="post">
                                 <AntiforgeryToken />
                                 <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                                <button type="submit" class="nav-link">
+                                <button type="submit" class="nav-link" onclick="adjustContentPadding()">
                                     <MudIcon Icon="@Icons.Material.Filled.Logout" Class="me-1" />
                                     <span>Logout</span>
                                 </button>
@@ -99,13 +100,13 @@
                     </Authorized>
                     <NotAuthorized>
                         <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Register">
+                            <NavLink class="nav-link" href="Account/Register" onclick="adjustContentPadding()">
                                 <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="me-1" />
                                 <span>Register</span>
                             </NavLink>
                         </div>
                         <div class="nav-item">
-                            <NavLink class="nav-link" href="Account/Login">
+                            <NavLink class="nav-link" href="Account/Login" onclick="adjustContentPadding()">
                                 <MudIcon Icon="@Icons.Material.Filled.Login" Class="me-1" />
                                 <span>Login</span>
                             </NavLink>
@@ -126,11 +127,17 @@
         NavigationManager.LocationChanged += OnLocationChanged;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JSRuntime.InvokeVoidAsync("adjustContentPadding");
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         Snackbar.Clear();
         StateHasChanged();
+        JSRuntime.InvokeVoidAsync("adjustContentPadding"); // Call the function on location change
     }
 
     public void Dispose()
