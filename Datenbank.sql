@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `vcc_event` (
   PRIMARY KEY (`EventID`),
   CONSTRAINT `chk_Dauer` CHECK ((`Dauer` > 0)),
   CONSTRAINT `chk_Strafminuten` CHECK ((`StrafminutenProFehlversuch` >= 0))
-) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Daten-Export vom Benutzer nicht ausgewählt
 
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `vcc_eventlog` (
   PRIMARY KEY (`EventLogID`),
   KEY `EventLog_LogKategorie_FK` (`LogKategorie_KatID`),
   CONSTRAINT `EventLog_LogKategorie_FK` FOREIGN KEY (`LogKategorie_KatID`) REFERENCES `vcc_logkategorie` (`KatID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1292 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1323 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Daten-Export vom Benutzer nicht ausgewählt
 
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `vcc_gruppe` (
   KEY `Gruppe_Event_FK` (`Event_EventID`) USING BTREE,
   CONSTRAINT `FK_vcc_gruppe_vcc_aspnetusers` FOREIGN KEY (`GruppenleiterId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON UPDATE CASCADE,
   CONSTRAINT `Gruppe_Event_FK` FOREIGN KEY (`Event_EventID`) REFERENCES `vcc_event` (`EventID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=309 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=312 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Daten-Export vom Benutzer nicht ausgewählt
 
@@ -211,7 +211,7 @@ CREATE TABLE IF NOT EXISTS `vcc_level` (
   KEY `Level_Event_FK` (`Event_EventID`) USING BTREE,
   CONSTRAINT `Level_Event_FK` FOREIGN KEY (`Event_EventID`) REFERENCES `vcc_event` (`EventID`) ON DELETE CASCADE,
   CONSTRAINT `chk_Levelnr` CHECK (((`Levelnr` > 0) and (`Levelnr` <= 5)))
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Daten-Export vom Benutzer nicht ausgewählt
 
@@ -233,7 +233,7 @@ CREATE TABLE IF NOT EXISTS `vcc_useringruppe` (
   KEY `FK_GruppenId` (`Gruppe_GruppenId`) USING BTREE,
   KEY `FK_UserId` (`User_UserId`) USING BTREE,
   CONSTRAINT `FK_GruppenId` FOREIGN KEY (`User_UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_UserId` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON UPDATE CASCADE
+  CONSTRAINT `FK_UserId` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Daten-Export vom Benutzer nicht ausgewählt
