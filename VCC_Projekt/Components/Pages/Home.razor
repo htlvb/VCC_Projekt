@@ -39,8 +39,9 @@
                     <MudText class="card-text flex-grow-1">
                         <strong>Datum:</strong> @dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).Select(e => e.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))).First()<br>
                     </MudText>
+                    <br />
                     <div class="text-center mt-auto">
-                        <a href="@GetEventLink(dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().EventID)" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                        <MudButton Variant="Variant.Outlined" style="color: #134883" Href="@GetEventLink(dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn).First().EventID)">Jetzt anmelden</MudButton>
                     </div>
                 </div>
             </div>
@@ -51,7 +52,7 @@
 
     <div class="text-center mt-5">
         <div class="text-center mt-auto">
-            <a href="info" class="w-25 btn btn-lg btn-success">Mehr erfahren</a>
+            <MudButton style="color: #134883" Href="info" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Info">Mehr über VCC erfahren</MudButton>
         </div>
         <br />
     </div>

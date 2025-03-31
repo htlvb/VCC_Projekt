@@ -25,7 +25,7 @@
                         </MudText>
                         <br />
                         <div class="text-center mt-auto">
-                            <a href="@GetEventLink(eventItem.EventID)" class="w-50 btn btn-lg btn-success">Jetzt anmelden</a>
+                            <MudButton Variant="Variant.Outlined" style="color: #134883" Href="@GetEventLink(eventItem.EventID)">Jetzt anmelden</MudButton>
                         </div>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
 
 
     <div class="mt-4">
-        <MudText Typo="Typo.h4">Warum teilnehmen?</MudText>
+        <MudText Typo="Typo.h4" style="color: #134883">Warum teilnehmen?</MudText>
         <MudText>
             Egal ob Anfänger:in oder Profi – die VCC-Events bieten jedem die Möglichkeit, 
             in spannenden Challenges seine Skills zu testen, Spaß zu haben und tolle Preise zu gewinnen.
@@ -43,14 +43,14 @@
     </div>
 
     <div class="mt-4">
-        <MudText Typo="Typo.h4">Noch Fragen?</MudText>
+        <MudText Typo="Typo.h4" style="color: #134883">Noch Fragen?</MudText>
         <MudText>
-            Kontaktiere uns unter: <a href="mailto:vcc.htlvb@gmail.com?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
+            Kontaktiere uns unter: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
         </MudText>
     </div>
 
     <div class="text-center mt-5">
-        <a class="w-25 btn btn-lg btn-success" Href="/info">Mehr über VCC erfahren</a>
+        <MudButton Variant="Variant.Outlined" style="color: #134883" StartIcon="@Icons.Material.Filled.Info" Href="info">Mehr über VCC erfahren</MudButton>
         <br />
     </div>
 </div>

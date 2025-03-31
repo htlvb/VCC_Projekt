@@ -64,14 +64,14 @@
     <div class="mt-4">
         <MudText Typo="Typo.h4" style="color: #134883;">Noch Fragen?</MudText>
         <MudText>
-            Schreib uns gerne an: <a href="mailto:vcc.htlvb@gmail.com?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
+            Schreib uns gerne an: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
         </MudText>
     </div>
 
     @if(!isLoggedIn)
     {
         <div class="text-center mt-5">
-            <a class="w-25 btn btn-lg btn-success" href="/Account/Login">Jetzt anmelden</a>
+            <MudButton Variant="Variant.Filled" style="color: #134883" Href="Account/Login">Jetzt anmelden</MudButton>
             <br />
         </div>
     }

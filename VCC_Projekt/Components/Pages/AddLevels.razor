@@ -170,6 +170,16 @@
                 <MudCardContent>
                     <MudButton OnClick="SaveLevels" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Save" Disabled="@(_selectedEvent.EventID == 0 || IsEventInPast)">Levels speichern</MudButton>
                     <MudButton Href="@($"preview-event/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.ContentPasteSearch" Disabled="@(_selectedEvent.EventID == 0 || _levels.Count == 0)" Target="_blank">Event testen</MudButton>
+
+                    @if (_selectedEvent.Beginn <= DateTime.Now && _selectedEvent.Beginn.AddMinutes(_selectedEvent.Dauer) >= DateTime.Now)
+                    {
+                        <MudButton Href="@($"dashboard/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.SpaceDashboard">Dashboard anzeigen</MudButton>
+                        <MudButton Href="@($"event-statistics/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
+                    }
+
+                    <MudButton Href="/" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat">Alle Teilnehmer benachrichtigen</MudButton>
+                    <MudButton Href="view-participantsData" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
+
                 </MudCardContent>
             </MudCard>
         </MudItem>
