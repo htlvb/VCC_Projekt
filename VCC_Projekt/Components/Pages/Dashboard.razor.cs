@@ -248,16 +248,17 @@ namespace VCC_Projekt.Components.Pages
                     .ToList();
 
                 // Combine ranked and unranked participants
-                _rankingList = rankedParticipants
-                    .Concat(unrankedParticipants)
-                    .ToList();
-
-                // Assign ranks to unranked participants (starting after the last ranked participant)
                 int lastRank = rankedParticipants.Count;
                 for (int i = 0; i < unrankedParticipants.Count(); i++)
                 {
                     unrankedParticipants[i].Rang = lastRank + i + 1;
                 }
+
+                _rankingList = rankedParticipants
+                    .Concat(unrankedParticipants)
+                    .ToList();
+
+                // Assign ranks to unranked participants (starting after the last ranked participant)
             }
             catch (Exception ex)
             {

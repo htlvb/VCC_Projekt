@@ -6,10 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using Microsoft.Extensions.Logging;
+using System.Timers;
+using System.Threading.Tasks;
 
 namespace VCC_Projekt.Components.Pages
 {
-    public partial class MyRank
+    public partial class MyRank : IDisposable
     {
         [Inject]
         private NavigationManager NavigationManager { get; set; }
@@ -27,6 +30,7 @@ namespace VCC_Projekt.Components.Pages
         private bool accessDenied;
         private string accessDeniedMessage = "";
         private string _userId;
+        private System.Timers.Timer _refreshTimer;
 
         protected override async Task OnInitializedAsync()
         {
@@ -64,6 +68,12 @@ namespace VCC_Projekt.Components.Pages
 
                 // Load the ranking and user position
                 LoadRankingAndUserPosition();
+
+                // Initialize refresh timer if access is not denied
+                if (!accessDenied)
+                {
+                    InitializeRefreshTimer();
+                }
             }
             catch (Exception ex)
             {
@@ -81,34 +91,145 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private void InitializeRefreshTimer()
+        {
+            // Clean up any existing timer
+            _refreshTimer?.Dispose();
+
+            // Create new timer with 5 second interval (same as Dashboard)
+            _refreshTimer = new System.Timers.Timer(5000);
+            _refreshTimer.Elapsed += async (sender, e) => await RefreshRanking();
+            _refreshTimer.AutoReset = true;
+            _refreshTimer.Enabled = true;
+        }
+
+        private async Task RefreshRanking()
+        {
+            // Only refresh if not in access denied state
+            if (!accessDenied && _event != null)
+            {
+                await InvokeAsync(() =>
+                {
+                    try
+                    {
+                        LoadRankingAndUserPosition();
+                        StateHasChanged();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error refreshing ranking: {ex.Message}");
+                        accessDenied = true;
+                        accessDeniedMessage = $"Fehler beim Aktualisieren: {ex.Message}";
+                        StopTimer();
+                        StateHasChanged();
+                    }
+                });
+            }
+            else
+            {
+                // If we're in access denied state, stop refreshing
+                StopTimer();
+            }
+        }
+
+        private void StopTimer()
+        {
+            if (_refreshTimer != null)
+            {
+                _refreshTimer.Enabled = false;
+            }
+        }
+
         private void LoadRankingAndUserPosition()
         {
             try
             {
                 // Fetch complete ranking data for the event
-                var completeRanking = dbContext.Set<RanglisteResult>()
+                var rankingData = dbContext.Set<RanglisteResult>()
                     .FromSqlRaw("CALL ShowRangliste(@eventId)", new MySqlParameter("@eventId", EventId))
                     .ToList();
 
-                // Get top 10 entries
-                _topRankingList = completeRanking.ToList();
+                var groups = dbContext.Gruppen
+                    .Where(g => g.Event_EventID == EventId)
+                    .Select(g => new RanglisteResult
+                    {
+                        GruppenID = g.GruppenID,
+                        Gruppenname = g.Gruppenname,
+                        GruppenleiterId = g.GruppenleiterId,
+                        Teilnehmertyp = g.Teilnehmertyp,
+                        AbgeschlosseneLevel = "",
+                        AnzahlLevel = 0,
+                        GesamtFehlversuche = 0,
+                        MaxBenötigteZeit = null,
+                        GebrauchteZeit = null
+                    })
+                    .ToList();
+
+                var individualUsers = dbContext.UserInGruppe
+                    .Where(u => u.Gruppe.Event_EventID == EventId && u.Gruppe.Teilnehmertyp == "Einzelspieler")
+                    .Select(u => new RanglisteResult
+                    {
+                        GruppenID = u.Gruppe.GruppenID,
+                        Gruppenname = null,
+                        GruppenleiterId = u.User.Id,
+                        Teilnehmertyp = "Einzelspieler",
+                        AbgeschlosseneLevel = "",
+                        AnzahlLevel = 0,
+                        GesamtFehlversuche = 0,
+                        MaxBenötigteZeit = null,
+                        GebrauchteZeit = null
+                    })
+                    .ToList();
+
+                // Combine all participants
+                var allParticipants = groups.Concat(individualUsers).ToList();
+
+                var unrankedParticipants = allParticipants
+                    .Where(participant => !rankingData.Any(ranking => ranking.GruppenID == participant.GruppenID))
+                    .OrderBy(p => p.Gruppenname ?? p.GruppenleiterId.ToString())
+                    .ToList();
+
+                int lastRank = rankingData.Count;
+                for (int i = 0; i < unrankedParticipants.Count(); i++)
+                {
+                    unrankedParticipants[i].Rang = lastRank + i + 1;
+                }
+
+                // Combine ranked and unranked participants
+                var combinedRanking = rankingData.Concat(unrankedParticipants).ToList();
 
                 // Find user's group ID(s)
-                //var userGroupIds = dbContext.UserInGruppe
-                //    .Where(uig => uig.User.Id == _userId && uig.Gruppe.Event_EventID == EventId)
-                //    .Select(uig => uig.Gruppe.GruppenID)
-                //    .ToList();
+                var memberGroupIds = dbContext.UserInGruppe
+                    .Where(uig => uig.User_UserId == _userId)
+                    .Select(uig => uig.Gruppe_GruppenId)
+                    .Distinct()
+                    .ToList();
+
+                var leaderGroupIds = dbContext.Gruppen
+                    .Where(g => g.GruppenleiterId == _userId && g.Event_EventID == EventId)
+                    .Select(g => g.GruppenID)
+                    .ToList();
+
+                var allUserGroupIds = memberGroupIds.Concat(leaderGroupIds).Distinct().ToList();
 
                 // Find user's ranking entry
-                //_userRankingEntry = completeRanking.FirstOrDefault(r => userGroupIds.Contains(r.GruppenID));
+                _userRankingEntry = combinedRanking
+                    .FirstOrDefault(r => allUserGroupIds.Contains(r.GruppenID));
 
-                //// Check if user entry exists and if it's not already in top 10
-                showUserEntry = false; /* _userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID);*/
+                // Get top 10 entries
+                _topRankingList = combinedRanking.Take(10).ToList();
+
+                // If user is not in top 10, add them as the 11th entry
+                if (_userRankingEntry != null && !_topRankingList.Any(r => r.GruppenID == _userRankingEntry.GruppenID))
+                {
+                    _topRankingList.Add(_userRankingEntry);
+                }
             }
             catch (Exception ex)
             {
                 accessDenied = true;
                 accessDeniedMessage = $"Fehler beim Laden der Rangliste: {ex.Message}";
+                StopTimer();
             }
         }
 
@@ -118,6 +239,33 @@ namespace VCC_Projekt.Components.Pages
                 return false;
 
             return entry.GruppenID == _userRankingEntry.GruppenID;
+        }
+
+        private static List<T> GetFirst10WithFallback<T>(List<T> primary, List<T> secondary)
+        {
+            // Take up to 10 from primary
+            var result = primary.Take(10).ToList();
+
+            // If we need more, take from secondary
+            if (result.Count < 10)
+            {
+                int needed = 10 - result.Count;
+                result.AddRange(secondary.Take(needed));
+            }
+
+            // Ensure we return exactly 10 items (if secondary has enough)
+            return result.Take(10).ToList();
+        }
+
+        public void Dispose()
+        {
+            // Dispose of the timer when the component is disposed
+            if (_refreshTimer != null)
+            {
+                _refreshTimer.Enabled = false;
+                _refreshTimer.Dispose();
+                _refreshTimer = null;
+            }
         }
     }
 }
