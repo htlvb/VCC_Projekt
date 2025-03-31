@@ -25,6 +25,7 @@ namespace VCC_Projekt.Components.Pages
         private string accessDeniedMessage = "";
         private int Fehlversuche;
         private int Platzierung;
+        public bool isSubmitting { get; set; } = false;
         private List<RanglisteResult> Rangliste { get; set; } = new();
 
         protected override async void OnInitialized()
@@ -154,8 +155,11 @@ namespace VCC_Projekt.Components.Pages
             UploadedFiles[aufgabenId] = uploadedFile;
         }
 
-        private async Task SubmitFile(Aufgabe aufgabe)
+        private async void SubmitFile(Aufgabe aufgabe)
         {
+            if (isSubmitting) return; // Falls bereits eine Verarbeitung läuft, abbrechen
+            isSubmitting = true; // Sperr-Flag setzen
+
             if (Event.Beginn.AddMinutes((double)Event.Dauer) < DateTime.Now)
             {
                 OnInitialized();
@@ -181,7 +185,6 @@ namespace VCC_Projekt.Components.Pages
                     {
                         absolviertLevel.Fehlversuche++;
                         Fehlversuche = absolviertLevel.Fehlversuche;
-                        StateHasChanged();
                     }
                     else
                     {
@@ -209,6 +212,8 @@ namespace VCC_Projekt.Components.Pages
             AllFilesSubmitted = CurrentLevel?.Aufgaben.All(a =>
                 UploadedFiles.ContainsKey(a.AufgabenID) &&
                 UploadedFiles[a.AufgabenID].FileIsRight == true) ?? false;
+            isSubmitting = false;
+            StateHasChanged();
         }
         private async Task ProceedToNextLevel()
         {

@@ -165,7 +165,7 @@ else
 
                                         <!-- Datei Absenden Button am Ende der Reihe -->
                                         <MudItem>
-                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(async () => await SubmitFile(aufgabe))">
+                                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => SubmitFile(aufgabe))">
                                                 ✅ Datei Absenden
                                             </MudButton>
                                         </MudItem>
