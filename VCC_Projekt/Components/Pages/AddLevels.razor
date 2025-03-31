@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Forms
 @using MudBlazor
+@inject IDialogService DialogService
 
 @attribute [Authorize(Roles = "Admin,Editor")]
 
@@ -177,7 +178,7 @@
                         <MudButton Href="@($"event-statistics/{_selectedEvent.EventID}")" Color="Color.Primary" StartIcon="@Icons.Material.Filled.LineAxis">Wettbewerbsstatistik anzeigen</MudButton>
                     }
 
-                    <MudButton Href="/" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat">Alle Teilnehmer benachrichtigen</MudButton>
+                    <MudButton OnClick="() => OpenEmailDialog()" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Chat">Alle Teilnehmer benachrichtigen</MudButton>
                     <MudButton Href="view-participantsData" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Person">Teilnehmerdaten einsehen</MudButton>
 
                 </MudCardContent>

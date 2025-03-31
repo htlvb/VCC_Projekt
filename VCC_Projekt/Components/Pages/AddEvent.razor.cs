@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿using MailKit;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 using System.ComponentModel.DataAnnotations;
+using VCC_Projekt.Components.Account.Pages.Manage;
 
 namespace VCC_Projekt.Components.Pages
 {
@@ -152,6 +154,19 @@ namespace VCC_Projekt.Components.Pages
             }
         }
 
+        private async Task OpenEmailDialog()
+        {
+            var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true };
+            var parameters = new DialogParameters
+            {
+                { "UseDropdown", true },
+                { "SelectedEmails", dbContext.UserInGruppe.Where(x=> x.Gruppe.Event_EventID == _selectedEvent.EventID).Select(x => x.User.Email).ToList()  },
+                { "ReadOnly", true }
+            };
+            var dialog = await DialogService.ShowAsync<EmailSendDialog>($"Support Email Senden - Event {_selectedEvent.Bezeichnung}", parameters, options);
+            var result = await dialog.Result;
+        }
+
         private void ShowSnackbar(string message, Severity severity)
              => Snackbar.Add(message, severity);
 
@@ -250,6 +265,8 @@ namespace VCC_Projekt.Components.Pages
 
                 return errors;
             }
+
+            
         }
 
     }
