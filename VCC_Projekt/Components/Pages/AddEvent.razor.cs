@@ -17,6 +17,7 @@ namespace VCC_Projekt.Components.Pages
         protected override void OnInitialized()
         {
             _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
+            _selectedEvent = new() { EventID = 0 };
             Input = new();
             editContext = new EditContext(Input);
             Input.Snackbar = Snackbar;
