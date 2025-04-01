@@ -157,14 +157,15 @@ namespace VCC_Projekt.Components.Pages
 
         private async void SubmitFile(Aufgabe aufgabe)
         {
-            if (isSubmitting) return; // Falls bereits eine Verarbeitung läuft, abbrechen
-            isSubmitting = true; // Sperr-Flag setzen
+            if (isSubmitting) return;
+            isSubmitting = true;
 
             if (Event.Beginn.AddMinutes((double)Event.Dauer) < DateTime.Now)
             {
                 OnInitialized();
                 return;
             }
+
             if (UploadedFiles.TryGetValue(aufgabe.AufgabenID, out var uploadedFile))
             {
                 var ergebnisTxt = await dbContext.Aufgabe
@@ -173,10 +174,13 @@ namespace VCC_Projekt.Components.Pages
                                                 .FirstOrDefaultAsync();
                 if (ergebnisTxt == null) return;
 
-                string uploadedContent = System.Text.Encoding.UTF8.GetString(uploadedFile.FileData).Trim();
-                string correctContent = System.Text.Encoding.UTF8.GetString(ergebnisTxt).Trim();
+                string uploadedContent = NormalizeWhitespace(
+                    System.Text.Encoding.UTF8.GetString(uploadedFile.FileData));
+                string correctContent = NormalizeWhitespace(
+                    System.Text.Encoding.UTF8.GetString(ergebnisTxt));
 
                 bool isCorrect = uploadedContent == correctContent;
+
                 if (!isCorrect && uploadedFile.FileIsRight == null)
                 {
                     var absolviertLevel = await dbContext.GruppeAbsolviertLevels
@@ -198,22 +202,28 @@ namespace VCC_Projekt.Components.Pages
                         dbContext.GruppeAbsolviertLevels.Add(newAbsolviertLevel);
                         Fehlversuche = 1;
                     }
-                    dbContext.SaveChanges();
+                    await dbContext.SaveChangesAsync();
                 }
                 UploadedFiles[aufgabe.AufgabenID] = uploadedFile with { FileIsRight = isCorrect };
             }
 
-            // Prüfen, ob alle Aufgaben eine richtige Datei haben
-            if (CurrentLevel?.Aufgaben.Count == 0)
-            {
-                AllFilesSubmitted = true;
-                return;
-            }
             AllFilesSubmitted = CurrentLevel?.Aufgaben.All(a =>
                 UploadedFiles.ContainsKey(a.AufgabenID) &&
                 UploadedFiles[a.AufgabenID].FileIsRight == true) ?? false;
+
             isSubmitting = false;
             StateHasChanged();
+        }
+
+        // Normalisiert Whitespace (inkl. Newlines) für den Vergleich
+        private string NormalizeWhitespace(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+
+            if (string.IsNullOrEmpty(input)) return input;
+            return input
+                .Replace("\r\n", "\n")  // Windows → Unix
+                .Replace("\r", "\n");   // Old Mac → Unix
         }
         private async Task ProceedToNextLevel()
         {
