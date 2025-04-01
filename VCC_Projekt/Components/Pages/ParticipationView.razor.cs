@@ -174,9 +174,9 @@ namespace VCC_Projekt.Components.Pages
                                                 .FirstOrDefaultAsync();
                 if (ergebnisTxt == null) return;
 
-                string uploadedContent = NormalizeWhitespace(
+                string uploadedContent = NormalizeNewline(
                     System.Text.Encoding.UTF8.GetString(uploadedFile.FileData));
-                string correctContent = NormalizeWhitespace(
+                string correctContent = NormalizeNewline(
                     System.Text.Encoding.UTF8.GetString(ergebnisTxt));
 
                 bool isCorrect = uploadedContent == correctContent;
@@ -216,7 +216,7 @@ namespace VCC_Projekt.Components.Pages
         }
 
         // Normalisiert Whitespace (inkl. Newlines) für den Vergleich
-        private string NormalizeWhitespace(string input)
+        private string NormalizeNewline(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
 
