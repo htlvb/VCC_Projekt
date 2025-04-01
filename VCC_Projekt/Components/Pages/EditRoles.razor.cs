@@ -177,7 +177,7 @@ namespace VCC_Projekt.Components.Pages
 
         private Func<EditRoleUser, bool> _quickFilter => x =>
         {
-            if (string.IsNullOrWhiteSpace(_searchString)) return false;
+            if (string.IsNullOrWhiteSpace(_searchString)) return true;
             _searchString = _searchString.ToLower();
             if (x.Typ.ToLower().StartsWith(_searchString)) return true;
 

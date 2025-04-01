@@ -30,8 +30,8 @@
             </ToolBarContent>
 
             <Columns>
-                @if (!string.IsNullOrEmpty(_searchString))
-                {
+@*                 @if (!string.IsNullOrEmpty(_searchString))
+                { *@
                     <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
                     <TemplateColumn Title="Email" Editable="false" Required="false">
                         <CellTemplate>
@@ -72,7 +72,7 @@
                             <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                         </CellTemplate>
                     </TemplateColumn>
-                }
+                @* } *@
             </Columns>
 
             <ChildRowContent>
@@ -103,10 +103,10 @@
             </ChildRowContent>
 
             <PagerContent>
-                @if (!string.IsNullOrEmpty(_searchString))
-                {
+                @* @if (!string.IsNullOrEmpty(_searchString))
+                { *@
                     <MudDataGridPager T="EditRoleUser" />
-                }
+                @* } *@
             </PagerContent>
         </MudDataGrid>
     </div>
