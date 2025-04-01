@@ -27,7 +27,7 @@
 <MudContainer MaxWidth="MaxWidth.False">
     <MudGrid Justify="Justify.Center">
         <MudItem xs="10">
-            <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e != null ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
+            <MudSelect T="Event" Label="Event auswählen" ValueChanged="@(async e => await OnEventSelected(e))" Value="_selectedEvent" ToStringFunc="@(e => e.EventID != 0 ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")" Variant="Variant.Outlined">
                 @foreach (var ev in _events)
                 {
                     <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
