@@ -20,11 +20,11 @@
         {
             if (isLoggedIn)
             {
-                return $"/signup-event?eventId={eventId}";
+                return $"signup-event?eventId={eventId}";
             }
             else
             {
-                return "/Account/Register";
+                return "Account/Register";
             }
         }
     }

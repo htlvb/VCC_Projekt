@@ -163,7 +163,7 @@ namespace VCC_Projekt.Components.Pages
                         {
                             var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(groupId.ToString()));
                             var invaitationLink = NavigationManager.GetUriWithQueryParameters(
-                                    NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={groupId}").AbsoluteUri,
+                                    NavigationManager.ToAbsoluteUri($"Account/Login?groupId={groupId}").AbsoluteUri,
                                     new Dictionary<string, object?>
                                     {
                                         ["inviteToken"] = inviteToken,
@@ -176,7 +176,7 @@ namespace VCC_Projekt.Components.Pages
                             if (!dbContext.Users.Any(u => u.Email == memberEmail))
                             {
                                 registerLink = NavigationManager.GetUriWithQueryParameters(
-                                    NavigationManager.ToAbsoluteUri($"/Account/Register").AbsoluteUri,
+                                    NavigationManager.ToAbsoluteUri($"Account/Register").AbsoluteUri,
                                     new Dictionary<string, object?>
                                     {
                                         ["inviteToken"] = inviteToken,
