@@ -32,6 +32,11 @@ namespace VCC_Projekt.Components.Pages
                 eventId = parsedEventId;
             }
 
+            if(dbContext.Events.Any(x => x.EventID == eventId && x.Beginn < DateTime.Now))
+            {
+                NavigationManager.NavigateTo($"{App.BasePath}Account/AccessDenied");
+            }
+
             Input.Snackbar = Snackbar;
 
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();

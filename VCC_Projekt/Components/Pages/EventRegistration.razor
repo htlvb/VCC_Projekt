@@ -1,5 +1,6 @@
 @page "/signup-event"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authorization
 @inject NavigationManager NavigationManager
 @inject EmailSender EmailSender
 @inject IdentityRedirectManager RedirectManager
@@ -8,6 +9,8 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ApplicationDbContext dbContext
 @inject ISnackbar Snackbar
+
+@attribute [Authorize]
 
 <PageTitle>Event-Anmeldung</PageTitle>
 

@@ -124,17 +124,22 @@ public class EmailSender : IEmailSender<ApplicationUser>
 
     public async Task SendEmailAsync(MailMessage message)
     {
-        EnsureSmtpConnected();
         message.From = new MailAddress(_options.Email);
         message.BodyEncoding = Encoding.UTF8;
 
-        try
+        using (var smtpClient = new SmtpClient(_options.SmptServer, 587))
         {
-            await _smtpClient.SendMailAsync(message).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error sending Email: {ex.Message} To: {string.Join(",", message.To)}");
+            smtpClient.EnableSsl = true;
+            smtpClient.Credentials = new NetworkCredential(_options.Email, _options.Password);
+
+            try
+            {
+                await smtpClient.SendMailAsync(message).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending Email: {ex.Message} To: {string.Join(",", message.To)}");
+            }
         }
     }
 

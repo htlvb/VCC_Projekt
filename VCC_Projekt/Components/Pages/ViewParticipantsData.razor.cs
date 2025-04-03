@@ -57,24 +57,7 @@ namespace VCC_Projekt.Components.Pages
                         })
                         .ToList();
 
-                    var individualUsers = dbContext.UserInGruppe
-                        .Where(u => u.Gruppe.Event_EventID == _selectedEvent.EventID && u.Gruppe.Teilnehmertyp == "Einzelspieler")
-                        .Select(u => new Participants
-                        {
-                            Name = u.User.UserName,
-                            Type = "Einzelspieler",
-                            Members = new List<MemberInfo>
-                            {
-                                new MemberInfo
-                                {
-                                    User = u.User,
-                                    MemberType = "Einzelspieler"
-                                }
-                            }
-                        })
-                        .ToList();
-
-                    _participants = groups.Concat(individualUsers).ToList();
+                    _participants = groups;
                 }
                 else
                 {
