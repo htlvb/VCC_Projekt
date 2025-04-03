@@ -20,7 +20,7 @@ namespace VCC_Projekt.Components.Pages
                 _events = dbContext.Events.OrderByDescending(ev => ev.Beginn).ToList();
                 if (EventId != 0)
                 {
-                    _selectedEvent = _events.FirstOrDefault(ev => ev.EventID == EventId) ?? new Event { EventID = 0 };
+                    OnEventSelected(_events.FirstOrDefault(ev => ev.EventID == EventId) ?? new Event { EventID = 0 });
                     StateHasChanged();
                 }
             }

@@ -195,7 +195,7 @@ namespace VCC_Projekt.Components.Pages
 
         private async Task JoinEvent(int eventId)
         {
-            NavigationManager.NavigateTo($"/participation/{eventId}");
+            NavigationManager.NavigateTo($"{App.BasePath}participation/{eventId}");
         }
 
         private async void AddMember(int groupId, int eventId, string newMemberEmail)
@@ -206,7 +206,7 @@ namespace VCC_Projekt.Components.Pages
 
                 var inviteToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(groupId.ToString()));
                 var invaitationLink = NavigationManager.GetUriWithQueryParameters(
-                        NavigationManager.ToAbsoluteUri($"/Account/Login?groupId={groupId}").AbsoluteUri,
+                        NavigationManager.ToAbsoluteUri($"{App.BasePath}Account/Login?groupId={groupId}").AbsoluteUri,
                         new Dictionary<string, object?>
                         {
                             ["inviteToken"] = inviteToken,
@@ -219,7 +219,7 @@ namespace VCC_Projekt.Components.Pages
                 if (!dbContext.Users.Any(u => u.Email == newMemberEmail))
                 {
                     registerLink = NavigationManager.GetUriWithQueryParameters(
-                        NavigationManager.ToAbsoluteUri($"/Account/Register").AbsoluteUri,
+                        NavigationManager.ToAbsoluteUri($"{App.BasePath}Account/Register").AbsoluteUri,
                         new Dictionary<string, object?>
                         {
                             ["inviteToken"] = inviteToken,

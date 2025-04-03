@@ -20,7 +20,7 @@
                     <MudSelect T="Event" Label="Event wählen" Value="_selectedEvent" ValueChanged="@(async e => await OnEventSelected(e))" ToStringFunc="@(e => e.EventID != 0 ? $"{e.Bezeichnung} (EventId:{e.EventID})" : "")">
                         @foreach (var ev in _events)
                         {
-                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn)</MudSelectItem>
+                            <MudSelectItem Value="@ev">@ev.Bezeichnung (@ev.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE")))</MudSelectItem>
                         }
                     </MudSelect>
                 </MudCardContent>

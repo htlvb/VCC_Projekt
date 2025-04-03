@@ -64,7 +64,7 @@ namespace VCC_Projekt.Components.Pages
                         // Only redirect if we haven't encountered an error
                         if (!accessDenied)
                         {
-                            NavigationManager.NavigateTo($"/dashboard/{_selectedEvent.EventID}", false);
+                            NavigationManager.NavigateTo($"{App.BasePath}dashboard/{_selectedEvent.EventID}", false);
                         }
                     }
 
