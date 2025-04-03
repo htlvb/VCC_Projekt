@@ -59,7 +59,7 @@ namespace VCC_Projekt.Components.Account.Pages
 
             if (groupId != 0)
             {
-                var groupExists = dbContext.Gruppen.Any(g => g.GruppenID == groupId);
+                var groupExists = dbContext.Gruppen.AsNoTracking().Any(g => g.GruppenID == groupId);
 
                 if (!groupExists)
                 {
@@ -67,7 +67,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     return;
                 }
 
-                var memberEntry = await dbContext.EingeladeneUserInGruppe
+                var memberEntry = await dbContext.EingeladeneUserInGruppe.AsNoTracking()
                     .FirstOrDefaultAsync(euig => euig.Gruppe_GruppenId == groupId && euig.Email == user.Email);
 
                 if(memberEntry == null)
@@ -76,7 +76,7 @@ namespace VCC_Projekt.Components.Account.Pages
                     return;
                 }
 
-                var isAlreadyInGroup = dbContext.UserInGruppe
+                var isAlreadyInGroup = dbContext.UserInGruppe.AsNoTracking()
                     .Any(ug => ug.User_UserId == user.UserName && ug.Gruppe_GruppenId == groupId);
 
                 if (isAlreadyInGroup)
