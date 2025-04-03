@@ -104,9 +104,7 @@ namespace VCC_Projekt.Components.Account.Pages
                         dbContext.EingeladeneUserInGruppe.Remove(invitedMember);
                         dbContext.SaveChanges();
 
-                        var teamname = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Gruppenname).FirstOrDefault();
-                        var eventId = dbContext.Gruppen.Where(g => g.GruppenID == groupId).Select(g => g.Event_EventID).FirstOrDefault();
-                        NavigationManager.NavigateTo($"/signup-event-confirmation?teamname={teamname}&eventId={eventId}");
+                        RedirectManager.RedirectTo("my-events");
                     }
 
                     else RedirectManager.RedirectTo(ReturnUrl);
