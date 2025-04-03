@@ -2,7 +2,6 @@
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize]
-
 @if (accessDenied)
 {
     <PageTitle>Zugriff verweigert</PageTitle>
@@ -13,6 +12,7 @@
 }
 else
 {
+    <PageTitle>Dashboard</PageTitle>
     @if (_selectedEvent != null)
     {
         <div class="text-center">
