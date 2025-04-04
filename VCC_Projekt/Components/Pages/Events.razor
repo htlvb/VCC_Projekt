@@ -4,62 +4,68 @@
 
 <PageTitle>Events</PageTitle>
 
-<div class="container mt-5">
-    <div class="text-center">
-        <MudText Typo="Typo.h2" style="color: #134883;">Kommende Events</MudText>
-        <MudText Typo="Typo.subtitle1">
-            Sei dabei und erlebe die nächsten spannenden Programmier-Herausforderungen!
-        </MudText>
-        <br />
-    </div>
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883;">Kommende Events</MudText>
+    <MudText Typo="Typo.subtitle1">
+        Sei dabei und erlebe die nächsten spannenden Programmier-Herausforderungen!
+    </MudText>
+    <br />
+</div>
 
-    <div class="row gx-4">
-        @foreach (var eventItem in dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn))
-        {
-            <div class="col-md-6 d-flex mb-4">
-                <div class="card mx-auto" style="flex: 1; border-color: #134883;">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">@eventItem.Bezeichnung</h3>
-                        <MudText class="card-text flex-grow-1">
-                            <strong>Datum:</strong> @eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))<br>
-                        </MudText>
-                       <MudText class="card-text flex-grow-1">
-                            <strong>Beginn:</strong> @eventItem.Beginn.ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
-                        </MudText>
-                        <MudText class="card-text flex-grow-1">
-                            <strong>Ende:</strong> @eventItem.Beginn.AddMinutes(eventItem.Dauer).ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
-                        </MudText>
-                        <br />
-                        <div class="text-center mt-auto">
-                            <MudButton Variant="Variant.Outlined" style="color: #134883" Href="@GetEventLink(eventItem.EventID)">Jetzt anmelden</MudButton>
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <div class="row gx-4">
+                @foreach (var eventItem in dbContext.Events.Where(e => e.Beginn >= DateTime.Now).OrderBy(e => e.Beginn))
+                {
+                    <div class="col-md-6 d-flex mb-4">
+                        <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                            <div class="card-body d-flex flex-column">
+                                <h3 class="card-title">@eventItem.Bezeichnung</h3>
+                                <MudText class="card-text flex-grow-1">
+                                    <strong>Datum:</strong> @eventItem.Beginn.ToString("d. MMMM yyyy", new System.Globalization.CultureInfo("de-DE"))<br>
+                                </MudText>
+                                <MudText class="card-text flex-grow-1">
+                                    <strong>Beginn:</strong> @eventItem.Beginn.ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                                </MudText>
+                                <MudText class="card-text flex-grow-1">
+                                    <strong>Ende:</strong> @eventItem.Beginn.AddMinutes(eventItem.Dauer).ToString("HH:mm", new System.Globalization.CultureInfo("de-DE"))<br>
+                                </MudText>
+                                <br />
+                                <div class="text-center mt-auto">
+                                    <MudButton Variant="Variant.Outlined" style="color: #134883" Href="@GetEventLink(eventItem.EventID)">Jetzt anmelden</MudButton>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
+                }
             </div>
-        }
-    </div>
 
 
-    <div class="mt-4">
-        <MudText Typo="Typo.h4" style="color: #134883">Warum teilnehmen?</MudText>
-        <MudText>
-            Egal ob Anfänger:in oder Profi – die VCC-Events bieten jedem die Möglichkeit, 
-            in spannenden Challenges seine Skills zu testen, Spaß zu haben und tolle Preise zu gewinnen.
-        </MudText>
-    </div>
+            <div class="mt-4">
+                <MudText Typo="Typo.h4" style="color: #134883">Warum teilnehmen?</MudText>
+                <MudText>
+                    Egal ob Anfänger:in oder Profi – die VCC-Events bieten jedem die Möglichkeit,
+                    in spannenden Challenges seine Skills zu testen, Spaß zu haben und tolle Preise zu gewinnen.
+                </MudText>
+            </div>
 
-    <div class="mt-4">
-        <MudText Typo="Typo.h4" style="color: #134883">Noch Fragen?</MudText>
-        <MudText>
-            Kontaktiere uns unter: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
-        </MudText>
-    </div>
+            <div class="mt-4">
+                <MudText Typo="Typo.h4" style="color: #134883">Noch Fragen?</MudText>
+                <MudText>
+                    Kontaktiere uns unter: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
+                </MudText>
+            </div>
 
-    <div class="text-center mt-5">
-        <MudButton Variant="Variant.Outlined" style="color: #134883" StartIcon="@Icons.Material.Filled.Info" Href="info">Mehr über VCC erfahren</MudButton>
-        <br />
-    </div>
-</div>
+            <div class="text-center mt-5">
+                <MudButton Variant="Variant.Outlined" style="color: #134883" StartIcon="@Icons.Material.Filled.Info" Href="info">Mehr über VCC erfahren</MudButton>
+                <br />
+            </div>
+
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
 
 <style>
     body {

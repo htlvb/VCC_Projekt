@@ -4,78 +4,84 @@
 
 <PageTitle>Info</PageTitle>
 
-<div class="container mt-5">
-    <div class="text-center">
-        <MudText Typo="Typo.h2" style="color: #134883;">Vöcklaprogger Coding Contest (VCC)</MudText>
-        <MudText Typo="Typo.subtitle1">
-            Der einzigartige Programmierwettbewerb der HTL Vöcklabruck!
-        </MudText>
-        <br />
-    </div>
-
-    <div class="mt-4">
-        <MudText class="text-justify">
-            Jedes Frühjahr treten Programmierer:innen der Informatikklassen in spannenden, Level-basierten Coding-Challenges gegeneinander an.
-            Mit jedem gelösten Level wird es kniffliger – und wer das höchste Level in der kürzesten Zeit erreicht, gewinnt.
-            Klingt spannend? Dann meld dich unbedingt zum nächsten Event an!
-        </MudText>
-    </div>
-
-    <div class="mt-4">
-        <MudText Typo="Typo.h4" style="color: #134883;">Team oder Einzelspieler: Deine Wahl!</MudText>
-        <div class="row">
-            <div class="col-md-6 d-flex">
-                <div class="card mx-auto" style="flex: 1; border-color: #134883;">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">#Team</h3>
-                        <MudText class="card-text flex-grow-1">
-                            <strong>Du meisterst Herausforderungen lieber gemeinsam?</strong> <br />
-                            Kein Problem! Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.<br />
-                            Während des Wettbewerbs kann jedes Teammitglied Lösungen einreichen. Die Teambildung ist ganz einfach –
-                            direkt bei der Anmeldung einfach Team auswählen und gleich deine Teammitgleider einladen.
-                        </MudText>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 d-flex">
-                <div class="card mx-auto" style="flex: 1; border-color: #134883;">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">#Single</h3>
-                        <MudText class="card-text flex-grow-1">
-                            <strong>Du bist ein Solo-Champion?</strong> <br />
-                            Perfekt! Melde dich alleine an und zeig, was du drauf hast. <br />
-                            Natürlich kannst du trotzdem deine Freunde herausfordern – gemeinsam teilnehmen, aber unabhängig antreten.
-                        </MudText>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-4">
-        <MudText Typo="Typo.h4" style="color: #134883;">Die Spielregeln:</MudText>
-        <ul>
-            <li><strong>Lade deine Lösungen für jedes Level hoch.</strong> </li>
-            <li><strong>Falsche Lösung?</strong>  Das bedeutet Strafminuten. Diese variieren bei jedem Event.</li>
-            <li><strong>Teamregeln:</strong> Jedes Teammitglied darf einen Laptop mitbringen und Lösungen für das Team einreichen.</li>
-        </ul>
-    </div>
-
-    <div class="mt-4">
-        <MudText Typo="Typo.h4" style="color: #134883;">Noch Fragen?</MudText>
-        <MudText>
-            Schreib uns gerne an: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
-        </MudText>
-    </div>
-
-    @if(!isLoggedIn)
-    {
-        <div class="text-center mt-5">
-            <MudButton Variant="Variant.Filled" style="color: #134883" Href="Account/Login">Jetzt anmelden</MudButton>
-            <br />
-        </div>
-    }
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883;">Vöcklaprogger Coding Contest (VCC)</MudText>
+    <MudText Typo="Typo.subtitle1">
+        Der einzigartige Programmierwettbewerb der HTL Vöcklabruck!
+    </MudText>
+    <br />
 </div>
+
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <div class="mt-4">
+                <MudText class="text-justify">
+                    Jedes Frühjahr treten Programmierer:innen der Informatikklassen in spannenden, Level-basierten Coding-Challenges gegeneinander an.
+                    Mit jedem gelösten Level wird es kniffliger – und wer das höchste Level in der kürzesten Zeit erreicht, gewinnt.
+                    Klingt spannend? Dann meld dich unbedingt zum nächsten Event an!
+                </MudText>
+            </div>
+
+            <div class="mt-4">
+                <MudText Typo="Typo.h4" style="color: #134883;">Team oder Einzelspieler: Deine Wahl!</MudText>
+                <div class="row">
+                    <div class="col-md-6 d-flex">
+                        <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                            <div class="card-body d-flex flex-column">
+                                <h3 class="card-title">#Team</h3>
+                                <MudText class="card-text flex-grow-1">
+                                    <strong>Du meisterst Herausforderungen lieber gemeinsam?</strong> <br />
+                                    Kein Problem! Bildet ein Team aus 2 bis 5 Personen und tretet zusammen an.<br />
+                                    Während des Wettbewerbs kann jedes Teammitglied Lösungen einreichen. Die Teambildung ist ganz einfach –
+                                    direkt bei der Anmeldung einfach Team auswählen und gleich deine Teammitgleider einladen.
+                                </MudText>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex">
+                        <div class="card mx-auto" style="flex: 1; border-color: #134883;">
+                            <div class="card-body d-flex flex-column">
+                                <h3 class="card-title">#Single</h3>
+                                <MudText class="card-text flex-grow-1">
+                                    <strong>Du bist ein Solo-Champion?</strong> <br />
+                                    Perfekt! Melde dich alleine an und zeig, was du drauf hast. <br />
+                                    Natürlich kannst du trotzdem deine Freunde herausfordern – gemeinsam teilnehmen, aber unabhängig antreten.
+                                </MudText>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <MudText Typo="Typo.h4" style="color: #134883;">Die Spielregeln:</MudText>
+                <ul>
+                    <li><strong>Lade deine Lösungen für jedes Level hoch.</strong> </li>
+                    <li><strong>Falsche Lösung?</strong>  Das bedeutet Strafminuten. Diese variieren bei jedem Event.</li>
+                    <li><strong>Teamregeln:</strong> Jedes Teammitglied darf einen Laptop mitbringen und Lösungen für das Team einreichen.</li>
+                </ul>
+            </div>
+
+            <div class="mt-4">
+                <MudText Typo="Typo.h4" style="color: #134883;">Noch Fragen?</MudText>
+                <MudText>
+                    Schreib uns gerne an: <a href="mailto:vcc@htlvb.at?subject=Support%20Anfrage" class="text-primary">vcc@htlvb.at</a>
+                </MudText>
+            </div>
+
+            @if (!isLoggedIn)
+            {
+                <div class="text-center mt-5">
+                    <MudButton Variant="Variant.Filled" style="color: #134883" Href="Account/Login">Jetzt anmelden</MudButton>
+                    <br />
+                </div>
+            }
+
+        </MudItem>
+    </MudGrid>
+</MudContainer>
+
 
 <style>
     body {

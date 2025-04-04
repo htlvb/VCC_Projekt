@@ -7,110 +7,115 @@
 
 <PageTitle>Rollen ändern</PageTitle>
 
-<div class="container mt-5">
-    <div class="text-center">
-        <MudText Typo="Typo.h2" style="color: #134883;">Rollen ändern</MudText>
-        <MudText Typo="Typo.subtitle1">
-            Um die Rollen einer Person oder Gruppe zu verändern, bitte die Person oder Gruppe suchen und dann die Rollen bearbeiten.
-        </MudText>
-        <br />
-    </div>
+<div class="text-center">
+    <MudText Typo="Typo.h2" style="color: #134883;">Rollen ändern</MudText>
+    <MudText Typo="Typo.subtitle1">
+        Um die Rollen einer Person oder Gruppe zu verändern, bitte die Person oder Gruppe suchen und dann die Rollen bearbeiten.
+    </MudText>
+    <br />
+</div>
 
-    <!-- DataGrid -->
-    <div class="datagrid">
-        <MudDataGrid T="EditRoleUser" Items="@users" ColumnResizeMode="ResizeMode.Column"
-                     SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
-                     QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
-                     CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual" Outlined="true">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Personen und Gruppen</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
+<MudContainer MaxWidth="MaxWidth.False">
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="10">
+            <!-- DataGrid -->
+            <div class="datagrid">
+                <MudDataGrid T="EditRoleUser" Items="@users" ColumnResizeMode="ResizeMode.Column"
+                             SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false"
+                             QuickFilter="@_quickFilter" EditMode="DataGridEditMode.Form"
+                             CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual" Outlined="true">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Personen und Gruppen</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
 
-            <Columns>
-@*                 @if (!string.IsNullOrEmpty(_searchString))
-                { *@
-                    <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
-                    <TemplateColumn Title="Email" Editable="false" Required="false">
-                        <CellTemplate>
-                            <div class="email-cell">
-                                <span>@context.Item.Email</span>
-                                @if (!string.IsNullOrEmpty(context.Item.Email))
-                                {
-                                    <MudTooltip Text="Email senden" Placement="Placement.Bottom">
-                                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="@(() => OpenEmailDialog(context.Item.Email))" />
-                                    </MudTooltip>
-                                }
-                            </div>
-                        </CellTemplate>
-                    </TemplateColumn>
-                    <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false" />
-                    <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
-                    <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />
-                    <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen">
-                        <EditTemplate Context="context">
-                            <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="@(context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
-                                @if (context.Item.Typ != "Nutzer")
-                                {
-                                    <MudSelectItem T="string" Value="@("Gesperrt")">Gesperrt</MudSelectItem>
-                                    <MudSelectItem T="string" Value="@("Nicht gesperrt")">Nicht gesperrt</MudSelectItem>
-                                }
-                                else
-                                {
-                                    @foreach (var role in roles)
-                                    {
-                                        <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
-                                    }
-                                }
-                            </MudSelect>
-                        </EditTemplate>
-                    </PropertyColumn>
-                    <TemplateColumn CellClass="d-flex justify-end">
-                        <CellTemplate Context="context">
-                            <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                        </CellTemplate>
-                    </TemplateColumn>
-                @* } *@
-            </Columns>
-
-            <ChildRowContent>
-                <MudDataGrid T="EditRoleUser" Items="@context.Item.Teammitglieder" ColumnResizeMode="ResizeMode.Column"
-                             SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false" EditMode="DataGridEditMode.Form"
-                             CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
                     <Columns>
-                        <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
-                        <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false"/>
-                        <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
-                        <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" Context="child_context">
-                            <EditTemplate Context="child_context">
-                                <MudSelect T="string" SelectedValues="child_context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(child_context.Item, newRoles))" MultiSelection="@(child_context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
-                                    @foreach (var role in roles)
+                        @*                 @if (!string.IsNullOrEmpty(_searchString))
+                        { *@
+                        <HierarchyColumn T="EditRoleUser" ButtonDisabledFunc="@(x => x.Typ != "Team")" />
+                        <TemplateColumn Title="Email" Editable="false" Required="false">
+                            <CellTemplate>
+                                <div class="email-cell">
+                                    <span>@context.Item.Email</span>
+                                    @if (!string.IsNullOrEmpty(context.Item.Email))
                                     {
-                                        <MudSelectItem T="string" Value="@role" Disabled="@(child_context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                        <MudTooltip Text="Email senden" Placement="Placement.Bottom">
+                                            <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Email" Color="Color.Primary" OnClick="@(() => OpenEmailDialog(context.Item.Email))" />
+                                        </MudTooltip>
+                                    }
+                                </div>
+                            </CellTemplate>
+                        </TemplateColumn>
+                        <PropertyColumn Property="u => u.DiplayName" Title="Benutzername/Gruppenname" Editable="false" />
+                        <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
+                        <PropertyColumn Property="u => u.Typ" Title="Typ" Editable="false" />
+                        <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen">
+                            <EditTemplate Context="context">
+                                <MudSelect T="string" SelectedValues="context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(context.Item, newRoles))" MultiSelection="@(context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
+                                    @if (context.Item.Typ != "Nutzer")
+                                    {
+                                        <MudSelectItem T="string" Value="@("Gesperrt")">Gesperrt</MudSelectItem>
+                                        <MudSelectItem T="string" Value="@("Nicht gesperrt")">Nicht gesperrt</MudSelectItem>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var role in roles)
+                                        {
+                                            <MudSelectItem T="string" Value="@role" Disabled="@(context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                        }
                                     }
                                 </MudSelect>
                             </EditTemplate>
                         </PropertyColumn>
-                        <TemplateColumn CellClass="d-flex justify-end" Context="child_context">
-                            <CellTemplate Context="child_context">
-                                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@child_context.Actions.StartEditingItemAsync" />
+                        <TemplateColumn CellClass="d-flex justify-end">
+                            <CellTemplate Context="context">
+                                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
                             </CellTemplate>
                         </TemplateColumn>
+                        @* } *@
                     </Columns>
-                </MudDataGrid>
-            </ChildRowContent>
 
-            <PagerContent>
-                @* @if (!string.IsNullOrEmpty(_searchString))
-                { *@
-                    <MudDataGridPager T="EditRoleUser" />
-                @* } *@
-            </PagerContent>
-        </MudDataGrid>
-    </div>
-</div>
+                    <ChildRowContent>
+                        <MudDataGrid T="EditRoleUser" Items="@context.Item.Teammitglieder" ColumnResizeMode="ResizeMode.Column"
+                                     SortMode="SortMode.Multiple" Filterable="true" ReadOnly="false" EditMode="DataGridEditMode.Form"
+                                     CommittedItemChanges="@CommittedItemChanges" EditTrigger="DataGridEditTrigger.Manual">
+                            <Columns>
+                                <PropertyColumn Property="u => u.Email" Title="Email" Editable="false" Required="false" />
+                                <PropertyColumn Property="u => u.DiplayName" Title="Benutzername" Editable="false" />
+                                <PropertyColumn Property="u => u.Fullname" Title="Name" Editable="false" Required="false" />
+                                <PropertyColumn Property=@(u => string.Join(", ", u.Roles)) Title="Rollen" Context="child_context">
+                                    <EditTemplate Context="child_context">
+                                        <MudSelect T="string" SelectedValues="child_context.Item.Roles" SelectedValuesChanged="@((newRoles) => OnRolesChanged(child_context.Item, newRoles))" MultiSelection="@(child_context.Item.Typ == "Nutzer" ? true : false)" Required Margin="Margin.Normal">
+                                            @foreach (var role in roles)
+                                            {
+                                                <MudSelectItem T="string" Value="@role" Disabled="@(child_context.Item.Roles.Contains("Gesperrt") && role != "Gesperrt")">@role</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </EditTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn CellClass="d-flex justify-end" Context="child_context">
+                                    <CellTemplate Context="child_context">
+                                        <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@child_context.Actions.StartEditingItemAsync" />
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </ChildRowContent>
+
+                    <PagerContent>
+                        @* @if (!string.IsNullOrEmpty(_searchString))
+                        { *@
+                        <MudDataGridPager T="EditRoleUser" />
+                        @* } *@
+                    </PagerContent>
+                </MudDataGrid>
+            </div>
+
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 <style>
     body {
