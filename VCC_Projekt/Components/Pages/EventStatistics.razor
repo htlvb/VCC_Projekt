@@ -1,5 +1,7 @@
 ﻿@page "/event-statistics"
 @page "/event-statistics/{eventId:int}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles ="Admin,Editor")]
 
 <PageTitle>Event Statistiken</PageTitle>
 
