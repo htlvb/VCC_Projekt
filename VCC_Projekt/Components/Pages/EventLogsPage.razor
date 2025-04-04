@@ -1,5 +1,6 @@
 ﻿@page "/eventlogs"
 @using VCC_Projekt.Data
+@attribute [Authorize(Roles = "Admin")]
 
 <div class="text-center">
     <MudText Typo="Typo.h2" style="color: #134883;">Event Logs</MudText>

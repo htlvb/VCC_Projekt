@@ -1,5 +1,6 @@
 ﻿@page "/dashboard/{EventId:int}"
 @using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin,Editor,Benutzer")]
 
 @attribute [Authorize]
 @if (accessDenied)
