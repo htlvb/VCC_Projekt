@@ -30,6 +30,7 @@
                             <span>Support Emails</span>
                         </NavLink>
                     </div>
+                    
                     <div class="nav-item">
                         <NavLink class="nav-link" href="events-manager">
                             <MudIcon Icon="@Icons.Material.Filled.EventNote" Class="me-1" />
@@ -49,6 +50,14 @@
                         <NavLink class="nav-link" href="event-statistics">
                             <MudIcon Icon="@Icons.Material.Filled.PieChart" Class="me-1" />
                             <span>Event Statistiken</span>
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
+                <AuthorizeView Roles="Admin">
+                    <div class="nav-item">
+                        <NavLink class="nav-link" href="eventlogs">
+                            <MudIcon Icon="@Icons.Material.Filled.Article" Class="me-1" />
+                            <span>Eventlogs</span>
                         </NavLink>
                     </div>
                 </AuthorizeView>
