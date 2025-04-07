@@ -108,7 +108,7 @@
 
                             <MudTextField @bind-Value="Input.EventName" Label="Wettbewerbsname" Variant="Variant.Outlined" Required="true"></MudTextField>
 
-                            <MudDatePicker Date="Input.EventDate" DateChanged="(date) => Input.EventDate = date.HasValue ? date.Value : (DateTime?)null" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
+                            <MudDatePicker Date="Input.EventDate" FirstDayOfWeek="DayOfWeek.Monday" Culture="@(new System.Globalization.CultureInfo("de-AT"))" DateFormat="dd.MM.yyyy" DateChanged="(date) => Input.EventDate = date.HasValue ? date.Value : (DateTime?)null" Label="Datum" Variant="Variant.Outlined" Required="true" ShowToolbar="false"></MudDatePicker>
 
                             <div class="row mb-3">
                                 <div class="col">
