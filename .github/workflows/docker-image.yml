@@ -16,15 +16,18 @@ jobs:
 
     - name: Write appsettings.json from secret
       run: |
-        echo "$SECRETS_APPSETTINGS_JSON" > VCC_Projekt/appsettings.json
+        # Ensure that appsettings.json is written correctly from the secret
+        echo "${{ secrets.APPSETTINGS_JSON }}" > VCC_Projekt/appsettings.json
       env:
-        SECRETS_APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
+        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
     - name: Build the Docker image
-      run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
+      run: |
+        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt/my-image-name:latest .
 
     - name: Log in to GitHub Container Registry
-      run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
 
     - name: Push the Docker image to GitHub Container Registry
       run: docker push ghcr.io/mirci212/vcc_projekt/my-image-name:latest
