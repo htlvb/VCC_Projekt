@@ -23,7 +23,8 @@ jobs:
     - name: Generate timestamp tag
       id: tag
       run: |
-        echo "TAG=$(date +'%d.%m.%Y_%H-%M')" >> $GITHUB_ENV
+        TAG=$(date +'%d.%m.%Y_%H-%M')
+        echo "TAG=$TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
 
     - name: Build the Docker image
@@ -38,15 +39,6 @@ jobs:
       run: |
         docker push ${{ env.IMAGE_NAME }}
         docker push ghcr.io/mirci212/vcc_projekt:latest
-
-    - name: Update compose file
-      run: |
-        sed -i "s|image: ghcr.io/mirci212/vcc_projekt:.*|image: ${{ env.IMAGE_NAME }}|" docker-compose.yml
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
-        git add docker-compose.yml
-        git commit -m "Update image tag to ${{ env.TAG }}" || echo "No changes to commit"
-        git push
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
