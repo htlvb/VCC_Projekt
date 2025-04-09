@@ -2,52 +2,52 @@ version: '3.7'
 
 services:
   app:
-    image: my-image-name:latest
+    image: vcc_projekt:${TAG:-latest}
     build:
       context: .
       dockerfile: VCC_Projekt/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DB_SERVER_FILE=/run/secrets/VCC_DB_SERVER
-      - DB_NAME_FILE=/run/secrets/VCC_DB_NAME
-      - DB_USER_FILE=/run/secrets/VCC_DB_USER
-      - DB_PASSWORD_FILE=/run/secrets/VCC_DB_PASSWORD
-      - FRONTEND_URL_FILE=/run/secrets/VCC_FRONTEND_URL
-      - MAIL_EMAIL_FILE=/run/secrets/VCC_MAIL_EMAIL
-      - MAIL_PASSWORD_FILE=/run/secrets/VCC_MAIL_PASSWORD
-      - TENANT_ID_FILE=/run/secrets/VCC_TENANT_ID
-      - CLIENT_ID_FILE=/run/secrets/VCC_CLIENT_ID
-      - CLIENT_SECRET_FILE=/run/secrets/VCC_CLIENT_SECRET
+      - DB_SERVER_FILE=/run/secrets/DB_SERVER
+      - DB_NAME_FILE=/run/secrets/DB_NAME
+      - DB_USER_FILE=/run/secrets/DB_USER
+      - DB_PASSWORD_FILE=/run/secrets/DB_PASSWORD
+      - FRONTEND_URL_FILE=/run/secrets/FRONTEND_URL
+      - MAIL_EMAIL_FILE=/run/secrets/MAIL_EMAIL
+      - MAIL_PASSWORD_FILE=/run/secrets/MAIL_PASSWORD
+      - TENANT_ID_FILE=/run/secrets/TENANT_ID
+      - CLIENT_ID_FILE=/run/secrets/CLIENT_ID
+      - CLIENT_SECRET_FILE=/run/secrets/CLIENT_SECRET
     secrets:
-      - VCC_DB_SERVER
-      - VCC_DB_NAME
-      - VCC_DB_USER
-      - VCC_DB_PASSWORD
-      - VCC_FRONTEND_URL
-      - VCC_MAIL_EMAIL
-      - VCC_MAIL_PASSWORD
-      - VCC_TENANT_ID
-      - VCC_CLIENT_ID
-      - VCC_CLIENT_SECRET
+      - DB_SERVER
+      - DB_NAME
+      - DB_USER
+      - DB_PASSWORD
+      - FRONTEND_URL
+      - MAIL_EMAIL
+      - MAIL_PASSWORD
+      - TENANT_ID
+      - CLIENT_ID
+      - CLIENT_SECRET
 
 secrets:
-  VCC_DB_SERVER:
+  DB_SERVER:
     external: true
-  VCC_DB_NAME:
+  DB_NAME:
     external: true
-  VCC_DB_USER:
+  DB_USER:
     external: true
-  VCC_DB_PASSWORD:
+  DB_PASSWORD:
     external: true
-  VCC_FRONTEND_URL:
+  FRONTEND_URL:
     external: true
-  VCC_MAIL_EMAIL:
+  MAIL_EMAIL:
     external: true
-  VCC_MAIL_PASSWORD:
+  MAIL_PASSWORD:
     external: true
-  VCC_TENANT_ID:
+  TENANT_ID:
     external: true
-  VCC_CLIENT_ID:
+  CLIENT_ID:
     external: true
-  VCC_CLIENT_SECRET:
+  CLIENT_SECRET:
     external: true
