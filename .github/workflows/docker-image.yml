@@ -22,15 +22,19 @@ jobs:
         APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
     - name: Build the Docker image
+      id: build
       run: |
-        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt:$(date +%s) .
-
+        IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date +%s)"
+        docker build -f VCC_Projekt/Dockerfile -t $IMAGE_TAG .
+        echo "::set-output name=image_tag::$IMAGE_TAG"
+    
     - name: Log in to GitHub Container Registry
       run: |
         echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
 
     - name: Push the Docker image to GitHub Container Registry
-      run: docker push ghcr.io/mirci212/vcc_projekt:$(date +%s)
+      run: |
+        docker push ${{ steps.build.outputs.image_tag }}
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
