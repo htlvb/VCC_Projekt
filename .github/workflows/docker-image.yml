@@ -15,7 +15,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Write appsettings.json from secret
-      run: echo "${{ secrets.APPSETTINGS_JSON }}" | base64 -d > VCC_Projekt/appsettings.json
+      run: |
+        echo "$(
+          echo "${{ secrets.APPSETTINGS_JSON }}" | sed 's/\\n/\n/g'
+        )" > VCC_Projekt/appsettings.json
 
     - name: Build the Docker image
       run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
