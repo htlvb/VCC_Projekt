@@ -16,4 +16,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:latest
+      run: docker build ./VCC_Project --file ./VCC_Project/Dockerfile --tag my-image-name:latest
