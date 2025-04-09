@@ -5,42 +5,64 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+    # Login to GitHub Container Registry
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Generate dynamic tag
+    # Set up Docker Buildx
+    - name: Set up Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Generate proper image tag
+    - name: Generate tag
       id: tag
       run: |
-        echo "TAG=$(date +%Y%m%d_%H%M)" >> $GITHUB_ENV
-        echo "IMAGE=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
+        echo "TAG=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+        echo "IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}" >> $GITHUB_ENV
+        echo "IMAGE_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
 
+    # Build and push the image
     - name: Build and push
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v5
       with:
         context: .
         file: VCC_Projekt/Dockerfile
         push: true
-        tags: ${{ env.IMAGE }}
-        secrets: |
-          "DB_SERVER=${{ secrets.DB_SERVER }}"
-          "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
-          # Fügen Sie hier alle anderen Secrets hinzu
+        tags: |
+          ${{ env.IMAGE }}
+          ${{ env.IMAGE_LATEST }}
+        build-args: |
+          BUILD_CONFIGURATION=Release
 
+    # Update compose file with new image tag
     - name: Update compose file
       run: |
         sed -i "s|image: vcc_projekt:.*|image: ${{ env.IMAGE }}|" docker-compose.yml
-        # Für Kubernetes:
-        # sed -i "s|image:.*|image: ${{ env.IMAGE }}|" k8s/deployment.yaml
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add docker-compose.yml
+        git commit -m "Update image tag to ${{ env.TAG }}" || echo "No changes to commit"
+        git push
 
-    - name: Deploy (example for SSH)
+    # Deploy (example using SSH)
+    - name: Deploy to server
       uses: appleboy/ssh-action@master
+      if: github.ref == 'refs/heads/master'
       with:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
@@ -48,4 +70,4 @@ jobs:
         script: |
           cd /path/to/your/project
           docker compose pull
-          docker compose up -d
+          docker compose up -d --build
