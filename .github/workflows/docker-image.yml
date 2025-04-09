@@ -1,73 +1,52 @@
-name: Docker Image CI/CD
+name: Docker Image CI
 
 on:
   push:
     branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
   workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v4
 
-    # Login to GitHub Container Registry
-    - name: Log in to GHCR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Write appsettings.json from secret
+      run: |
+        echo "$APPSETTINGS_JSON" > VCC_Projekt/appsettings.json
+      env:
+        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
-    # Set up Docker Buildx
-    - name: Set up Buildx
-      uses: docker/setup-buildx-action@v3
-
-    # Generate proper image tag
-    - name: Generate tag
+    - name: Generate timestamp tag
       id: tag
       run: |
-        echo "TAG=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
-        echo "IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}" >> $GITHUB_ENV
-        echo "IMAGE_LATEST=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest" >> $GITHUB_ENV
+        echo "TAG=$(date +'%d.%m.%Y_%H-%M')" >> $GITHUB_ENV
+        echo "IMAGE_NAME=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
 
-    # Build and push the image
-    - name: Build and push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: VCC_Projekt/Dockerfile
-        push: true
-        tags: |
-          ${{ env.IMAGE }}
-          ${{ env.IMAGE_LATEST }}
-        build-args: |
-          BUILD_CONFIGURATION=Release
+    - name: Build the Docker image
+      run: |
+        docker build -f VCC_Projekt/Dockerfile -t ${{ env.IMAGE_NAME }} -t ghcr.io/mirci212/vcc_projekt:latest .
 
-    # Update compose file with new image tag
+    - name: Log in to GitHub Container Registry
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+
+    - name: Push the Docker image
+      run: |
+        docker push ${{ env.IMAGE_NAME }}
+        docker push ghcr.io/mirci212/vcc_projekt:latest
+
     - name: Update compose file
       run: |
-        sed -i "s|image: vcc_projekt:.*|image: ${{ env.IMAGE }}|" docker-compose.yml
+        sed -i "s|image: ghcr.io/mirci212/vcc_projekt:.*|image: ${{ env.IMAGE_NAME }}|" docker-compose.yml
         git config --global user.name "GitHub Actions"
         git config --global user.email "actions@github.com"
         git add docker-compose.yml
         git commit -m "Update image tag to ${{ env.TAG }}" || echo "No changes to commit"
         git push
 
-    # Deploy (example using SSH)
-    - name: Deploy to server
-      uses: appleboy/ssh-action@master
-      if: github.ref == 'refs/heads/master'
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          cd /path/to/your/project
-          docker compose pull
-          docker compose up -d --build
+    - name: Clean up appsettings.json
+      run: rm VCC_Projekt/appsettings.json
