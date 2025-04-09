@@ -17,11 +17,20 @@ jobs:
       env:
         APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
-    - name: Build and push latest
+    - name: Generate timestamp tag
+      id: tag
+      run: |
+        TAG=$(date +'%d.%m.%Y_%H-%M')
+        echo "TAG=$TAG" >> $GITHUB_ENV
+        echo "IMAGE_NAME=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
+
+    - name: Build and push
       run: |
         echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
-        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt:latest .
-        docker push ghcr.io/mirci212/vcc_projekt:latest
+        docker build -f VCC_Projekt/Dockerfile \
+          -t ${{ env.IMAGE_NAME }} \
+          -t ghcr.io/mirci212/vcc_projekt:latest .
+        docker push --all-tags ghcr.io/mirci212/vcc_projekt
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
