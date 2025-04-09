@@ -12,12 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Write appsettings.json from secret
-      run: |
-        echo "$APPSETTINGS_JSON" > VCC_Projekt/appsettings.json
-      env:
-        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
-
     - name: Login to GitHub Container Registry
       run: |
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -26,6 +20,3 @@ jobs:
       run: |
         docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt:latest .
         docker push ghcr.io/mirci212/vcc_projekt:latest
-
-    - name: Clean up
-      run: rm VCC_Projekt/appsettings.json
