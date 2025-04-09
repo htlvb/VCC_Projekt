@@ -16,7 +16,11 @@ jobs:
 
     - name: Write appsettings.json from secret
       run: |
+        mkdir -p VCC_Projekt
         printf "%s" "${{ secrets.APPSETTINGS_JSON }}" > VCC_Projekt/appsettings.json
 
     - name: Build the Docker image
       run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
+
+    - name: Clean up appsettings.json
+      run: rm VCC_Projekt/appsettings.json
