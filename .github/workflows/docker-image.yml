@@ -27,18 +27,13 @@ jobs:
         echo "TAG=$TAG" >> $GITHUB_ENV
         echo "IMAGE_NAME=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
 
-    - name: Build the Docker image
-      run: |
-        docker build -f VCC_Projekt/Dockerfile -t ${{ env.IMAGE_NAME }} -t ghcr.io/mirci212/vcc_projekt:latest .
-
-    - name: Log in to GitHub Container Registry
+    - name: Build and push with single command
       run: |
         echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
-
-    - name: Push the Docker image
-      run: |
-        docker push ${{ env.IMAGE_NAME }}
-        docker push ghcr.io/mirci212/vcc_projekt:latest
+        docker build -f VCC_Projekt/Dockerfile \
+          -t ${{ env.IMAGE_NAME }} \
+          -t ghcr.io/mirci212/vcc_projekt:latest .
+        docker push --all-tags ghcr.io/mirci212/vcc_projekt
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
