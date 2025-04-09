@@ -7,20 +7,21 @@ on:
     branches: [ "master" ]
   workflow_dispatch:
 
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v4
+    steps:
+    - uses: actions/checkout@v4
 
-    - name: Write appsettings.json from secret
-      run: |
-        mkdir -p VCC_Projekt
-        printf "%s" "${{ secrets.APPSETTINGS_JSON }}" > VCC_Projekt/appsettings.json
+    - name: Write appsettings.json from secret
+      run: |
+        mkdir -p VCC_Projekt
+        echo "${{ secrets.APPSETTINGS_JSON }}" > VCC_Projekt/appsettings.json
 
-    - name: Build the Docker image
-      run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
+    - name: Build the Docker image
+      run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
 
-    - name: Clean up appsettings.json
-      run: rm VCC_Projekt/appsettings.json
+    - name: Clean up appsettings.json
+      run: rm VCC_Projekt/appsettings.json
