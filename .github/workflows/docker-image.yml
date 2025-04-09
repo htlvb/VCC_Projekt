@@ -14,12 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Remove old Docker images
+    - name: Remove all Docker images
       run: |
-        # Remove all images from the GitHub Container Registry
-        docker image prune -a --filter "dangling=true" -f
-        # Optional: Remove all specific images tagged with ghcr.io
-        docker rmi $(docker images ghcr.io/mirci212/vcc_projekt -q) || true
+        # Remove all Docker images from the system
+        docker rmi $(docker images -q) || true
 
     - name: Write appsettings.json from secret
       run: |
