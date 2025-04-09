@@ -18,6 +18,8 @@ services:
       - TENANT_ID_FILE=/run/secrets/TENANT_ID
       - CLIENT_ID_FILE=/run/secrets/CLIENT_ID
       - CLIENT_SECRET_FILE=/run/secrets/CLIENT_SECRET
+      - SMTP_SERVER_FILE=/run/secrets/SMTP_SERVER      # Neu hinzugefügt
+      - IMAP_SERVER_FILE=/run/secrets/IMAP_SERVER      # Neu hinzugefügt
     secrets:
       - DB_SERVER
       - DB_NAME
@@ -29,6 +31,8 @@ services:
       - TENANT_ID
       - CLIENT_ID
       - CLIENT_SECRET
+      - SMTP_SERVER                                   
+      - IMAP_SERVER                                   
 
 secrets:
   DB_SERVER:
@@ -50,4 +54,8 @@ secrets:
   CLIENT_ID:
     external: true
   CLIENT_SECRET:
+    external: true
+  SMTP_SERVER:                                       
+    external: true
+  IMAP_SERVER:                                      
     external: true
