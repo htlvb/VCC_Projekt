@@ -30,13 +30,16 @@ jobs:
     - name: Build and push
       run: |
         echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
-        # Zuerst mit Datums-Tag bauen
-        docker build -f VCC_Projekt/Dockerfile -t ${{ env.IMAGE_NAME }} .
-        # Dann latest Tag hinzufügen
-        docker tag ${{ env.IMAGE_NAME }} ghcr.io/mirci212/vcc_projekt:latest
+        
+        # Zuerst latest Tag bauen
+        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt:latest .
+        
+        # Dann Datums-Tag daraus ableiten
+        docker tag ghcr.io/mirci212/vcc_projekt:latest ${{ env.IMAGE_NAME }}
+        
         # Beide Tags pushen
-        docker push ${{ env.IMAGE_NAME }}
         docker push ghcr.io/mirci212/vcc_projekt:latest
+        docker push ${{ env.IMAGE_NAME }}
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
