@@ -23,7 +23,7 @@ jobs:
 
     - name: Build the Docker image
       run: |
-        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt/my-image-name:latest .
+        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/Mirci212/vcc_projekt:latest .
 
     - name: Log in to GitHub Container Registry
       run: |
