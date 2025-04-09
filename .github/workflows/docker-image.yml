@@ -3,8 +3,6 @@ name: Docker Image CI
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
@@ -20,24 +18,14 @@ jobs:
       env:
         APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
-    - name: Generate date tag
-      run: |
-        echo "DATE_TAG=$(date +'%d.%m.%Y_%H-%M')" >> $GITHUB_ENV
-
-    - name: Login to GHCR
+    - name: Login to GitHub Container Registry
       run: |
         echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Build and tag
+    - name: Build and push latest
       run: |
-        docker build -f VCC_Projekt/Dockerfile \
-          -t ghcr.io/mirci212/vcc_projekt:latest \
-          -t ghcr.io/mirci212/vcc_projekt:${{ env.DATE_TAG }} .
-
-    - name: Push images
-      run: |
+        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/mirci212/vcc_projekt:latest .
         docker push ghcr.io/mirci212/vcc_projekt:latest
-        docker push ghcr.io/mirci212/vcc_projekt:${{ env.DATE_TAG }}
 
     - name: Clean up
       run: rm VCC_Projekt/appsettings.json
