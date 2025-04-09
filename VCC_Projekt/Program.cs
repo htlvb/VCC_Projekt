@@ -10,6 +10,8 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -28,7 +30,10 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = builder.Configuration["DB_CONNECTION_STRING"]
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Database connection not configured");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)), mysqloptions => mysqloptions.EnableRetryOnFailure(int.MaxValue, TimeSpan.FromSeconds(5), null)),
     ServiceLifetime.Scoped);
@@ -40,11 +45,40 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
-builder.Services.Configure<MailOptions>(
-    builder.Configuration.GetSection(MailOptions.MailOptionsKey));
+// MailOptions with Secrets priority
+builder.Services.Configure<MailOptions>(options =>
+{
+    // Email Configuration (Secrets First)
+    options.Email = builder.Configuration["MAIL_EMAIL"]
+        ?? builder.Configuration["MailOptions:Email"];
+
+    // Password Configuration (Secrets First)
+    options.Password = builder.Configuration["MAIL_PASSWORD"]
+        ?? builder.Configuration["MailOptions:Password"];
+
+    // Server Configuration (Secrets First)
+    options.SmptServer = builder.Configuration["SMTP_SERVER"]
+        ?? builder.Configuration["MailOptions:SmptServer"]
+        ?? "smtp.office365.com"; // Default fallback
+
+    options.ImapServer = builder.Configuration["IMAP_SERVER"]
+        ?? builder.Configuration["MailOptions:ImapServer"]
+        ?? "outlook.office365.com"; // Default fallback
+
+    // Azure AD Configuration (Secrets First)
+    options.TenantId = builder.Configuration["TENANT_ID"]
+        ?? builder.Configuration["MailOptions:TenantId"];
+
+    options.ClientId = builder.Configuration["CLIENT_ID"]
+        ?? builder.Configuration["MailOptions:ClientId"];
+
+    options.ClientSecret = builder.Configuration["CLIENT_SECRET"]
+        ?? builder.Configuration["MailOptions:ClientSecret"];
+});
 
 builder.Services.AddControllers();
-var frontendUrl = builder.Configuration["Frontend:Url"];
+var frontendUrl = builder.Configuration["FRONTEND_URL"]
+    ?? builder.Configuration["Frontend:Url"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -67,7 +101,6 @@ else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
-    builder.Configuration.AddKeyPerFile("/run/secrets", optional: true);
 }
 
 app.UseHttpsRedirection();
