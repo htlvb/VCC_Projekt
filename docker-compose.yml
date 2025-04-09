@@ -6,6 +6,18 @@ services:
     build:
       context: .
       dockerfile: VCC_Projekt/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - DB_SERVER_FILE=/run/secrets/VCC_DB_SERVER
+      - DB_NAME_FILE=/run/secrets/VCC_DB_NAME
+      - DB_USER_FILE=/run/secrets/VCC_DB_USER
+      - DB_PASSWORD_FILE=/run/secrets/VCC_DB_PASSWORD
+      - FRONTEND_URL_FILE=/run/secrets/VCC_FRONTEND_URL
+      - MAIL_EMAIL_FILE=/run/secrets/VCC_MAIL_EMAIL
+      - MAIL_PASSWORD_FILE=/run/secrets/VCC_MAIL_PASSWORD
+      - TENANT_ID_FILE=/run/secrets/VCC_TENANT_ID
+      - CLIENT_ID_FILE=/run/secrets/VCC_CLIENT_ID
+      - CLIENT_SECRET_FILE=/run/secrets/VCC_CLIENT_SECRET
     secrets:
       - VCC_DB_SERVER
       - VCC_DB_NAME
@@ -17,8 +29,6 @@ services:
       - VCC_TENANT_ID
       - VCC_CLIENT_ID
       - VCC_CLIENT_SECRET
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
 
 secrets:
   VCC_DB_SERVER:
