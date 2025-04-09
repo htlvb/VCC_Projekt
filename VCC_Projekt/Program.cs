@@ -30,9 +30,26 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration["DB_CONNECTION_STRING"]
-    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? BuildConnectionStringFromSecrets(builder.Configuration)
     ?? throw new InvalidOperationException("Database connection not configured");
+
+static string? BuildConnectionStringFromSecrets(IConfiguration config)
+{
+    try
+    {
+        return $"Server={config["DB_SERVER"]};" +
+               $"Database={config["DB_NAME"]};" +
+               $"User Id={config["DB_USER"]};" +
+               $"Password={config["DB_PASSWORD"]};" +
+               "Connection Timeout=200;" +
+               "Default Command Timeout=60";
+    }
+    catch
+    {
+        return null;
+    }
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 23)), mysqloptions => mysqloptions.EnableRetryOnFailure(int.MaxValue, TimeSpan.FromSeconds(5), null)),
