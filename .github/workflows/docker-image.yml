@@ -24,7 +24,7 @@ jobs:
     - name: Build the Docker image
       id: build
       run: |
-        IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date +%s)"
+        IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date '+%d.%m.%Y_%H-%M')"
         docker build -f VCC_Projekt/Dockerfile -t $IMAGE_TAG .
         echo "::set-output name=image_tag::$IMAGE_TAG"
     
