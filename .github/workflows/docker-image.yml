@@ -14,16 +14,21 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Set up Docker Compose
+      run: |
+        echo "$DOCKER_COMPOSE_YML" > docker-compose.yml
+      env:
+        DOCKER_COMPOSE_YML: ${{ secrets.DOCKER_COMPOSE_YML }}
+
     - name: Write appsettings.json from secret
       run: |
-        # Write the appsettings.json securely from the secret (ensure it's hidden)
         echo "${{ secrets.APPSETTINGS_JSON }}" | base64 --decode > VCC_Projekt/appsettings.json
       env:
-        # Mask the secret to prevent it from appearing in the logs
         APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
 
     - name: Build the Docker image
-      run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
+      run: |
+        docker-compose up -d --build
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
