@@ -27,7 +27,7 @@ jobs:
       run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
 
     - name: Push the Docker image to GitHub Container Registry
-      run: docker push ghcr.io/${{ github.repository }}/my-image-name:latest
+      run: docker push ghcr.io/mirci212/vcc_projekt/my-image-name:latest
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
