@@ -1,40 +1,51 @@
-name: Docker Image CI
+name: Docker Image CI/CD
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Write appsettings.json from secret
-      run: |
-        # Ensure that appsettings.json is written correctly from the secret
-        echo "$APPSETTINGS_JSON" > VCC_Projekt/appsettings.json
-      env:
-        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-    - name: Build the Docker image
-      id: build
+    - name: Generate dynamic tag
+      id: tag
       run: |
-        IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date '+%d.%m.%Y_%H-%M')"
-        docker build -f VCC_Projekt/Dockerfile -t $IMAGE_TAG .
-        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-    
-    - name: Log in to GitHub Container Registry
-      run: |
-        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+        echo "TAG=$(date +%Y%m%d_%H%M)" >> $GITHUB_ENV
+        echo "IMAGE=ghcr.io/mirci212/vcc_projekt:$TAG" >> $GITHUB_ENV
 
-    - name: Push the Docker image to GitHub Container Registry
-      run: |
-        docker push $IMAGE_TAG
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: VCC_Projekt/Dockerfile
+        push: true
+        tags: ${{ env.IMAGE }}
+        secrets: |
+          "DB_SERVER=${{ secrets.DB_SERVER }}"
+          "DB_PASSWORD=${{ secrets.DB_PASSWORD }}"
+          # Fügen Sie hier alle anderen Secrets hinzu
 
-    - name: Clean up appsettings.json
-      run: rm VCC_Projekt/appsettings.json
+    - name: Update compose file
+      run: |
+        sed -i "s|image: vcc_projekt:.*|image: ${{ env.IMAGE }}|" docker-compose.yml
+        # Für Kubernetes:
+        # sed -i "s|image:.*|image: ${{ env.IMAGE }}|" k8s/deployment.yaml
+
+    - name: Deploy (example for SSH)
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /path/to/your/project
+          docker compose pull
+          docker compose up -d
