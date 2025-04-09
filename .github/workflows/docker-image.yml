@@ -26,7 +26,7 @@ jobs:
       run: |
         IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date '+%d.%m.%Y_%H-%M')"
         docker build -f VCC_Projekt/Dockerfile -t $IMAGE_TAG .
-        echo "::set-output name=image_tag::$IMAGE_TAG"
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
     
     - name: Log in to GitHub Container Registry
       run: |
@@ -34,7 +34,7 @@ jobs:
 
     - name: Push the Docker image to GitHub Container Registry
       run: |
-        docker push ${{ steps.build.outputs.image_tag }}
+        docker push $IMAGE_TAG
 
     - name: Clean up appsettings.json
       run: rm VCC_Projekt/appsettings.json
