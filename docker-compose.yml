@@ -3,6 +3,9 @@ version: '3.7'
 services:
   app:
     image: ghcr.io/mirci212/vcc_projekt:latest
+    ports:
+      - "80:8080"   # HTTP auf Port 80
+      - "443:8081"  # HTTPS auf Port 443
     build:
       context: .
       dockerfile: VCC_Projekt/Dockerfile
