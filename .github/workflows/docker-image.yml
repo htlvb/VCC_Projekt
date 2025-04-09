@@ -1,0 +1,40 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Write appsettings.json from secret
+      run: |
+        # Ensure that appsettings.json is written correctly from the secret
+        echo "$APPSETTINGS_JSON" > VCC_Projekt/appsettings.json
+      env:
+        APPSETTINGS_JSON: ${{ secrets.APPSETTINGS_JSON }}
+
+    - name: Build the Docker image
+      id: build
+      run: |
+        IMAGE_TAG="ghcr.io/mirci212/vcc_projekt:$(date '+%d.%m.%Y_%H-%M')"
+        docker build -f VCC_Projekt/Dockerfile -t $IMAGE_TAG .
+        echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+    
+    - name: Log in to GitHub Container Registry
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+
+    - name: Push the Docker image to GitHub Container Registry
+      run: |
+        docker push $IMAGE_TAG
+
+    - name: Clean up appsettings.json
+      run: rm VCC_Projekt/appsettings.json
