@@ -14,21 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
     - name: Write appsettings.json from secret
-      run: |
-        mkdir -p VCC_Projekt
-        echo "${{ secrets.APPSETTINGS_JSON }}" > VCC_Projekt/appsettings.json
+      run: echo "${{ secrets.APPSETTINGS_JSON }}" | base64 -d > VCC_Projekt/appsettings.json
 
     - name: Build the Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: VCC_Projekt/Dockerfile
-        push: false # Set to true if you want to push the image
-        tags: my-image-name:${{ github.sha }} # Example tagging
+      run: docker build . --file VCC_Projekt/Dockerfile --tag my-image-name:latest
 
     - name: Clean up appsettings.json
-      run: rm -rf VCC_Projekt # More robust removal
+      run: rm VCC_Projekt/appsettings.json
