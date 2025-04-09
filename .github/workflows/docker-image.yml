@@ -14,11 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Remove all Docker images
-      run: |
-        # Remove all Docker images from the system
-        docker rmi $(docker images -q) || true
-
     - name: Write appsettings.json from secret
       run: |
         # Ensure that appsettings.json is written correctly from the secret
