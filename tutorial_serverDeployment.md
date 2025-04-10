@@ -123,7 +123,7 @@ sudo docker service logs vcc_vcc-app
 sudo docker secret ls
 ```
 ## **Admin Benutzer**
-Username: admin1
+Username: admin1 <br/>
 Passwort: !Passw0rd
 
 ## **Troubleshooting**
