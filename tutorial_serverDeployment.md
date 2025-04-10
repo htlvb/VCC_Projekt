@@ -108,7 +108,7 @@ sudo docker stack deploy -c docker-compose.yml vcc
 ## **6. (Optional) Automatisches Weekly Update**
 ```bash
 # Cronjob für wöchentliches Update (Montags 2 Uhr)
-(crontab -l 2>/dev/null; echo "0 2 * * 1 /usr/bin/docker service update --image ghcr.io/mirci212/vcc_projekt:latest vcc_vcc-app") | crontab -
+(crontab -l 2>/dev/null; echo "0 2 * * 1 /usr/bin/docker pull ghcr.io/mirci212/vcc_projekt:latest && /usr/bin/docker service update --image ghcr.io/mirci212/vcc_projekt:latest vcc_vcc-app") | crontab -
 ```
 
 ## **Überprüfung**
