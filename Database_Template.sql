@@ -1046,6 +1046,22 @@ END//
 DELIMITER ;
 SET SQL_MODE=@OLDTMP_SQL_MODE;
 
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~3 rows (ungefähr)
+INSERT INTO `vcc_aspnetroles` (`Name`, `ConcurrencyStamp`, `Beschreibung`) VALUES
+	('Admin', NULL, 'Hat volle Zugriffsrechte auf das System, einschließlich Verwaltung von Benutzern, Inhalten und Einstellungen.'),
+	('Benutzer', NULL, 'Kann Inhalte ansehen und begrenzte Interaktionen ausführen, hat jedoch keine Berechtigungen zum Bearbeiten oder Verwalten.'),
+	('Editor', NULL, 'Kann Inhalte erstellen, bearbeiten und löschen, jedoch keine Benutzer verwalten oder Systemeinstellungen ändern.');
+
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles: ~32 rows (ungefähr)
+INSERT INTO `vcc_aspnetuserroles` (`UserId`, `RoleId`) VALUES
+	('admin1', 'Admin'),
+	('admin1', 'Benutzer'),
+	('admin1', 'Editor');
+
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusers: ~21 rows (ungefähr) (Standard Passwort: !Passw0rt)
+INSERT INTO `vcc_aspnetusers` (`UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `Firstname`, `Lastname`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `AccessFailedCount`) VALUES
+	('admin1', 'ADMIN1', 'spaa@htlvb.at', 'SPAA@HTLVB.AT', 'Alfred', 'Spalt', 1, 'AQAAAAIAAYagAAAAENEFfiWb1uYkWF61HVi7a/Lqh6Lq03snk4RYCKEbH3Nnl1HM2dCqN9PfXhjaUOZmwg==', 'UZXJWAUHMGMKC3SZXLM4ZLIG5U2YLUZK', 'decb842c-384a-40bf-b15b-282b0777374f', 0);
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
