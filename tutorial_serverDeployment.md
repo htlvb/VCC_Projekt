@@ -18,8 +18,11 @@ sudo docker swarm init
 
 ## **2. GitHub Container Registry Login (only if repo is private)**
 ```bash
-# Mit GitHub PAT authentifizieren
+# Mit GitHub PAT authentifizieren (only if repo is private)
 echo "dein_github_pat_token" | sudo docker login ghcr.io -u dein_github_username --password-stdin
+
+# Docker container pullen
+docker pull ghcr.io/mirci212/vcc_projekt:latest
 ```
 
 ## **3. Secrets erstellen**
