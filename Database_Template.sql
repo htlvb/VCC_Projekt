@@ -38,7 +38,11 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetroles` (
   UNIQUE KEY `RoleNameIndex` (`NormalizedName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~1 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~0 rows (ungefähr)
+INSERT INTO `vcc_aspnetroles` (`Name`, `ConcurrencyStamp`, `Beschreibung`) VALUES
+	('Admin', NULL, 'Hat volle Zugriffsrechte auf das System, einschließlich Verwaltung von Benutzern, Inhalten und Einstellungen.'),
+	('Benutzer', NULL, 'Kann Inhalte ansehen und begrenzte Interaktionen ausführen, hat jedoch keine Berechtigungen zum Bearbeiten oder Verwalten.'),
+	('Editor', NULL, 'Kann Inhalte erstellen, bearbeiten und löschen, jedoch keine Benutzer verwalten oder Systemeinstellungen ändern.');
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserclaims
 CREATE TABLE IF NOT EXISTS `vcc_aspnetuserclaims` (
@@ -78,6 +82,10 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetuserroles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles: ~0 rows (ungefähr)
+INSERT INTO `vcc_aspnetuserroles` (`UserId`, `RoleId`) VALUES
+	('admin1', 'Admin'),
+	('admin1', 'Benutzer'),
+	('admin1', 'Editor');
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusers
 CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
@@ -99,6 +107,8 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusers: ~0 rows (ungefähr)
+INSERT INTO `vcc_aspnetusers` (`UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `Firstname`, `Lastname`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `AccessFailedCount`) VALUES
+	('admin1', 'ADMIN1', 'spaa@htlvb.at', 'SPAA@HTLVB.AT', 'Alfred', 'Spalt', 1, 'AQAAAAIAAYagAAAAENEFfiWb1uYkWF61HVi7a/Lqh6Lq03snk4RYCKEbH3Nnl1HM2dCqN9PfXhjaUOZmwg==', 'UZXJWAUHMGMKC3SZXLM4ZLIG5U2YLUZK', 'decb842c-384a-40bf-b15b-282b0777374f', 0);
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusertokens
 CREATE TABLE IF NOT EXISTS `vcc_aspnetusertokens` (
@@ -221,7 +231,7 @@ CREATE TABLE IF NOT EXISTS `vcc_logkategorie` (
   `Beschreibung` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`KatID`),
   UNIQUE KEY `Beschr_UN` (`Beschreibung`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_logkategorie: ~4 rows (ungefähr)
 INSERT INTO `vcc_logkategorie` (`KatID`, `Beschreibung`) VALUES
