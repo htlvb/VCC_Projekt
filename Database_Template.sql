@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetroleclaims` (
   CONSTRAINT `FK_vcc_AspNetRoleClaims_vcc_AspNetRoles_RoleId` FOREIGN KEY (`RoleId`) REFERENCES `vcc_aspnetroles` (`Name`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroleclaims: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetroles
 CREATE TABLE IF NOT EXISTS `vcc_aspnetroles` (
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetroles` (
   UNIQUE KEY `RoleNameIndex` (`NormalizedName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~1 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserclaims
 CREATE TABLE IF NOT EXISTS `vcc_aspnetuserclaims` (
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetuserclaims` (
   CONSTRAINT `FK_vcc_AspNetUserClaims_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserclaims: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserlogins
 CREATE TABLE IF NOT EXISTS `vcc_aspnetuserlogins` (
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetuserlogins` (
   CONSTRAINT `FK_vcc_AspNetUserLogins_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserlogins: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles
 CREATE TABLE IF NOT EXISTS `vcc_aspnetuserroles` (
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetuserroles` (
   CONSTRAINT `FK_vcc_AspNetUserRoles_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusers
 CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
   UNIQUE KEY `UserNameIndex` (`NormalizedUserName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusers: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusertokens
 CREATE TABLE IF NOT EXISTS `vcc_aspnetusertokens` (
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetusertokens` (
   CONSTRAINT `FK_vcc_AspNetUserTokens_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusertokens: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aufgaben
 CREATE TABLE IF NOT EXISTS `vcc_aufgaben` (
@@ -123,9 +123,9 @@ CREATE TABLE IF NOT EXISTS `vcc_aufgaben` (
   KEY `Aufgaben_Level_FK` (`Level_LevelID`) USING BTREE,
   CONSTRAINT `Aufgaben_Level_FK` FOREIGN KEY (`Level_LevelID`) REFERENCES `vcc_level` (`LevelID`) ON DELETE CASCADE,
   CONSTRAINT `chk_aufgabennr_positive` CHECK ((0 < `Aufgabennr`))
-) ENGINE=InnoDB AUTO_INCREMENT=72 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aufgaben: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_eingeladeneuseringruppe
 CREATE TABLE IF NOT EXISTS `vcc_eingeladeneuseringruppe` (
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `vcc_eingeladeneuseringruppe` (
   CONSTRAINT `FK_vcc_eingeladeneuseringruppe_vcc_gruppe` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_eingeladeneuseringruppe: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_event
 CREATE TABLE IF NOT EXISTS `vcc_event` (
@@ -148,9 +148,9 @@ CREATE TABLE IF NOT EXISTS `vcc_event` (
   PRIMARY KEY (`EventID`),
   CONSTRAINT `chk_Dauer` CHECK ((`Dauer` > 0)),
   CONSTRAINT `chk_Strafminuten` CHECK ((`StrafminutenProFehlversuch` >= 0))
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_event: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_eventlog
 CREATE TABLE IF NOT EXISTS `vcc_eventlog` (
@@ -162,9 +162,9 @@ CREATE TABLE IF NOT EXISTS `vcc_eventlog` (
   PRIMARY KEY (`EventLogID`),
   KEY `EventLog_LogKategorie_FK` (`LogKategorie_KatID`),
   CONSTRAINT `EventLog_LogKategorie_FK` FOREIGN KEY (`LogKategorie_KatID`) REFERENCES `vcc_logkategorie` (`KatID`) ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1448 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_eventlog: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_gruppe
 CREATE TABLE IF NOT EXISTS `vcc_gruppe` (
@@ -180,9 +180,9 @@ CREATE TABLE IF NOT EXISTS `vcc_gruppe` (
   KEY `Gruppe_Event_FK` (`Event_EventID`) USING BTREE,
   CONSTRAINT `FK_vcc_gruppe_vcc_aspnetusers` FOREIGN KEY (`GruppenleiterId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON UPDATE CASCADE,
   CONSTRAINT `Gruppe_Event_FK` FOREIGN KEY (`Event_EventID`) REFERENCES `vcc_event` (`EventID`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=305 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_gruppe: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_gruppe_absolviert_level
 CREATE TABLE IF NOT EXISTS `vcc_gruppe_absolviert_level` (
@@ -194,11 +194,11 @@ CREATE TABLE IF NOT EXISTS `vcc_gruppe_absolviert_level` (
   KEY `Gruppe_absolviert_Level_Level_FK` (`Level_LevelID`) USING BTREE,
   CONSTRAINT `Gruppe_absolviert_Level_Gruppe_FK` FOREIGN KEY (`Gruppe_GruppeID`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE,
   CONSTRAINT `Gruppe_absolviert_Level_Level_FK` FOREIGN KEY (`Level_LevelID`) REFERENCES `vcc_level` (`LevelID`) ON DELETE CASCADE,
-  CONSTRAINT `chk_benoetigteZeit` CHECK ((`benoetigteZeit` > '00:00:00')),
+  CONSTRAINT `chk_benoetigteZeit` CHECK ((`benoetigteZeit` > _utf8mb4'00:00:00')),
   CONSTRAINT `chk_Fehlversuche` CHECK ((`Fehlversuche` >= 0))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_gruppe_absolviert_level: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_level
 CREATE TABLE IF NOT EXISTS `vcc_level` (
@@ -211,9 +211,9 @@ CREATE TABLE IF NOT EXISTS `vcc_level` (
   KEY `Level_Event_FK` (`Event_EventID`) USING BTREE,
   CONSTRAINT `Level_Event_FK` FOREIGN KEY (`Event_EventID`) REFERENCES `vcc_event` (`EventID`) ON DELETE CASCADE,
   CONSTRAINT `chk_Levelnr` CHECK (((`Levelnr` > 0) and (`Levelnr` <= 5)))
-) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_level: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_logkategorie
 CREATE TABLE IF NOT EXISTS `vcc_logkategorie` (
@@ -223,7 +223,12 @@ CREATE TABLE IF NOT EXISTS `vcc_logkategorie` (
   UNIQUE KEY `Beschr_UN` (`Beschreibung`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_logkategorie: ~4 rows (ungefähr)
+INSERT INTO `vcc_logkategorie` (`KatID`, `Beschreibung`) VALUES
+	(2, 'Datenänderung'),
+	(1, 'Einfügen'),
+	(4, 'Fehler'),
+	(3, 'Löschen');
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_useringruppe
 CREATE TABLE IF NOT EXISTS `vcc_useringruppe` (
@@ -236,7 +241,7 @@ CREATE TABLE IF NOT EXISTS `vcc_useringruppe` (
   CONSTRAINT `FK_UserId` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_useringruppe: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.__efmigrationshistory
 CREATE TABLE IF NOT EXISTS `__efmigrationshistory` (
@@ -245,7 +250,7 @@ CREATE TABLE IF NOT EXISTS `__efmigrationshistory` (
   PRIMARY KEY (`MigrationId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Daten Export vom Benutzer nicht ausgewählt
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.__efmigrationshistory: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Prozedur 2425_5ahwii_maier.ShowRangliste
 DELIMITER //
@@ -1045,22 +1050,6 @@ CREATE TRIGGER `beforeUpdate_vccGruppeabsolviertLevel` BEFORE UPDATE ON `vcc_gru
 END//
 DELIMITER ;
 SET SQL_MODE=@OLDTMP_SQL_MODE;
-
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~3 rows (ungefähr)
-INSERT INTO `vcc_aspnetroles` (`Name`, `ConcurrencyStamp`, `Beschreibung`) VALUES
-	('Admin', NULL, 'Hat volle Zugriffsrechte auf das System, einschließlich Verwaltung von Benutzern, Inhalten und Einstellungen.'),
-	('Benutzer', NULL, 'Kann Inhalte ansehen und begrenzte Interaktionen ausführen, hat jedoch keine Berechtigungen zum Bearbeiten oder Verwalten.'),
-	('Editor', NULL, 'Kann Inhalte erstellen, bearbeiten und löschen, jedoch keine Benutzer verwalten oder Systemeinstellungen ändern.');
-
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles: ~32 rows (ungefähr)
-INSERT INTO `vcc_aspnetuserroles` (`UserId`, `RoleId`) VALUES
-	('admin1', 'Admin'),
-	('admin1', 'Benutzer'),
-	('admin1', 'Editor');
-
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusers: ~21 rows (ungefähr) (Standard Passwort: !Passw0rt)
-INSERT INTO `vcc_aspnetusers` (`UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `Firstname`, `Lastname`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `AccessFailedCount`) VALUES
-	('admin1', 'ADMIN1', 'spaa@htlvb.at', 'SPAA@HTLVB.AT', 'Alfred', 'Spalt', 1, 'AQAAAAIAAYagAAAAENEFfiWb1uYkWF61HVi7a/Lqh6Lq03snk4RYCKEbH3Nnl1HM2dCqN9PfXhjaUOZmwg==', 'UZXJWAUHMGMKC3SZXLM4ZLIG5U2YLUZK', 'decb842c-384a-40bf-b15b-282b0777374f', 0);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
