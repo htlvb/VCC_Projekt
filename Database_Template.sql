@@ -251,17 +251,6 @@ CREATE TABLE IF NOT EXISTS `vcc_useringruppe` (
   CONSTRAINT `FK_UserId` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_useringruppe: ~0 rows (ungefähr)
-
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.__efmigrationshistory
-CREATE TABLE IF NOT EXISTS `__efmigrationshistory` (
-  `MigrationId` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `ProductVersion` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`MigrationId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.__efmigrationshistory: ~0 rows (ungefähr)
-
 -- Exportiere Struktur von Prozedur 2425_5ahwii_maier.ShowRangliste
 DELIMITER //
 CREATE PROCEDURE `ShowRangliste`(
