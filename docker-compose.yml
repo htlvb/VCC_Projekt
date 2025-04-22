@@ -1,7 +1,7 @@
 version: '3.7'
 
 services:
-  app:
+  vcc-app:
     image: ghcr.io/mirci212/vcc_projekt:latest
     ports:
       - "443:8081"
