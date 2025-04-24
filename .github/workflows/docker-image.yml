@@ -21,7 +21,6 @@ jobs:
     - name: Build and push latest
       run: |
         REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-        ACTOR=$(echo "${{ github.actor }}" | tr '[:upper:]' '[:lower:]')
-        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/$ACTOR/$REPO:latest .
+        docker build -f VCC_Projekt/Dockerfile -t ghcr.io/$REPO:latest .
         docker push ghcr.io/$ACTOR/$REPO:latest
 
