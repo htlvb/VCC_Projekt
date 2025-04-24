@@ -22,5 +22,5 @@ jobs:
       run: |
         REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
         docker build -f VCC_Projekt/Dockerfile -t ghcr.io/$REPO:latest .
-        docker push ghcr.io/$ACTOR/$REPO:latest
+        docker push ghcr.io/$REPO:latest
 
