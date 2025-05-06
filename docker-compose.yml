@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
   vcc-app:
@@ -11,41 +11,57 @@ services:
       dockerfile: VCC_Projekt/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - DB_SERVER_FILE=/run/secrets/DB_SERVER
-      - DB_NAME_FILE=/run/secrets/DB_NAME
-      - DB_USER_FILE=/run/secrets/DB_USER
-      - DB_PASSWORD_FILE=/run/secrets/DB_PASSWORD
+      - DB_SERVER=mysql  # Verweis auf den MySQL-Service
+      - DB_NAME=vcc_db
+      - DB_USER=vcc_user
+      - DB_PASSWORD=vcc_password
       - FRONTEND_URL_FILE=/run/secrets/FRONTEND_URL
       - MAIL_EMAIL_FILE=/run/secrets/MAIL_EMAIL
       - MAIL_PASSWORD_FILE=/run/secrets/MAIL_PASSWORD
       - TENANT_ID_FILE=/run/secrets/TENANT_ID
       - CLIENT_ID_FILE=/run/secrets/CLIENT_ID
       - CLIENT_SECRET_FILE=/run/secrets/CLIENT_SECRET
-      - SMTP_SERVER_FILE=/run/secrets/SMTP_SERVER      # Neu hinzugefügt
-      - IMAP_SERVER_FILE=/run/secrets/IMAP_SERVER      # Neu hinzugefügt
+      - SMTP_SERVER_FILE=/run/secrets/SMTP_SERVER
+      - IMAP_SERVER_FILE=/run/secrets/IMAP_SERVER
+    depends_on:
+      - mysql
     secrets:
-      - DB_SERVER
-      - DB_NAME
-      - DB_USER
-      - DB_PASSWORD
       - FRONTEND_URL
       - MAIL_EMAIL
       - MAIL_PASSWORD
       - TENANT_ID
       - CLIENT_ID
       - CLIENT_SECRET
-      - SMTP_SERVER                                   
-      - IMAP_SERVER                                   
+      - SMTP_SERVER
+      - IMAP_SERVER
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: vcc_db
+      MYSQL_USER: vcc_user
+      MYSQL_PASSWORD: vcc_password
+    command: --lower_case_table_names=1
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql_scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
+
+
+volumes:
+  mysql_data:
 
 secrets:
-  DB_SERVER:
-    external: true
-  DB_NAME:
-    external: true
-  DB_USER:
-    external: true
-  DB_PASSWORD:
-    external: true
   FRONTEND_URL:
     external: true
   MAIL_EMAIL:
@@ -58,7 +74,7 @@ secrets:
     external: true
   CLIENT_SECRET:
     external: true
-  SMTP_SERVER:                                       
+  SMTP_SERVER:
     external: true
-  IMAP_SERVER:                                      
+  IMAP_SERVER:
     external: true
