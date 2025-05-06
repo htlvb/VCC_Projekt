@@ -40,7 +40,7 @@ public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
-        builder.ToTable("vcc_AspNetUsers");
+        builder.ToTable("vcc_aspnetusers");
         builder.HasKey(u => u.UserName);
         builder.Property(u => u.UserName)
                   .IsRequired()
