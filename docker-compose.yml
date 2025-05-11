@@ -23,6 +23,7 @@ services:
       - CLIENT_SECRET_FILE=/run/secrets/CLIENT_SECRET
       - SMTP_SERVER_FILE=/run/secrets/SMTP_SERVER
       - IMAP_SERVER_FILE=/run/secrets/IMAP_SERVER
+      - TZ=Europe/Vienna
     depends_on:
       - mysql
     secrets:
