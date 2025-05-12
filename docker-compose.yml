@@ -44,7 +44,7 @@ services:
       MYSQL_DATABASE: vcc_db
       MYSQL_USER: vcc_user
       MYSQL_PASSWORD: vcc_password
-    - TZ=Europe/Vienna
+      TZ: Europe/Vienna
     command: --lower_case_table_names=1
     volumes:
       - mysql_data:/var/lib/mysql
