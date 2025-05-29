@@ -6,6 +6,8 @@ USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+COPY certificate.ps1
+RUN powershell.exe ./certificate.ps1
 
 
 # This stage is used to build the service project
