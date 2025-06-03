@@ -106,7 +106,7 @@
                                                                 .FirstOrDefault();
                                                                 <div class="file-preview">
                                                                     <a href="api/files/@level.LevelId/@aufgabe.AufgabenId/input" download="@($"{_selectedEvent.Bezeichnung}_Level{level.Levelnr}_Input{aufgabe.Aufgabennr}.txt")" class="download-link">Input.txt herunterladen</a>
-                                                                    <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(aufgabeData))</pre>
+                                                                    <pre class="txt-preview">@System.Text.Encoding.UTF8.GetString(aufgabeData)</pre>
                                                                 </div>
                                                             }
                                                         }
