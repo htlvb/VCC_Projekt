@@ -14,21 +14,21 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetroleclaims
-CREATE TABLE IF NOT EXISTS `vcc_aspnetroleclaims` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetRoleClaims
+CREATE TABLE IF NOT EXISTS `vcc_AspNetRoleClaims` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `RoleId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ClaimType` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `ClaimValue` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   PRIMARY KEY (`Id`),
   KEY `IX_vcc_AspNetRoleClaims_RoleId` (`RoleId`),
-  CONSTRAINT `FK_vcc_AspNetRoleClaims_vcc_AspNetRoles_RoleId` FOREIGN KEY (`RoleId`) REFERENCES `vcc_aspnetroles` (`Name`) ON DELETE CASCADE
+  CONSTRAINT `FK_vcc_AspNetRoleClaims_vcc_AspNetRoles_RoleId` FOREIGN KEY (`RoleId`) REFERENCES `vcc_AspNetRoles` (`Name`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroleclaims: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetRoleClaims: ~0 rows (ungefähr)
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetroles
-CREATE TABLE IF NOT EXISTS `vcc_aspnetroles` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetRoles
+CREATE TABLE IF NOT EXISTS `vcc_AspNetRoles` (
   `Name` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `NormalizedName` varchar(256) GENERATED ALWAYS AS (upper(`Name`)) STORED,
   `ConcurrencyStamp` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
@@ -38,57 +38,57 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetroles` (
   UNIQUE KEY `RoleNameIndex` (`NormalizedName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetroles: ~0 rows (ungefähr)
-INSERT INTO `vcc_aspnetroles` (`Name`, `ConcurrencyStamp`, `Beschreibung`) VALUES
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetRoles: ~0 rows (ungefähr)
+INSERT INTO `vcc_AspNetRoles` (`Name`, `ConcurrencyStamp`, `Beschreibung`) VALUES
 	('Admin', NULL, 'Hat volle Zugriffsrechte auf das System, einschließlich Verwaltung von Benutzern, Inhalten und Einstellungen.'),
 	('Benutzer', NULL, 'Kann Inhalte ansehen und begrenzte Interaktionen ausführen, hat jedoch keine Berechtigungen zum Bearbeiten oder Verwalten.'),
 	('Editor', NULL, 'Kann Inhalte erstellen, bearbeiten und löschen, jedoch keine Benutzer verwalten oder Systemeinstellungen ändern.');
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserclaims
-CREATE TABLE IF NOT EXISTS `vcc_aspnetuserclaims` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetUserClaims
+CREATE TABLE IF NOT EXISTS `vcc_AspNetUserClaims` (
   `Id` int NOT NULL AUTO_INCREMENT,
   `UserId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ClaimType` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `ClaimValue` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   PRIMARY KEY (`Id`),
   KEY `IX_vcc_AspNetUserClaims_UserId` (`UserId`),
-  CONSTRAINT `FK_vcc_AspNetUserClaims_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_vcc_AspNetUserClaims_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserclaims: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetUserClaims: ~0 rows (ungefähr)
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserlogins
-CREATE TABLE IF NOT EXISTS `vcc_aspnetuserlogins` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetUserLogins
+CREATE TABLE IF NOT EXISTS `vcc_AspNetUserLogins` (
   `LoginProvider` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ProviderKey` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ProviderDisplayName` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `UserId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`LoginProvider`,`ProviderKey`),
   KEY `IX_vcc_AspNetUserLogins_UserId` (`UserId`),
-  CONSTRAINT `FK_vcc_AspNetUserLogins_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_vcc_AspNetUserLogins_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserlogins: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetUserLogins: ~0 rows (ungefähr)
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles
-CREATE TABLE IF NOT EXISTS `vcc_aspnetuserroles` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetUserRoles
+CREATE TABLE IF NOT EXISTS `vcc_AspNetUserRoles` (
   `UserId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `RoleId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   PRIMARY KEY (`UserId`,`RoleId`),
   KEY `IX_vcc_AspNetUserRoles_RoleId` (`RoleId`),
   KEY `FK_vcc_UserId` (`UserId`),
-  CONSTRAINT `FK_vcc_AspNetUserRoles_vcc_AspNetRoles_RoleId` FOREIGN KEY (`RoleId`) REFERENCES `vcc_aspnetroles` (`Name`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_vcc_AspNetUserRoles_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_vcc_AspNetUserRoles_vcc_AspNetRoles_RoleId` FOREIGN KEY (`RoleId`) REFERENCES `vcc_AspNetRoles` (`Name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_vcc_AspNetUserRoles_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetuserroles: ~0 rows (ungefähr)
-INSERT INTO `vcc_aspnetuserroles` (`UserId`, `RoleId`) VALUES
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetUserRoles: ~0 rows (ungefähr)
+INSERT INTO `vcc_AspNetUserRoles` (`UserId`, `RoleId`) VALUES
 	('admin1', 'Admin'),
 	('admin1', 'Benutzer'),
 	('admin1', 'Editor');
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusers
-CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetUsers
+CREATE TABLE IF NOT EXISTS `vcc_AspNetUsers` (
   `UserName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `NormalizedUserName` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Email` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -106,21 +106,21 @@ CREATE TABLE IF NOT EXISTS `vcc_aspnetusers` (
   UNIQUE KEY `UserNameIndex` (`NormalizedUserName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusers: ~0 rows (ungefähr)
-INSERT INTO `vcc_aspnetusers` (`UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `Firstname`, `Lastname`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `AccessFailedCount`) VALUES
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetUsers: ~0 rows (ungefähr)
+INSERT INTO `vcc_AspNetUsers` (`UserName`, `NormalizedUserName`, `Email`, `NormalizedEmail`, `Firstname`, `Lastname`, `EmailConfirmed`, `PasswordHash`, `SecurityStamp`, `ConcurrencyStamp`, `AccessFailedCount`) VALUES
 	('admin1', 'ADMIN1', 'spaa@htlvb.at', 'SPAA@HTLVB.AT', 'Alfred', 'Spalt', 1, 'AQAAAAIAAYagAAAAENEFfiWb1uYkWF61HVi7a/Lqh6Lq03snk4RYCKEbH3Nnl1HM2dCqN9PfXhjaUOZmwg==', 'UZXJWAUHMGMKC3SZXLM4ZLIG5U2YLUZK', 'decb842c-384a-40bf-b15b-282b0777374f', 0);
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aspnetusertokens
-CREATE TABLE IF NOT EXISTS `vcc_aspnetusertokens` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_AspNetUserTokens
+CREATE TABLE IF NOT EXISTS `vcc_AspNetUserTokens` (
   `UserId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `LoginProvider` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `Name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `Value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   PRIMARY KEY (`UserId`,`LoginProvider`,`Name`),
-  CONSTRAINT `FK_vcc_AspNetUserTokens_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE
+  CONSTRAINT `FK_vcc_AspNetUserTokens_vcc_AspNetUsers_UserId` FOREIGN KEY (`UserId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aspnetusertokens: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_AspNetUserTokens: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_aufgaben
 CREATE TABLE IF NOT EXISTS `vcc_aufgaben` (
@@ -137,16 +137,16 @@ CREATE TABLE IF NOT EXISTS `vcc_aufgaben` (
 
 -- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_aufgaben: ~0 rows (ungefähr)
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_eingeladeneuseringruppe
-CREATE TABLE IF NOT EXISTS `vcc_eingeladeneuseringruppe` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_EingeladeneUserInGruppe
+CREATE TABLE IF NOT EXISTS `vcc_EingeladeneUserInGruppe` (
   `Email` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `Gruppe_GruppenId` int NOT NULL,
   PRIMARY KEY (`Email`,`Gruppe_GruppenId`),
-  KEY `FK_vcc_eingeladeneuseringruppe_vcc_gruppe` (`Gruppe_GruppenId`),
-  CONSTRAINT `FK_vcc_eingeladeneuseringruppe_vcc_gruppe` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE
+  KEY `FK_vcc_EingeladeneUserInGruppe_vcc_gruppe` (`Gruppe_GruppenId`),
+  CONSTRAINT `FK_vcc_EingeladeneUserInGruppe_vcc_gruppe` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_eingeladeneuseringruppe: ~0 rows (ungefähr)
+-- Exportiere Daten aus Tabelle 2425_5ahwii_maier.vcc_EingeladeneUserInGruppe: ~0 rows (ungefähr)
 
 -- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_event
 CREATE TABLE IF NOT EXISTS `vcc_event` (
@@ -188,7 +188,7 @@ CREATE TABLE IF NOT EXISTS `vcc_gruppe` (
   UNIQUE KEY `Gruppe_Gruppenname_EventID_UN` (`Gruppenname`,`Event_EventID`) USING BTREE,
   UNIQUE KEY `UN_Leader_For_Event` (`GruppenleiterId`,`Event_EventID`) USING BTREE,
   KEY `Gruppe_Event_FK` (`Event_EventID`) USING BTREE,
-  CONSTRAINT `FK_vcc_gruppe_vcc_aspnetusers` FOREIGN KEY (`GruppenleiterId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON UPDATE CASCADE,
+  CONSTRAINT `FK_vcc_gruppe_vcc_AspNetUsers` FOREIGN KEY (`GruppenleiterId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON UPDATE CASCADE,
   CONSTRAINT `Gruppe_Event_FK` FOREIGN KEY (`Event_EventID`) REFERENCES `vcc_event` (`EventID`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -240,14 +240,14 @@ INSERT INTO `vcc_logkategorie` (`KatID`, `Beschreibung`) VALUES
 	(4, 'Fehler'),
 	(3, 'Löschen');
 
--- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_useringruppe
-CREATE TABLE IF NOT EXISTS `vcc_useringruppe` (
+-- Exportiere Struktur von Tabelle 2425_5ahwii_maier.vcc_UserInGruppe
+CREATE TABLE IF NOT EXISTS `vcc_UserInGruppe` (
   `User_UserId` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `Gruppe_GruppenId` int NOT NULL,
   PRIMARY KEY (`User_UserId`,`Gruppe_GruppenId`) USING BTREE,
   KEY `FK_GruppenId` (`Gruppe_GruppenId`) USING BTREE,
   KEY `FK_UserId` (`User_UserId`) USING BTREE,
-  CONSTRAINT `FK_GruppenId` FOREIGN KEY (`User_UserId`) REFERENCES `vcc_aspnetusers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_GruppenId` FOREIGN KEY (`User_UserId`) REFERENCES `vcc_AspNetUsers` (`UserName`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_UserId` FOREIGN KEY (`Gruppe_GruppenId`) REFERENCES `vcc_gruppe` (`GruppenID`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -306,10 +306,10 @@ DELIMITER ;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterDelete_vccAspNetRoles
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterDelete_vccAspNetRoles` AFTER DELETE ON `vcc_aspnetroles` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterDelete_vccAspNetRoles` AFTER DELETE ON `vcc_AspNetRoles` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetroles', 
+        'vcc_AspNetRoles', 
         CONCAT(
             'Rolle ', old.`Name`, 
             ' wurde gelöscht. (Name: ', old.Name, ';RolleId: ', old.ID, ')'
@@ -323,10 +323,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterDelete_vccAspNetUserRoles
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterDelete_vccAspNetUserRoles` AFTER DELETE ON `vcc_aspnetuserroles` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterDelete_vccAspNetUserRoles` AFTER DELETE ON `vcc_AspNetUserRoles` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetuserroles', 
+        'vcc_AspNetUserRoles', 
         CONCAT(
             'Person ', old.UserId, 
             ' wurde die Rolle ', old.roleid,' entzogen.'
@@ -340,10 +340,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterDelete_vccAspNetUsers
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterDelete_vccAspNetUsers` AFTER DELETE ON `vcc_aspnetusers` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterDelete_vccAspNetUsers` AFTER DELETE ON `vcc_AspNetUsers` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetuser', 
+        'vcc_AspNetUsers', 
         CONCAT(
             'Person ', OLD.UserName, 
             ' wurde gelöscht. (Name: ', OLD.Firstname, ' ', OLD.Lastname, 
@@ -439,10 +439,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterDelete_vccUserInGruppe
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterDelete_vccUserInGruppe` AFTER DELETE ON `vcc_useringruppe` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterDelete_vccUserInGruppe` AFTER DELETE ON `vcc_UserInGruppe` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_useringruppe', 
+        'vcc_UserInGruppe', 
         CONCAT(
             'Benutzer ', old.User_UserId, 
             ' wurde aus der Gruppe ' , OLD.Gruppe_GruppenId , ' gelöscht.'
@@ -456,10 +456,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterInsert_vccAspNetRoles
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterInsert_vccAspNetRoles` AFTER INSERT ON `vcc_aspnetroles` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterInsert_vccAspNetRoles` AFTER INSERT ON `vcc_AspNetRoles` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetroles', 
+        'vcc_AspNetRoles', 
         CONCAT(
             'Rolle ', NEW.`Name`, 
             ' wurde hinzugefügt. (Name: ', NEW.Name, ';RolleId: ', new.ID, ')'
@@ -473,10 +473,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterInsert_vccAspNetUserRoles
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterInsert_vccAspNetUserRoles` AFTER INSERT ON `vcc_aspnetuserroles` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterInsert_vccAspNetUserRoles` AFTER INSERT ON `vcc_AspNetUserRoles` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetuserroles', 
+        'vcc_AspNetUserRoles', 
         CONCAT(
             'Person ', NEW.UserId, 
             ' hat die Rolle ', NEW.roleid,' bekommen.'
@@ -490,10 +490,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterInsert_vccAspNetUsers
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterInsert_vccAspNetUsers` AFTER INSERT ON `vcc_aspnetusers` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterInsert_vccAspNetUsers` AFTER INSERT ON `vcc_AspNetUsers` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetuser', 
+        'vcc_AspNetUsers', 
         CONCAT(
             'Person ', new.UserName, 
             ' wurde hinzugefügt. (Name: ', new.Firstname, ' ', new.Lastname, 
@@ -590,10 +590,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterInsert_vccUserInGruppe
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterInsert_vccUserInGruppe` AFTER INSERT ON `vcc_useringruppe` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterInsert_vccUserInGruppe` AFTER INSERT ON `vcc_UserInGruppe` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_useringruppe', 
+        'vcc_UserInGruppe', 
         CONCAT(
             'Benutzer ', new.User_UserId,
             ' wurde in die Gruppe ' , new.Gruppe_GruppenId , ' hinzugefügt.'
@@ -607,10 +607,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterUpdate_vccAspNetRoles
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterUpdate_vccAspNetRoles` AFTER UPDATE ON `vcc_aspnetroles` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterUpdate_vccAspNetRoles` AFTER UPDATE ON `vcc_AspNetRoles` FOR EACH ROW BEGIN
     INSERT INTO `vcc_eventlog` (`Tabellenname`, `Beschreibung`, `LogKategorie_KatID`)
     VALUES (
-        'vcc_aspnetroles', 
+        'vcc_AspNetRoles', 
         CONCAT(
             'Rolle ', old.`Name`, 
             ' wurde geändert. (Name: ', old.Name, ';RolleId: ', old.ID, ') -> neue Daten(Name: ', new.Name, ';RolleId: ', new.ID, ')'
@@ -624,7 +624,7 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterUpdate_vccAspNetUsers
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterUpdate_vccAspNetUsers` AFTER UPDATE ON `vcc_aspnetusers` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterUpdate_vccAspNetUsers` AFTER UPDATE ON `vcc_AspNetUsers` FOR EACH ROW BEGIN
    DECLARE userCount INT;
 		SELECT COUNT(*) INTO userCount FROM vcc_gruppe pe WHERE pe.Gruppenname = upper(NEW.NormalizedUserName);
 		if userCount > 0 then
@@ -740,10 +740,10 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.afterUpdate_vccUserInGruppe
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `afterUpdate_vccUserInGruppe` AFTER UPDATE ON `vcc_useringruppe` FOR EACH ROW BEGIN
+CREATE TRIGGER `afterUpdate_vccUserInGruppe` AFTER UPDATE ON `vcc_UserInGruppe` FOR EACH ROW BEGIN
     
     INSERT INTO vcc_eventlog (Tabellenname, Beschreibung, LogKategorie_KatID)
-    VALUES ('vcc_useringruppe', 
+    VALUES ('vcc_UserInGruppe', 
             CONCAT(
             'Daten in UserInGruppe ',
             ' wurde geändert. Alte Daten: (User_UserId: ', OLD.User_Userid,'; Gruppe_GruppenId: ',OLD.Gruppe_GruppenId , ') -> Neue Daten: (User_UserId: ', new.User_Userid,'; Gruppe_GruppenId: ',new.Gruppe_GruppenId , ')'
@@ -756,7 +756,7 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.beforeInsert_vccAspNetUsers
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `beforeInsert_vccAspNetUsers` BEFORE INSERT ON `vcc_aspnetusers` FOR EACH ROW BEGIN
+CREATE TRIGGER `beforeInsert_vccAspNetUsers` BEFORE INSERT ON `vcc_AspNetUsers` FOR EACH ROW BEGIN
    DECLARE userCount INT;
 	SELECT COUNT(*) INTO userCount FROM vcc_gruppe gr WHERE upper(gr.Gruppenname) = NEW.NormalizedUserName;
 	if userCount > 0 then
@@ -800,7 +800,7 @@ DELIMITER //
 CREATE TRIGGER `beforeInsert_vccGruppe` BEFORE INSERT ON `vcc_gruppe` FOR EACH ROW BEGIN
 	DECLARE userCount INT;
 	if NEW.Teilnehmertyp = 'Team' then
-		SELECT COUNT(*) INTO userCount FROM vcc_aspnetusers pe WHERE pe.NormalizedUserName = upper(NEW.Gruppenname);
+		SELECT COUNT(*) INTO userCount FROM vcc_AspNetUsers pe WHERE pe.NormalizedUserName = upper(NEW.Gruppenname);
 		if userCount > 0 then
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ein Teamname kann nicht gleich wie ein Benutzer heißen!';
 		END if;
@@ -913,13 +913,13 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 -- Exportiere Struktur von Trigger 2425_5ahwii_maier.beforeInsert_vccUserInGruppe
 SET @OLDTMP_SQL_MODE=@@SQL_MODE, SQL_MODE='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 DELIMITER //
-CREATE TRIGGER `beforeInsert_vccUserInGruppe` BEFORE INSERT ON `vcc_useringruppe` FOR EACH ROW BEGIN
+CREATE TRIGGER `beforeInsert_vccUserInGruppe` BEFORE INSERT ON `vcc_UserInGruppe` FOR EACH ROW BEGIN
 	DECLARE event_count INT;
 
    -- Prüfe, ob der User bereits in einer anderen Gruppe ist, die am selben Event teilnimmt
    SELECT COUNT(*)
    INTO event_count
-   FROM vcc_useringruppe UIG
+   FROM vcc_UserInGruppe UIG
    JOIN vcc_gruppe G ON UIG.Gruppe_GruppenId = G.GruppenID
    WHERE UIG.User_UserId = NEW.User_UserId
    AND G.Event_EventID = (SELECT Event_EventID FROM vcc_gruppe WHERE GruppenID = NEW.Gruppe_GruppenId)
@@ -955,7 +955,7 @@ DELIMITER //
 CREATE TRIGGER `beforeUpdate_vccGruppe` BEFORE UPDATE ON `vcc_gruppe` FOR EACH ROW BEGIN
 	DECLARE userCount INT;
 	if NEW.Teilnehmertyp = 'Team' then
-		SELECT COUNT(*) INTO userCount FROM vcc_aspnetusers pe WHERE pe.NormalizedUserName = upper(NEW.Gruppenname);
+		SELECT COUNT(*) INTO userCount FROM vcc_AspNetUsers pe WHERE pe.NormalizedUserName = upper(NEW.Gruppenname);
 		if userCount > 0 then
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ein Teamname kann nicht gleich wie ein Benutzer heißen!';
 		END if;
@@ -1055,3 +1055,4 @@ SET SQL_MODE=@OLDTMP_SQL_MODE;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+

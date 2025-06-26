@@ -19,7 +19,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<ApplicationRole>
 {
     public void Configure(EntityTypeBuilder<ApplicationRole> builder)
     {
-        builder.ToTable("vcc_aspnetroles");
+        builder.ToTable("vcc_AspNetRoles");
         builder.HasKey(r => r.Name);
         builder.Property(r => r.NormalizedName)
                .HasMaxLength(256);
